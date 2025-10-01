@@ -1,0 +1,79 @@
+Archivo,Algoritmo,Semilla,Costo,Costo Optimo,Evaluaciones
+DataSets/tai25b.dat,Greedy,N/A,913427707,344355646,1
+DataSets/tai25b.dat,Busqueda Aleatoria,769123,480030086,344355646,25000
+DataSets/tai25b.dat,Busqueda Local del Mejor Vecino,769123,435346432,344355646,6001
+DataSets/tai25b.dat,Busqueda Local del Primer Vecino,769123,402914653,344355646,4762
+DataSets/tai25b.dat,Enfriamiento Simulado,769123,373057364,344355646,48096
+DataSets/tai25b.dat,Busqueda Tabu,769123,365695354,344355646,40008
+DataSets/tai25b.dat,Busqueda Aleatoria,8435,478828510,344355646,25000
+DataSets/tai25b.dat,Busqueda Local del Mejor Vecino,8435,483218597,344355646,6001
+DataSets/tai25b.dat,Busqueda Local del Primer Vecino,8435,382736549,344355646,4979
+DataSets/tai25b.dat,Enfriamiento Simulado,8435,348224589,344355646,47802
+DataSets/tai25b.dat,Busqueda Tabu,8435,357412730,344355646,40009
+DataSets/tai25b.dat,Busqueda Aleatoria,423543,505627321,344355646,25000
+DataSets/tai25b.dat,Busqueda Local del Mejor Vecino,423543,400025455,344355646,4801
+DataSets/tai25b.dat,Busqueda Local del Primer Vecino,423543,367030385,344355646,5876
+DataSets/tai25b.dat,Enfriamiento Simulado,423543,364043768,344355646,47699
+DataSets/tai25b.dat,Busqueda Tabu,423543,363667045,344355646,40008
+DataSets/tai25b.dat,Busqueda Aleatoria,656343,489240642,344355646,25000
+DataSets/tai25b.dat,Busqueda Local del Mejor Vecino,656343,446739851,344355646,5701
+DataSets/tai25b.dat,Busqueda Local del Primer Vecino,656343,368379802,344355646,7706
+DataSets/tai25b.dat,Enfriamiento Simulado,656343,400347572,344355646,47517
+DataSets/tai25b.dat,Busqueda Tabu,656343,345500788,344355646,40009
+DataSets/tai25b.dat,Busqueda Aleatoria,80987,494185733,344355646,25000
+DataSets/tai25b.dat,Busqueda Local del Mejor Vecino,80987,458038241,344355646,5701
+DataSets/tai25b.dat,Busqueda Local del Primer Vecino,80987,435271658,344355646,5671
+DataSets/tai25b.dat,Enfriamiento Simulado,80987,347720714,344355646,48110
+DataSets/tai25b.dat,Busqueda Tabu,80987,345061761,344355646,40009
+DataSets/sko90b.dat,Greedy,N/A,136080,115534,1
+DataSets/sko90b.dat,Busqueda Aleatoria,769123,131902,115534,90000
+DataSets/sko90b.dat,Busqueda Local del Mejor Vecino,769123,117122,115534,508636
+DataSets/sko90b.dat,Busqueda Local del Primer Vecino,769123,117108,115534,566027
+DataSets/sko90b.dat,Enfriamiento Simulado,769123,116830,115534,167764
+DataSets/sko90b.dat,Busqueda Tabu,769123,117752,115534,144008
+DataSets/sko90b.dat,Busqueda Aleatoria,8435,132346,115534,90000
+DataSets/sko90b.dat,Busqueda Local del Mejor Vecino,8435,117350,115534,428536
+DataSets/sko90b.dat,Busqueda Local del Primer Vecino,8435,117190,115534,789150
+DataSets/sko90b.dat,Enfriamiento Simulado,8435,116490,115534,168324
+DataSets/sko90b.dat,Busqueda Tabu,8435,118098,115534,144009
+DataSets/sko90b.dat,Busqueda Aleatoria,423543,132306,115534,90000
+DataSets/sko90b.dat,Busqueda Local del Mejor Vecino,423543,117898,115534,368461
+DataSets/sko90b.dat,Busqueda Local del Primer Vecino,423543,117030,115534,659400
+DataSets/sko90b.dat,Enfriamiento Simulado,423543,116240,115534,168236
+DataSets/sko90b.dat,Busqueda Tabu,423543,117820,115534,144008
+DataSets/sko90b.dat,Busqueda Aleatoria,656343,132166,115534,90000
+DataSets/sko90b.dat,Busqueda Local del Mejor Vecino,656343,117902,115534,500626
+DataSets/sko90b.dat,Busqueda Local del Primer Vecino,656343,118296,115534,582754
+DataSets/sko90b.dat,Enfriamiento Simulado,656343,116434,115534,167874
+DataSets/sko90b.dat,Busqueda Tabu,656343,117962,115534,144010
+DataSets/sko90b.dat,Busqueda Aleatoria,80987,132060,115534,90000
+DataSets/sko90b.dat,Busqueda Local del Mejor Vecino,80987,117994,115534,492616
+DataSets/sko90b.dat,Busqueda Local del Primer Vecino,80987,117038,115534,754970
+DataSets/sko90b.dat,Enfriamiento Simulado,80987,115970,115534,168112
+DataSets/sko90b.dat,Busqueda Tabu,80987,117880,115534,144007
+DataSets/tai150b.dat,Greedy,N/A,653315921,498896643,1
+DataSets/tai150b.dat,Busqueda Aleatoria,769123,623963050,498896643,150000
+DataSets/tai150b.dat,Busqueda Local del Mejor Vecino,769123,522059020,498896643,2268526
+DataSets/tai150b.dat,Busqueda Local del Primer Vecino,769123,509412789,498896643,4465263
+DataSets/tai150b.dat,Enfriamiento Simulado,769123,508119400,498896643,280463
+DataSets/tai150b.dat,Busqueda Tabu,769123,508805761,498896643,240009
+DataSets/tai150b.dat,Busqueda Aleatoria,8435,620373469,498896643,150000
+DataSets/tai150b.dat,Busqueda Local del Mejor Vecino,8435,523060808,498896643,1944451
+DataSets/tai150b.dat,Busqueda Local del Primer Vecino,8435,510018713,498896643,6482436
+DataSets/tai150b.dat,Enfriamiento Simulado,8435,509605782,498896643,279772
+DataSets/tai150b.dat,Busqueda Tabu,8435,513401030,498896643,240008
+DataSets/tai150b.dat,Busqueda Aleatoria,423543,621458411,498896643,150000
+DataSets/tai150b.dat,Busqueda Local del Mejor Vecino,423543,514673404,498896643,2905501
+DataSets/tai150b.dat,Busqueda Local del Primer Vecino,423543,509920849,498896643,6304166
+DataSets/tai150b.dat,Enfriamiento Simulado,423543,506465325,498896643,280956
+DataSets/tai150b.dat,Busqueda Tabu,423543,518576080,498896643,240010
+DataSets/tai150b.dat,Busqueda Aleatoria,656343,621381952,498896643,150000
+DataSets/tai150b.dat,Busqueda Local del Mejor Vecino,656343,520116943,498896643,2357926
+DataSets/tai150b.dat,Busqueda Local del Primer Vecino,656343,512367226,498896643,5643033
+DataSets/tai150b.dat,Enfriamiento Simulado,656343,506047294,498896643,281277
+DataSets/tai150b.dat,Busqueda Tabu,656343,514887987,498896643,240008
+DataSets/tai150b.dat,Busqueda Aleatoria,80987,622680494,498896643,150000
+DataSets/tai150b.dat,Busqueda Local del Mejor Vecino,80987,516428653,498896643,2223826
+DataSets/tai150b.dat,Busqueda Local del Primer Vecino,80987,513780289,498896643,5159328
+DataSets/tai150b.dat,Enfriamiento Simulado,80987,509683691,498896643,280928
+DataSets/tai150b.dat,Busqueda Tabu,80987,513021489,498896643,240007
