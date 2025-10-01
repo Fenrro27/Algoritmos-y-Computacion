@@ -47,9 +47,14 @@ Ejercicios de combinatoria, ecuaciones cuadráticas, intervalos y primos.
    - If-then-else  
    - Case  
 
-5. `P2_5a_encontrarNPrimo.hs` → Encuentra el **n-ésimo número primo** (ejemplo: el primo nº 10.001).  
+5. `P2_5_encontrarNPrimo.hs` → Encuentra el **n-ésimo número primo** (ejemplo: el primo nº 10.001).  
 
-6. `P2_5b_sumaNPrimerosPrimos.hs` → Calcula la **suma de todos los primos menores que n**.  
+6. `P2_6_sumaNPrimerosPrimos.hs` → Calcula la **suma de todos los primos menores que n**.  
+
+---
+
+### 🔹 Práctica 3
+
 
 ---
 
