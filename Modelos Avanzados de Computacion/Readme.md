@@ -54,7 +54,45 @@ Ejercicios de combinatoria, ecuaciones cuadráticas, intervalos y primos.
 ---
 
 ### 🔹 Práctica 3
+Ejercicios de **listas intensionales** en Haskell.
 
+1. `ej1` → Lista con los números del 1 al 10 sumando 10 a cada uno.  
+2. `ej2` → Lista de listas unitarias con los números pares del 1 al 10.  
+3. `ej3` → Lista de listas con la expresión `11 - x` para `x` en `[1..10]`.  
+4. `ej4` → Lista booleana indicando si cada número de 1 a 10 es impar.  
+5. `ej5` → Pares `(x*3, x<10)` para `x` en `[1..6]`.  
+6. `ej6` → Pares `(x*5, even x && x < 4)` con condición `x<=3 || x==8`.  
+7. `ej7` → Pares `(x+10, x+11)` para los números impares de 1 a 10.  
+8. `ej8` → Listas `[5..x+4]` para impares entre 3 y 9.  
+9. `ej9` → Secuencia aritmética descendente generada con `(5-x)*5+1`.  
+10. `ej10` → Para cada `x` par, genera `[4..x+2]`, la invierte y filtra pares.  
+
+---
+
+### 🔹 Práctica 4
+Ejercicios con **registros, fechas y árboles binarios**.
+
+Para comprobar esta práctica se debe compilar `P4_Main.hs`.
+Incluye el módulo auxiliar `MEmpleados.hs` con las funciones necesarias. 
+
+1. `Ejercicio 2` → Gestión de empleados de la empresa **JobVen SL**.  
+   - Listar empleados con todos sus datos (DNI, nombre, apellidos, fecha de nacimiento, cargo, fecha de alta).  
+   - Filtrar por **fecha de nacimiento** y/o **fecha de alta**.  
+   - Buscar empleados por **cargo**.  
+   - Volver al menú principal.   
+
+2. `Ejercicio 3` → Implementación de un **árbol binario de empleados** ordenado por fecha de nacimiento.  
+   - Recorrido en **profundidad**.  
+   - Recorrido en **anchura**.  
+   - Búsqueda de empleados por **DNI**.  
+   - Volver al menú principal.  
+
+📌 **Nota de compilación**:  
+Para compilar el programa principal de esta práctica, ejecutar:  
+
+```bash
+ghc P4_Main.hs -o P4_Main.exe
+```
 
 ---
 
