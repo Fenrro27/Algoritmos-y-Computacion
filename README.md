@@ -5,7 +5,7 @@ Repositorio con el contenido de las practicas de las asignaturas del Grado en In
 
 ## 📂 Asignaturas incluidas
 
-- **Modelos Bioinspirados**
+- **Modelos bioinspirados y heurísticas de búsqueda**
 - **Aprendizaje Automático**
 - **Sistemas Inteligentes**
 - **Fundamentos de Análisis de Algoritmos**

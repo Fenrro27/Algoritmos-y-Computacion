@@ -1,0 +1,49 @@
+Archivo,Algoritmo,Semilla,Costo,Costo Optimo,Evaluaciones
+DataSets/tai25b.dat,Greedy,N/A,913427707,344355646,1
+DataSets/tai25b.dat,Algoritmo Genetico Basico,769123,407715879,344355646,10050
+DataSets/tai25b.dat,Algoritmo Chc,769123,345869372,344355646,100616
+DataSets/tai25b.dat,Algoritmo Genetico Clearing,769123,470561901,344355646,10000
+DataSets/tai25b.dat,Algoritmo Genetico Basico,8435,502851530,344355646,10050
+DataSets/tai25b.dat,Algoritmo Chc,8435,353036884,344355646,102216
+DataSets/tai25b.dat,Algoritmo Genetico Clearing,8435,558427386,344355646,10000
+DataSets/tai25b.dat,Algoritmo Genetico Basico,423543,479537650,344355646,10050
+DataSets/tai25b.dat,Algoritmo Chc,423543,366741332,344355646,101098
+DataSets/tai25b.dat,Algoritmo Genetico Clearing,423543,493357076,344355646,10000
+DataSets/tai25b.dat,Algoritmo Genetico Basico,656343,566397956,344355646,10050
+DataSets/tai25b.dat,Algoritmo Chc,656343,349612999,344355646,103990
+DataSets/tai25b.dat,Algoritmo Genetico Clearing,656343,477960520,344355646,10000
+DataSets/tai25b.dat,Algoritmo Genetico Basico,80987,474199258,344355646,10050
+DataSets/tai25b.dat,Algoritmo Chc,80987,356008717,344355646,101182
+DataSets/tai25b.dat,Algoritmo Genetico Clearing,80987,491294706,344355646,10000
+DataSets/sko90b.dat,Greedy,N/A,136080,115534,1
+DataSets/sko90b.dat,Algoritmo Genetico Basico,769123,126128,115534,10050
+DataSets/sko90b.dat,Algoritmo Chc,769123,122008,115534,62228
+DataSets/sko90b.dat,Algoritmo Genetico Clearing,769123,124674,115534,10000
+DataSets/sko90b.dat,Algoritmo Genetico Basico,8435,125706,115534,10050
+DataSets/sko90b.dat,Algoritmo Chc,8435,123048,115534,63224
+DataSets/sko90b.dat,Algoritmo Genetico Clearing,8435,126048,115534,10000
+DataSets/sko90b.dat,Algoritmo Genetico Basico,423543,126032,115534,10050
+DataSets/sko90b.dat,Algoritmo Chc,423543,123116,115534,61778
+DataSets/sko90b.dat,Algoritmo Genetico Clearing,423543,125902,115534,10000
+DataSets/sko90b.dat,Algoritmo Genetico Basico,656343,125626,115534,10050
+DataSets/sko90b.dat,Algoritmo Chc,656343,122932,115534,64846
+DataSets/sko90b.dat,Algoritmo Genetico Clearing,656343,126208,115534,10000
+DataSets/sko90b.dat,Algoritmo Genetico Basico,80987,127768,115534,10050
+DataSets/sko90b.dat,Algoritmo Chc,80987,122720,115534,61626
+DataSets/sko90b.dat,Algoritmo Genetico Clearing,80987,124950,115534,10000
+DataSets/tai150b.dat,Greedy,N/A,653315921,498896643,1
+DataSets/tai150b.dat,Algoritmo Genetico Basico,769123,599117747,498896643,10050
+DataSets/tai150b.dat,Algoritmo Chc,769123,567246571,498896643,51058
+DataSets/tai150b.dat,Algoritmo Genetico Clearing,769123,602952445,498896643,10000
+DataSets/tai150b.dat,Algoritmo Genetico Basico,8435,597608949,498896643,10050
+DataSets/tai150b.dat,Algoritmo Chc,8435,561902317,498896643,51938
+DataSets/tai150b.dat,Algoritmo Genetico Clearing,8435,586119471,498896643,10000
+DataSets/tai150b.dat,Algoritmo Genetico Basico,423543,592624740,498896643,10050
+DataSets/tai150b.dat,Algoritmo Chc,423543,565055129,498896643,51472
+DataSets/tai150b.dat,Algoritmo Genetico Clearing,423543,594667437,498896643,10000
+DataSets/tai150b.dat,Algoritmo Genetico Basico,656343,592730000,498896643,10050
+DataSets/tai150b.dat,Algoritmo Chc,656343,565188592,498896643,53820
+DataSets/tai150b.dat,Algoritmo Genetico Clearing,656343,595883063,498896643,10000
+DataSets/tai150b.dat,Algoritmo Genetico Basico,80987,592892961,498896643,10050
+DataSets/tai150b.dat,Algoritmo Chc,80987,563064372,498896643,53390
+DataSets/tai150b.dat,Algoritmo Genetico Clearing,80987,589767885,498896643,10000
