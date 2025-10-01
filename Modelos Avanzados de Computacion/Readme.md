@@ -1,7 +1,8 @@
 # 📘 Ejercicios de Haskell
 
 Repositorio con prácticas de **Modelos Avanzados de Computación**.  
-Incluye ejercicios de listas, recursión, funciones de orden superior, combinatoria, álgebra y teoría de números.  
+Incluye ejercicios de listas, recursión, funciones de orden superior, combinatoria, álgebra y teoría de números.
+**Se debe tener instalado GHCI**  
 
 ---
 
@@ -95,6 +96,24 @@ ghc P4_Main.hs -o P4_Main.exe
 ```
 
 ---
+
+### 🚀 Proyecto Final
+El repositorio también incluye un **Proyecto Final** en Haskell, desarrollado como trabajo de cierre de la asignatura **Modelos Avanzados de Computación**.  
+
+En este proyecto se integran y aplican los conceptos trabajados a lo largo de las prácticas:  
+- Manejo de listas, recursión y funciones de orden superior.  
+- Definición y uso de tipos de datos personalizados.  
+- Módulos auxiliares para estructuración del código.  
+- Uso de árboles y estructuras de datos.  
+
+Puedes consultar el código completo del proyecto en el siguiente enlace:  
+
+👉 [MAC_PracticaFinal_KJBA_JDCZ](https://github.com/jcalvente083/MAC_PracticaFinal_KJBA_JDCZ)
+
+
+---
+
+
 
 ## 📜 Notas
 - Cada ejercicio se encuentra en un archivo independiente (`.hs`).  
