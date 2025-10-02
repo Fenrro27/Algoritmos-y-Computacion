@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Archivos de origen">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Archivos de encabezado">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Archivos de recursos">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Archivos de encabezado\P2">
+      <UniqueIdentifier>{998f6a44-9844-4cf3-be6a-2e3ac367a3c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\P2">
+      <UniqueIdentifier>{b0048a7b-9435-45f4-b734-69c153842c5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\P1">
+      <UniqueIdentifier>{18306a18-9ed1-41eb-a55f-af70d4062384}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\P1">
+      <UniqueIdentifier>{9cefbfa2-8e3d-4237-8399-95ac40bcdf7a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="P1_3_BusquedaOE.h">
+      <Filter>Archivos de encabezado\P1</Filter>
+    </ClInclude>
+    <ClInclude Include="P1_1_Busqueda.h">
+      <Filter>Archivos de encabezado\P1</Filter>
+    </ClInclude>
+    <ClInclude Include="P1_2A_Busqueda.h">
+      <Filter>Archivos de encabezado\P1</Filter>
+    </ClInclude>
+    <ClInclude Include="P1_2B_Busqueda.h">
+      <Filter>Archivos de encabezado\P1</Filter>
+    </ClInclude>
+    <ClInclude Include="P2_1_Potencia.h">
+      <Filter>Archivos de encabezado\P2</Filter>
+    </ClInclude>
+    <ClInclude Include="P2_2_PotenciaRec.h">
+      <Filter>Archivos de encabezado\P2</Filter>
+    </ClInclude>
+    <ClInclude Include="P2_3_PotenciaDV.h">
+      <Filter>Archivos de encabezado\P2</Filter>
+    </ClInclude>
+    <ClInclude Include="P3_FAA.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="P1_3_BusquedaOE.cpp">
+      <Filter>Archivos de origen\P1</Filter>
+    </ClCompile>
+    <ClCompile Include="P1_1_Busqueda.cpp">
+      <Filter>Archivos de origen\P1</Filter>
+    </ClCompile>
+    <ClCompile Include="P1_2A_Busqueda.cpp">
+      <Filter>Archivos de origen\P1</Filter>
+    </ClCompile>
+    <ClCompile Include="P1_2B_Busqueda.cpp">
+      <Filter>Archivos de origen\P1</Filter>
+    </ClCompile>
+    <ClCompile Include="P2_1_Potencia.cpp">
+      <Filter>Archivos de origen\P2</Filter>
+    </ClCompile>
+    <ClCompile Include="P2_2_PotenciaRec.cpp">
+      <Filter>Archivos de origen\P2</Filter>
+    </ClCompile>
+    <ClCompile Include="P2_3_PotenciaDV.cpp">
+      <Filter>Archivos de origen\P2</Filter>
+    </ClCompile>
+    <ClCompile Include="P3_FAA.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

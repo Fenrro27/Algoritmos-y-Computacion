@@ -1,0 +1,51 @@
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build / Bin / Obj
+[Bb]in/
+[Oo]bj/
+x64/
+Debug/
+Release/
+
+# Macros / Logs / Temp
+*.log
+*.tlog
+*.lastbuildstate
+*.pch
+*.idb
+*.ipch
+*.iobj
+*.ipdb
+
+# Visual Studio Code settings
+.vscode/
+
+# Windows Thumbnails
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+*.bak
+*.old
+
+# Compiled libraries / executables
+*.exe
+*.dll
+*.lib
+*.obj
+
+# JetBrains Rider (si se usa)
+.idea/
+
+# Node / npm (si se agrega algún paquete)
+node_modules/
