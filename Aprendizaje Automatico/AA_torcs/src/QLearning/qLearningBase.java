@@ -9,7 +9,7 @@ public abstract class qLearningBase {
     protected double gamma = 0.9;
     protected double epsilon = 0.8;
     protected final double minEpsilon = 0.05;
-    protected final double epsilonDecay = 0.999;
+    protected double epsilonDecay = 0.999;
 
     protected int numStates;
     protected int numActions;
@@ -121,7 +121,7 @@ public abstract class qLearningBase {
             double avgReward = cumulativeReward / 50.0;
             double avgQ = computeAvgQ();
             double optimalPct = 100.0 * optimalActions / 50.0;
-            monitor.update(avgReward, epsilon, avgQ, optimalPct);
+            monitor.update(avgReward, epsilon, avgQ, optimalPct, Q);
             cumulativeReward = 0;
             optimalActions = 0;
         }

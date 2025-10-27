@@ -94,7 +94,7 @@ public class DriverSteerTrain extends Controller {
             stuckEpisodes++;
             System.out.println("Stuck episode " + stuckEpisodes);
 
-            if (stuckEpisodes >= 300) {
+            if (stuckEpisodes >= 400) {
                 Action restart = new Action();
                 restart.restartRace = true;
                 stuckEpisodes = 0;
