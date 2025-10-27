@@ -17,6 +17,11 @@ public abstract class qLearningBase {
     protected Random rnd = new Random();
 
     protected long iterationCount = 0;
+    
+    protected static QLearningMonitor monitor = new QLearningMonitor();
+    protected double cumulativeReward = 0;
+    protected int episodeSteps = 0;
+    protected int optimalActions = 0;
 
     // --- Métodos abstractos que cada subclase implementa ---
     protected abstract int getStateIndex(Object sensors);
@@ -51,6 +56,7 @@ public abstract class qLearningBase {
             if (Q[nextState][a] > maxNextQ) maxNextQ = Q[nextState][a];
         }
         Q[state][action] += alpha * (reward + gamma * maxNextQ - Q[state][action]);
+        logStep(state, action, reward, nextState);
     }
 
     // --- Decaimiento de epsilon ---
@@ -95,4 +101,42 @@ public abstract class qLearningBase {
             System.err.println("Error cargando Q-table: " + e.getMessage());
         }
     }
+    
+    protected void logStep(int state, int action, double reward, int nextState) {
+        cumulativeReward += reward;
+        episodeSteps++;
+
+        // acción óptima
+        double maxQ = Double.NEGATIVE_INFINITY;
+        int bestAction = 0;
+        for (int a = 0; a < numActions; a++) {
+            if (Q[state][a] > maxQ) {
+                maxQ = Q[state][a];
+                bestAction = a;
+            }
+        }
+        if (action == bestAction) optimalActions++;
+
+        if (episodeSteps % 50 == 0) { // cada 50 pasos actualiza monitor
+            double avgReward = cumulativeReward / 50.0;
+            double avgQ = computeAvgQ();
+            double optimalPct = 100.0 * optimalActions / 50.0;
+            monitor.update(avgReward, epsilon, avgQ, optimalPct);
+            cumulativeReward = 0;
+            optimalActions = 0;
+        }
+    }
+
+    private double computeAvgQ() {
+        double sum = 0;
+        int count = 0;
+        for (int s = 0; s < numStates; s++) {
+            for (int a = 0; a < numActions; a++) {
+                sum += Q[s][a];
+                count++;
+            }
+        }
+        return sum / count;
+    }
+
 }
