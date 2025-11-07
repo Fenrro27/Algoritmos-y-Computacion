@@ -52,12 +52,12 @@ public class DriverGearTrain extends Controller{
 	
 	public DriverGearTrain() {
 		System.out.println("Iniciando Entrenamiento qGear");
-	    gearAgent.loadQTableCSV();  // cargar Q-table al inicio
+	    gearAgent.loadQTableCSV(false);  // cargar Q-table al inicio
 	}
 	
 	public void reset() {
 		System.out.println("Restarting the race!");
-	    gearAgent.loadQTableCSV();  // cargar Q-table al inicio
+	    gearAgent.loadQTableCSV(false);  // cargar Q-table al inicio
 
 	}
 

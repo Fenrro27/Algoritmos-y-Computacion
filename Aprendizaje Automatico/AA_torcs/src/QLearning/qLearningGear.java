@@ -10,10 +10,14 @@ public class qLearningGear extends qLearningBase {
 
     private int lastState = -1;
     private int lastAction = -1;
+    
+    private final GearMonitor monitor = new GearMonitor();
+    private int iteration = 0;
 
     public qLearningGear() {
+    	epsilonDecay = 0.999;
         initQTable(rpmBins, numActionsLocal);
-        loadQTableCSV();
+        loadQTableCSV(false);
     }
 
     private int rpmToBin(double rpm) {
@@ -34,7 +38,7 @@ public class qLearningGear extends qLearningBase {
         SensorModel sensors = (SensorModel) s;
         double rpm = sensors.getRPM();
         double low = 2500, high = 7000, mid = (low + high) / 2.0;
-        double r;
+        double r=0;
         switch (action) {
             case 0: r = (rpm < low) ? 1.0 : -Math.min(1.0, (rpm - low) / 1000); break;
             case 1: r = 1.0 - Math.abs(rpm - mid) / (high - low); break;
@@ -66,6 +70,7 @@ public class qLearningGear extends qLearningBase {
         decayEpsilon();
         if (iterationCount % 500 == 0) saveQTableCSV();
 
+        monitor.updateData(iteration++, sensors.getRPM(), sensors.getGear());
         return nextGear;
     }
 

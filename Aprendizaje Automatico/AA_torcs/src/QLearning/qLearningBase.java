@@ -33,11 +33,21 @@ public abstract class qLearningBase {
         this.numStates = numStates;
         this.numActions = numActions;
         Q = new double[numStates][numActions];
+        
+        // Inicialización aleatoria
+        for (int s = 0; s < numStates; s++) {
+            for (int a = 0; a < numActions; a++) {
+                Q[s][a] = rnd.nextDouble() * 2 - 1; // entre -1 y 1
+            }
+        }
+        
     }
 
     // --- Selección de acción (ε-greedy) ---
     protected int chooseAction(int state) {
-        if (rnd.nextDouble() < epsilon) return rnd.nextInt(numActions);
+        if (rnd.nextDouble() < epsilon) { 
+//        	System.out.println("Accion Aleatoria++");
+        	return rnd.nextInt(numActions);}
         double maxQ = -Double.MAX_VALUE;
         int best = 0;
         for (int a = 0; a < numActions; a++) {
@@ -62,7 +72,7 @@ public abstract class qLearningBase {
     // --- Decaimiento de epsilon ---
     protected void decayEpsilon() {
         if (epsilon > minEpsilon) epsilon *= epsilonDecay;
-        if (epsilon < minEpsilon) epsilon = minEpsilon;
+        if (epsilon < minEpsilon) epsilon = 0;
     }
 
     // --- Guardar y cargar Q-table ---
@@ -84,9 +94,12 @@ public abstract class qLearningBase {
         }
     }
 
-    public void loadQTableCSV() {
+    public void loadQTableCSV(boolean loadIfExists) {
+        if (!loadIfExists) return; // no cargar si se indica false
+
         File file = new File("Knowledge/" + getQTableName() + ".csv");
         if (!file.exists()) return;
+
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             br.readLine(); // cabecera
             String line;
@@ -101,6 +114,7 @@ public abstract class qLearningBase {
             System.err.println("Error cargando Q-table: " + e.getMessage());
         }
     }
+
     
     protected void logStep(int state, int action, double reward, int nextState) {
         cumulativeReward += reward;
@@ -121,7 +135,7 @@ public abstract class qLearningBase {
             double avgReward = cumulativeReward / 50.0;
             double avgQ = computeAvgQ();
             double optimalPct = 100.0 * optimalActions / 50.0;
-            monitor.update(avgReward, epsilon, avgQ, optimalPct, Q);
+            monitor.update(avgReward, epsilon, Q);
             cumulativeReward = 0;
             optimalActions = 0;
         }
