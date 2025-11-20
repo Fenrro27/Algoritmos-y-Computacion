@@ -2,24 +2,36 @@ package Agentes;
 
 import champ2011client.Controller;
 import champ2011client.Controller.Stage;
-import QLearning.qLearningSteer;
 import champ2011client.Action;
 import champ2011client.SensorModel;
+import QLearning.qLearningAccel;
 
-public class DriverSteerTrain extends Controller {
+public class DriverAccelTrain extends Controller {
 
-    private qLearningSteer steerAgent = new qLearningSteer();
+    private qLearningAccel accelAgent = new qLearningAccel();
 
+    /* Gear Changing Constants */
     final int[] gearUp = {5000,6000,6000,6500,7000,0};
     final int[] gearDown = {0,2500,3000,3000,3500,3500};
 
+    /* Stuck constants */
     final int stuckTime = 25;
-    final float stuckAngle = (float) 0.523598775; // PI/6
+    final float stuckAngle = 0.523598775f; // PI/6
 
-    final float steerLock = (float) 0.785398;
+    /* ABS Filter */
+    final float wheelRadius[] = {0.3179f,0.3179f,0.3276f,0.3276f};
+    final float absSlip = 2.0f;
+    final float absRange = 3.0f;
+    final float absMinSpeed = 3.0f;
+
+    /* Steering */
+    final float steerLock = 0.785398f;
+    final float steerSensitivityOffset = 80.0f;
+    final float wheelSensitivityCoeff = 1;
+
+    /* Clutch */
     final float clutchMax = 0.5f;
     final float clutchDelta = 0.05f;
-    final float clutchRange = 0.82f;
     final float clutchDeltaTime = 0.02f;
     final float clutchDeltaRaced = 10;
     final float clutchDec = 0.01f;
@@ -27,31 +39,36 @@ public class DriverSteerTrain extends Controller {
     final float clutchMaxTime = 1.5f;
 
     private int stuck = 0;
-    private int stuckEpisodes = 0;
     private float clutch = 0;
 
-    // --- Control de avance ---
+    /* Episodios */
+    private int stuckEpisodes = 0;
+
+    /* No avance */
     private double lastDistance = 0.0;
     private int noProgressCount = 0;
     private int noProgressEpisodes = 0;
-    
-    public DriverSteerTrain() {
-    	
+
+
+    public DriverAccelTrain() {
+        System.out.println("Iniciando Entrenamiento qAccel");
+        accelAgent.loadQTableCSV(false);
     }
 
     @Override
     public void reset() {
         System.out.println("Restarting the race!");
-        steerAgent.saveQTableCSV();
+        accelAgent.saveQTableCSV();
         stuckEpisodes = 0;
         noProgressEpisodes = 0;
         noProgressCount = 0;
+        lastDistance = 0;
     }
 
     @Override
     public void shutdown() {
         System.out.println("Bye bye!");
-        steerAgent.finishTraining();
+        accelAgent.finishTraining();
     }
 
     private int getGear(SensorModel sensors) {
@@ -63,43 +80,46 @@ public class DriverSteerTrain extends Controller {
         return gear;
     }
 
-    // --- Acelerador fijo ---
-    private float getAccel(SensorModel sensors) {
-        return 0.6f; // gas constante al 60%
+    private float getSteer(SensorModel sensors) {
+        float targetAngle = (float)(sensors.getAngleToTrackAxis() - sensors.getTrackPosition()*0.5);
+        if (sensors.getSpeed() > steerSensitivityOffset)
+            return (float)( targetAngle /
+                (steerLock * (sensors.getSpeed() - steerSensitivityOffset) * wheelSensitivityCoeff) );
+        return targetAngle / steerLock;
     }
 
-    private float getSteer(SensorModel sensors) {
-        return steerAgent.chooseSteer(sensors);
-    }
 
     @Override
     public Action control(SensorModel sensors) {
 
-        // --- Detección de atasco por ángulo ---
-        if (Math.abs(sensors.getAngleToTrackAxis()) > stuckAngle)
-            stuck++;
-        else
-            stuck = 0;
+        /* === DETECCIÓN STUCK === */
+        if (Math.abs(sensors.getAngleToTrackAxis()) > stuckAngle) stuck++;
+        else stuck = 0;
 
         if (stuck > stuckTime) {
+
             stuckEpisodes++;
             System.out.println("Stuck episode " + stuckEpisodes);
 
             if (stuckEpisodes >= 800) {
+                System.out.println("Reiniciando por atasco excesivo.");
                 Action restart = new Action();
                 restart.restartRace = true;
                 stuckEpisodes = 0;
-                steerAgent.resetRaceFlag(sensors);
+                accelAgent.resetRaceFlag(sensors);
                 return restart;
             }
 
-            float steer = (float) (-sensors.getAngleToTrackAxis() / steerLock);
+            float steer = (float)(-sensors.getAngleToTrackAxis() / steerLock);
             int gear = -1;
+
             if (sensors.getAngleToTrackAxis() * sensors.getTrackPosition() > 0) {
                 gear = 1;
                 steer = -steer;
             }
+
             clutch = clutching(sensors, clutch);
+
             Action action = new Action();
             action.gear = gear;
             action.steering = steer;
@@ -111,16 +131,17 @@ public class DriverSteerTrain extends Controller {
 
         if (stuck == 0) stuckEpisodes = 0;
 
-        // --- Detección de “no avance” ---
-        final double minSpeedThreshold = 10.0;
-        final double minDeltaDistance = 0.5;
+
+        /* === DETECCIÓN NO AVANCE === */
+        final double minSpeed = 10.0;
+        final double minDeltaDist = 0.5;
         final int maxNoProgressCount = 80;
         final int maxNoProgressEpisodes = 10;
 
-        double currentDistance = sensors.getDistanceRaced();
-        double deltaDist = currentDistance - lastDistance;
+        double currentDist = sensors.getDistanceRaced();
+        double delta = currentDist - lastDistance;
 
-        if (sensors.getSpeed() < minSpeedThreshold && deltaDist < minDeltaDistance)
+        if (sensors.getSpeed() < minSpeed && delta < minDeltaDist)
             noProgressCount++;
         else if (noProgressCount > 0)
             noProgressCount--;
@@ -128,49 +149,74 @@ public class DriverSteerTrain extends Controller {
         if (noProgressCount > maxNoProgressCount) {
             noProgressEpisodes++;
             noProgressCount = 0;
-            System.out.printf("⚠️ No avance detectado (%d/%d)%n",
-                    noProgressEpisodes, maxNoProgressEpisodes);
+            System.out.println("No advance episode " + noProgressEpisodes);
         }
 
         if (noProgressEpisodes >= maxNoProgressEpisodes) {
-            System.out.println("Reinicio por múltiples episodios de no avance.");
+            System.out.println("Reinicio por no avance.");
+            Action restart = new Action();
+            restart.restartRace = true;
             noProgressEpisodes = 0;
             noProgressCount = 0;
-            Action restart = new Action();
-            restart.restartRace = true;
-            steerAgent.resetRaceFlag(sensors);
-            lastDistance = currentDistance;
+            accelAgent.resetRaceFlag(sensors);
+            lastDistance = currentDist;
             return restart;
         }
 
-        lastDistance = currentDistance;
+        lastDistance = currentDist;
 
-        // --- Control normal ---
-        float accel = getAccel(sensors);
+
+        /* === AGENTE: ACCIÓN === */
+        double[] accel_brake = accelAgent.chooseAccel(sensors);
+        float accel = (float) accel_brake[0];
+        float brake = filterABS(sensors, (float) accel_brake[1]);
+
+
+        if (accelAgent.shouldRestartRace()) {
+            Action restart = new Action();
+            restart.restartRace = true;
+            accelAgent.resetRaceFlag(sensors);
+            return restart;
+        }
+
+
+        /* === CONTROL DEL COCHE === */
+
         int gear = getGear(sensors);
         float steer = getSteer(sensors);
-
-        if (steerAgent.shouldRestartRace()) {
-            Action restart = new Action();
-            restart.restartRace = true;
-            steerAgent.resetRaceFlag(sensors);
-            return restart;
-        }
-
         steer = Math.max(-1, Math.min(1, steer));
+
         clutch = clutching(sensors, clutch);
 
         Action action = new Action();
         action.gear = gear;
         action.steering = steer;
         action.accelerate = accel;
-        action.brake = 0.0f; // sin freno
+        action.brake = brake;
         action.clutch = clutch;
+
         return action;
     }
 
-    private float clutching(SensorModel sensors, float clutch) {
+    private float filterABS(SensorModel sensors, float brake) {
+        float speed = (float)(sensors.getSpeed() / 3.6);
+        if (speed < absMinSpeed) return brake;
+
+        float slip = 0;
+        for (int i = 0; i < 4; i++)
+            slip += sensors.getWheelSpinVelocity()[i] * wheelRadius[i];
+
+        slip = speed - slip / 4f;
+
+        if (slip > absSlip)
+            brake = brake - (slip - absSlip) / absRange;
+
+        return Math.max(brake, 0);
+    }
+
+    float clutching(SensorModel sensors, float clutch) {
         float maxClutch = clutchMax;
+
         if (sensors.getCurrentLapTime() < clutchDeltaTime &&
             getStage() == Stage.RACE &&
             sensors.getDistanceRaced() < clutchDeltaRaced)
@@ -178,20 +224,27 @@ public class DriverSteerTrain extends Controller {
 
         if (clutch > 0) {
             double delta = clutchDelta;
+
             if (sensors.getGear() < 2) {
                 delta /= 2;
                 maxClutch *= clutchMaxModifier;
+
                 if (sensors.getCurrentLapTime() < clutchMaxTime)
                     clutch = maxClutch;
             }
+
             clutch = Math.min(maxClutch, clutch);
-            if (clutch != maxClutch)
-                clutch = Math.max(0, clutch - (float) delta);
-            else
+
+            if (clutch != maxClutch) {
+                clutch = (float)Math.max(0, clutch - delta);
+            } else {
                 clutch -= clutchDec;
+            }
         }
+
         return clutch;
     }
+
 
     @Override
     public float[] initAngles() {

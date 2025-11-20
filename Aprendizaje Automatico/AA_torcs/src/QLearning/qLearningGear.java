@@ -33,19 +33,52 @@ public class qLearningGear extends qLearningBase {
         return rpmToBin(sensors.getRPM());
     }
 
+    double lastRpm;
     @Override
     protected double computeReward(Object s, int action) {
         SensorModel sensors = (SensorModel) s;
-        double rpm = sensors.getRPM();
-        double low = 2500, high = 7000, mid = (low + high) / 2.0;
-        double r=0;
-        switch (action) {
-            case 0: r = (rpm < low) ? 1.0 : -Math.min(1.0, (rpm - low) / 1000); break;
-            case 1: r = 1.0 - Math.abs(rpm - mid) / (high - low); break;
-            case 2: r = (rpm > high) ? 1.0 : -Math.min(1.0, (high - rpm) / 1000); break;
-            default: r = 0; break;
-        }
-        return r;
+
+	    double rpm = sensors.getRPM();
+	    double prevRpm = lastRpm;               // debes mantener este valor del paso anterior
+	    lastRpm = rpm;
+
+	    double low = 2500;
+	    double high = 7000;
+	    double rpmOpt = (low + high) / 2.0;     // 4750
+	    double halfRange = (high - low) / 2.0;  // 2250
+
+	    // --- shaping principal (cuanto más cerca del óptimo, mejor)
+	    double dist = Math.abs(rpm - rpmOpt);
+	    double normDist = dist / halfRange;     // normalizado 0..1
+	    double shaping = Math.max(0.0, 1.0 - normDist);
+
+	    // --- penalización por fuera del rango útil (futuro malo si el motor no está usable)
+	    double outPenalty = 0.0;
+	    if (rpm < low) {
+	        outPenalty = -0.3 * ((low - rpm) / low);
+	    }
+	    if (rpm > high) {
+	        outPenalty = -0.3 * ((rpm - high) / high);
+	    }
+
+	    // --- penalización por zona crítica (estados futuros muy malos)
+	    double criticalPenalty = 0.0;
+	    if (rpm < 1200) criticalPenalty -= 0.6;   // casi stall
+	    if (rpm > 8500) criticalPenalty -= 0.6;   // casi over-rev real
+
+	    // --- penalización por oscilación (importe depende del salto respecto al frame previo)
+	    double swing = Math.abs(rpm - prevRpm) / halfRange;   // normalizado
+	    double swingPenalty = -0.4 * Math.max(0.0, swing - 0.10);
+	    // swing > 10% del rango útil indica inestabilidad → peor para futuros Q-values
+
+	    // --- combinación final
+	    double reward = shaping + outPenalty + criticalPenalty + swingPenalty;
+
+	    // clipping para estabilidad numérica
+	    if (reward > 1.0) reward = 1.0;
+	    if (reward < -1.0) reward = -1.0;
+
+	    return reward;
     }
 
     public int chooseGear(SensorModel sensors) {
@@ -78,4 +111,17 @@ public class qLearningGear extends qLearningBase {
     protected String getQTableName() {
         return "QTable_Gear";
     }
+
+    @Override
+    protected boolean checkSuccess(Object s) {
+        SensorModel sensors = (SensorModel) s;
+        double rpm = sensors.getRPM();
+
+        double low = 2500;
+        double high = 7000;
+
+        // Éxito si la RPM está dentro del rango ideal
+        return rpm >= low && rpm <= high;
+    }
+
 }

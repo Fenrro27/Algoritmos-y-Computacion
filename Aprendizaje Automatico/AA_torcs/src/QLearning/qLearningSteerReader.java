@@ -7,12 +7,11 @@ import java.util.Locale;
 public class qLearningSteerReader {
 
     private double[][] Q; // Q[state][action]
-    private final int numPosBins = 5;
-    private final int numAngleBins = 5;
-    private final int numActions = 7; // {-1, -0.6667, -0.3333, 0, 0.3333, 0.6667, 1}
+    private final int numPosBins = 7;
+    private final int numAngleBins = 11;
+    private final int numActions = 13;
 
     private final String qTablePath;
-
     private final float[] steerValues;
 
     public qLearningSteerReader(String csvPath) {
@@ -23,37 +22,31 @@ public class qLearningSteerReader {
         int totalStates = numPosBins * numAngleBins;
         Q = new double[totalStates][numActions];
 
-        // Inicialización de los valores de giro del volante [-1,1]
-        steerValues = new float[] {-1f, -0.2f, -0.1f, 0f, 0.1f, 0.2f, 1f};
+        // Acciones de volante uniformemente distribuidas en [-1, 1]
+        steerValues = new float[numActions];
+        for (int i = 0; i < numActions; i++) {
+            steerValues[i] = -1f + (2f * i / (numActions - 1)); // desde -1 hasta 1
+        }
+
         loadQTableCSV();
     }
 
     // -------------------------
     //  Discretización de estados
     // -------------------------
-    private int discretizePosition(double pos) {
-        double norm = Math.max(-1.0, Math.min(1.0, pos));
 
-        if (norm < -0.7) return 0;   // izquierda
-        if (norm <= -0.3) return 1;   // izquierda)
-        if (norm <= 0.3) return 2;   
-        if (norm <= 0.7) return 3;   // centro (70%)
-        return 4;                     // derecha (15%)
+    private int discretizePosition(double pos) {
+        // Normaliza a [-1, 1] y mapea a 11 bins
+        double norm = Math.max(-1.0, Math.min(1.0, pos));
+        int idx = (int) ((norm + 1.0) / 2.0 * (numPosBins - 1));
+        return idx;
     }
 
-
-    private int discretizeAngle(double angle) { // Los angulos nos lo dan en radianes
-        // Límites en radianes
-        double neg25 = Math.toRadians(-25);
-        double neg5  = Math.toRadians(-5);
-        double pos5  = Math.toRadians(5);
-        double pos25 = Math.toRadians(25);
-
-        if (angle < neg25) return 0;       // muy a la izquierda
-        if (angle < neg5)  return 1;       // izquierda leve
-        if (angle <= pos5) return 2;       // centrado
-        if (angle <= pos25) return 3;      // derecha leve
-        return 4;                          // muy a la derecha
+    private int discretizeAngle(double angle) {
+        // Normaliza a [-pi/2, pi/2] y mapea a 21 bins
+        double norm = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, angle));
+        int idx = (int) ((norm + Math.PI / 2) / Math.PI * (numAngleBins - 1));
+        return idx;
     }
 
     protected int getStateIndex(Object s) {
@@ -84,7 +77,7 @@ public class qLearningSteerReader {
         float steer = decodeAction(bestAction);
 
         System.out.printf(Locale.US,
-                "State=%d (pos=%.3f, angle=%.3f) → BestAction=%d → Steer=%.2f%n",
+                "State=%d (pos=%.3f, angle=%.3f°) → BestAction=%d → Steer=%.3f%n",
                 state,
                 sensors.getTrackPosition(),
                 Math.toDegrees(sensors.getAngleToTrackAxis()),
