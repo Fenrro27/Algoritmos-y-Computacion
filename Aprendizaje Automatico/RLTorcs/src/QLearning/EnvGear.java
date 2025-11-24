@@ -2,7 +2,7 @@ package QLearning;
 
 import champ2011client.SensorModel;
 
-public class GearEnv implements IEnvironment {
+public class EnvGear implements IEnvironment {
 
 	double alpha;
 	double gamma;
@@ -20,7 +20,11 @@ public class GearEnv implements IEnvironment {
 	final double[] velGearUp   = { 60.0, 110.0, 160.0, 210.0, 250.0, 400.0 }; 
     final double[] velGearDown = { 0.0,   40.0,  90.0, 140.0, 190.0, 230.0 };
 
-	public GearEnv(double alpha, double gamma, double epsilon) {
+    public EnvGear() {
+    	
+    }
+    
+	public EnvGear(double alpha, double gamma, double epsilon) {
 		this.alpha = alpha;
 		this.gamma = gamma;
 		this.epsilon = epsilon;
@@ -43,32 +47,31 @@ public class GearEnv implements IEnvironment {
 
 	@Override
 	public int discretizeState(SensorModel sensors) {
-	    int gear = sensors.getGear();
-	    double rpm = sensors.getRPM();
+		double rpm = sensors.getRPM();
+		int gear = sensors.getGear();
 
-	    // 1. Ajuste de índice de marcha (Gear 1 es índice 0)
-	    // Si está en Neutral (0) o Reversa (-1), usamos la lógica de 1ra marcha
-	    if (gear < 1) gear = 1;
+		// 1. Manejo de seguridad para marchas (N, R o errores)
+		if (gear < 1) return 0; // Tratamos N/R como RPM bajas para incitar a meter primera
 
-	    int gearIndex = gear - 1;
+		// 2. Obtenemos los límites DE LA MARCHA ACTUAL (Igual que en Reward)
+		int idx = gear - 1;
+		if (idx >= rpmGearUp.length) idx = rpmGearUp.length - 1; // Protección array
 
-	    // Protección: si la marcha es mayor que el tamaño de tu array (ej: 7ª), usamos la última disponible
-	    if (gearIndex >= rpmGearUp.length) {
-	        gearIndex = rpmGearUp.length - 1;
-	    }
+		double rMin = rpmGearDown[idx];
+		double rMax = rpmGearUp[idx];
 
-	    // 2. Obtenemos los límites específicos para ESTA marcha
-	    int limitDown = rpmGearDown[gearIndex];
-	    int limitUp   = rpmGearUp[gearIndex];
-
-	    // 3. Retornamos el estado (0: Bajo, 1: Óptimo, 2: Alto)
-	    if (rpm < limitDown) {
-	        return 0; // RPM demasiado bajas para esta marcha
-	    } else if (rpm > limitUp) {
-	        return 2; // RPM demasiado altas para esta marcha
-	    } else {
-	        return 1; // Zona óptima
-	    }
+		// 3. Discretización RELATIVA
+		// Estado 0: RPM Bajas (Necesita bajar marcha o acelerar)
+		// Estado 1: RPM Óptimas (Mantener marcha)
+		// Estado 2: RPM Altas (Necesita subir marcha)
+		
+		if (rpm < rMin) {
+			return 0; // Under-revving
+		} else if (rpm > rMax) {
+			return 2; // Over-revving
+		} else {
+			return 1; // Zona óptima
+		}
 	}
 
 	@Override
@@ -182,8 +185,12 @@ public class GearEnv implements IEnvironment {
 	public double getEpsilon() {
 		return epsilon;
 	}
-
-	public float[] getActionMap(int discreteAction) {
+	@Override
+	public float[][] getActionMap(){
+		return ACTION_MAP;
+	}
+	@Override
+	public float[] getActionFromMap(int discreteAction) {
 
 		return ACTION_MAP[discreteAction];
 

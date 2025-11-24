@@ -6,7 +6,8 @@ import QLearning.QLearning;
 import champ2011client.Action;
 import champ2011client.SensorModel;
 
-public class DriverGearTrain extends AbstractTrainDriverBase {
+public abstract class AbstractTrainDriverBase extends DriverBase{
+
 
 	// === 1. COMPONENTES DE Q-LEARNING ===
 	private QLearning agent;
@@ -25,20 +26,10 @@ public class DriverGearTrain extends AbstractTrainDriverBase {
     // Configuración:
     private final double MIN_SPEED_THRESHOLD = 5.0;   // 5 km/h mínimo
     private final double MIN_DELTA_DISTANCE = 0.2;    // Metros avanzandos por tick
-    private final int MAX_NO_PROGRESS_TICKS = 1000;   
+    private final int MAX_NO_PROGRESS_TICKS = 1000;
     
-	public DriverGearTrain() {
-		System.out.println("Iniciando DriverGearTrain...");
-
-		// B. Inicializar el Entorno (pasándole la política y 'this')
-		// Nota: AccelEnv usará 'this' para llamar a getSteerState
-		this.env = new EnvGear(0.1, 0.99, 0.4); // Politica - Alpha - Gamma - Epsilon inicial
-
-		// C. Inicializar el Agente Q-Learning
-		this.agent = new QLearning(this.env);
-
-		System.out.println("Entrenamiento configurado: " + env.getName());
-	}
+	protected int currentLearnedAction = -1; 
+    
 
 	@Override
 	public void reset() {
@@ -98,7 +89,6 @@ public class DriverGearTrain extends AbstractTrainDriverBase {
 	public Action control(SensorModel sensors) {
 
 		// --- 1. LÓGICA DE STUCK (Seguridad heredada) ---
-		// Si el coche se atasca, dejamos de aprender y usamos lógica de rescate
 		if (Math.abs(sensors.getAngleToTrackAxis()) > stuckAngle)
 			stuck++;
 		else
@@ -106,8 +96,7 @@ public class DriverGearTrain extends AbstractTrainDriverBase {
 
 		if (stuck > stuckTime) {
 			noProgressCount = 0; 
-
-			// Lógica de recuperación (código original)
+			// Lógica de recuperación original de DriverBase (Hardcoded para salir del atasco)
 			float steer = (float) (-sensors.getAngleToTrackAxis() / steerLock);
 			int gear = -1;
 			if (sensors.getAngleToTrackAxis() * sensors.getTrackPosition() > 0) {
@@ -121,131 +110,92 @@ public class DriverGearTrain extends AbstractTrainDriverBase {
 			action.accelerate = 1.0;
 			action.brake = 0;
 			action.clutch = clutch;
-			return action; // Retorno temprano, no aprendemos en este tick
+			return action; 
 		}
 
-		// --- 2. NUEVO: DETECCIÓN DE "NO AVANCE" (TIMEOUT) ---
+		// --- 2. DETECCIÓN DE "NO AVANCE" ---
 		boolean isStuckStopped = false;
-		// Solo chequeamos si la carrera ha comenzado realmente (dist > 0)
         if (sensors.getDistanceFromStartLine() > 0) {
             double currentDistance = sensors.getDistanceRaced();
-            double deltaDist = currentDistance - lastDistance; // Cuanto avanzó en este tick
+            double deltaDist = currentDistance - lastDistance; 
 
-            // Si va lento Y NO avanza distancia significativa
             if (sensors.getSpeed() < MIN_SPEED_THRESHOLD && deltaDist < MIN_DELTA_DISTANCE) {
                 noProgressCount++;
             } else {
-                // Si se mueve, bajamos el contador (recuperación)
                 if (noProgressCount > 0) noProgressCount--;
             }
-            
-            // Actualizamos lastDistance para el siguiente tick
             lastDistance = currentDistance; 
         }
 
-        // Verificamos si superó el tiempo máximo parado
         if (noProgressCount > MAX_NO_PROGRESS_TICKS) {
             isStuckStopped = true;
             System.out.println("⚠️ REINICIO: Coche atascado (No avance detectado).");
         }
         
-		// --- 3. LÓGICA DE Q-LEARNING (Sustituye a tu antiguo 'else') ---
+		// --- 3. LÓGICA DE Q-LEARNING UNIVERSAL ---
 
-		// A. Obtener estado actual y recompensa del entorno
+		// A. Obtener estado y recompensa
 		int currentState = env.discretizeState(sensors);
 		double reward = env.calculateReward(sensors);
 		boolean isDone = env.isEpisodeDone(sensors);
 
-		// B. Aprender: Actualizar Q-Table (usando s, a, r, s')
-		// Solo actualizamos si tenemos un estado previo (no es el primer tick)
+		// B. Aprender
 		if (previousState != -1) {
 			agent.updateQTable(previousState, previousAction, reward, currentState);
 		}
 
-		// C. Decidir siguiente acción
-		int nextAction;
-
+		// C. Decidir acción o Reiniciar
 		if (isDone || isStuckStopped) {
-			// Enviamos acción de reinicio a TORCS
 			Action resetAction = new Action();
 			resetAction.restartRace = true;
 			return resetAction;
-
 		} else {
-			// Episodio continúa: El agente elige qué hacer
-			nextAction = agent.chooseAction(currentState);
+			// El agente elige la acción abstracta (int)
+			int nextAction = agent.chooseAction(currentState);
+			
+			// GUARDAMOS LA ACCIÓN EN LA VARIABLE DE CLASE
+			// Las clases hijas leerán esto dentro de su Override de getAccel/getSteer
+			this.currentLearnedAction = nextAction;
 
-			// Guardamos estado para el siguiente ciclo
 			previousState = currentState;
 			previousAction = nextAction;
 		}
 
-		// D. Ejecutar: Traducir acción abstracta a comando TORCS
-		// AccelEnv usará getSteerState (abajo) + política + nextAction
-		return mapActionToTorcs(this, sensors, nextAction);
-	}
-
-	// ===================================================================
-	// === MÉTODO DE TRADUCCIÓN DE ACCIÓN (Ahora específico para GEAR) ===
-	// ===================================================================
-	/**
-     * Traduce la acción discreta del agente (0=Downshift, 1=Hold, 2=Upshift) a un objeto Action de TORCS.
-     * La aceleración, frenado y volante se controlan con la lógica de DriverBase, ya que el agente solo aprende marchas.
-     */
-	public Action mapActionToTorcs(DriverBase baseDriver, SensorModel sensors, int discreteAction) {
-	
-        Action action = new Action();
-        int currentGear = sensors.getGear();
-
-        // 1. Lógica de Marchas (Controlada por el Agente Q-Learning)
-        switch (discreteAction) {
-            case 0: // Downshift
-                action.gear = currentGear - 1;
-                break;
-            case 1: // Hold Gear
-                action.gear = currentGear;
-                break;
-            case 2: // Upshift
-                action.gear = currentGear + 1;
-                break;
-            default:
-                action.gear = currentGear; // Por si acaso
-                break;
-        }
-
-        // Ajuste de límites de marcha (no más bajo que -1)
-        if (action.gear < 1) {
-            action.gear = 1;
-        }else if(action.gear > 6){
-        	action.gear = 6;
+		// D. EJECUTAR (Construcción estándar basada en métodos polimórficos)
+		// Esto replica la lógica final de DriverBase.control, pero llamando a tus métodos
+		
+		Action action = new Action();
+		
+		// 1. Obtener valores llamando a los métodos (uno de ellos estará sobrecargado por el hijo)
+		float steer = getSteer(sensors);
+		int gear = getGear(sensors);
+		float accel_and_brake = getAccel(sensors); // Puede venir de heurística o de Q-Learning
+		
+		// 2. Normalización de dirección (lógica original)
+        if (steer < -1) steer = -1;
+        if (steer > 1)  steer = 1;
+        
+        // 3. Separación Acelerador/Freno (lógica original)
+        float accel, brake;
+        if (accel_and_brake > 0) {
+            accel = accel_and_brake;
+            brake = 0;
+        } else {
+            accel = 0;
+            // Aplicar ABS al freno (lógica original)
+            brake = filterABS(sensors, -accel_and_brake);
         }
         
-        // 2. Lógica de Aceleración y Frenado (Usamos el DriverBase)
-        
-    	float accel_and_brake = getAccel(sensors); // Lógica de aceleración/frenado original
-    	float accel,brake;
+        // 4. Embrague (lógica original)
+        clutch = clutching(sensors, clutch);
 
-         if (accel_and_brake>0){
-        	accel = accel_and_brake;
-        	brake = 0;
-        	}
-        	else
-        	{
-        	accel = 0;
-        	brake = filterABS(sensors,-accel_and_brake);
-        	}
-        
-        action.accelerate = accel; 
+        // 5. Asignar al objeto final
+        action.gear = gear;
+        action.steering = steer;
+        action.accelerate = accel;
         action.brake = brake;
-
-        // 3. Lógica de Volante (Usamos el DriverBase)
-        action.steering = super.getSteer(sensors);
-
-        // 4. Lógica de Embrague y ABS (Usamos el DriverBase)
-        action.clutch = super.clutching(sensors, clutch);
-        action.brake = super.filterABS(sensors, (float)action.brake); 
-       
-        return action;
-    }
-
+        action.clutch = clutch;
+        
+		return action;
+	}
 }

@@ -29,6 +29,8 @@ public class QLearning {
 		this.gamma = gamma;
 		this.epsilon = epsilon;
 		this.qTable = new double[numStates][numActions];
+		initializeRandomQTable();
+
 	}
 
 	public QLearning(IEnvironment env) {
@@ -37,7 +39,20 @@ public class QLearning {
 		this.gamma = env.getGamma();
 		this.epsilon = env.getEpsilon();
 		this.qTable = new double[env.getNumStates()][env.getNumActions()];
+		initializeRandomQTable();
 
+
+	}
+	
+	private void initializeRandomQTable() {
+		for (int i = 0; i < qTable.length; i++) {
+			for (int j = 0; j < qTable[i].length; j++) {
+				// Math.random() devuelve [0.0, 1.0)
+				// Multiplicamos por 2 -> [0.0, 2.0)
+				// Restamos 1 -> [-1.0, 1.0)
+				qTable[i][j] = (Math.random() * 2.0) - 1.0;
+			}
+		}
 	}
 
 	public int chooseAction(int state) {

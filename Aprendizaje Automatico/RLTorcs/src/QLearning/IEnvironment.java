@@ -51,11 +51,13 @@ public interface IEnvironment {
      */
     boolean isEpisodeDone(SensorModel sensors);
 
+	public float[][] getActionMap();
+
     /**
      * Devuelve la traduccion de una accion en el mapa de acciones
      * @param discreteAction
      * @return
      */
-	public float[] getActionMap(int discreteAction);
+	public float[] getActionFromMap(int discreteAction);
 
  }
