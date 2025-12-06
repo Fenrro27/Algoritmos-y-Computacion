@@ -1,28 +1,31 @@
 package Agentes;
 
 import QLearning.EnvSteer;
-import QLearning.IEnvironment;
+import QLearning.LocalQLearningUtils;
+import QLearning.Politica;
 import QLearning.QLearning;
 import champ2011client.SensorModel;
 
-public class DriverSteerTrain extends AbstractTrainDriverBase{
+public class DriverSteerTrain extends AbstractTrainDriverBase {
 
-	QLearning agent;
-	IEnvironment env;
-	
-	
+
 	public DriverSteerTrain() {
-		System.out.println("Iniciando DriverSteerTrain...");
-		env = new EnvSteer(0.1, 0.99, 0.4);
-		agent = new QLearning(env);
+		nMaxEpisodios = 250;
+		System.out.println(LocalQLearningUtils.GREEN + "Iniciando DriverSteerTrain..." + LocalQLearningUtils.RESET);
+		this.env = new EnvSteer();
+		this.agent = new QLearning(env);
+		this.pol = new Politica(env);
+		agent.loadQTableCSV();// Cargamos para volver a entrenar y ajustar mas
 		System.out.println("Entrenamiento configurado: " + env.getName());
+		
+		System.out.println(agent);
+		startTrain();
 	}
-	
-	
+
 	@Override
 	public float getSteer(SensorModel sensors) {
-
-		return agent.chooseAction(env.discretizeState(sensors));
-	}
+	return env.getActionFromMap(this.currentLearnedAction)[0];
 	
+	}
+
 }

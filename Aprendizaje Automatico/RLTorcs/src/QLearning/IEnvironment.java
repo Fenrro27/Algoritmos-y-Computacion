@@ -16,16 +16,7 @@ public interface IEnvironment {
      */
     String getName();
 
-    /**
-     * Devuelve el número total de estados discretos para esta tarea.
-     * (Ej: 3 estados de velocidad * 5 de posición = 15 estados)
-     */
     int getNumStates();
-
-    /**
-     * Devuelve el número total de acciones discretas para esta tarea.
-     * (Ej: 3 acciones de acelerador = [Frenar, Mantener, Acelerar])
-     */
     int getNumActions();
     
 	double getGamma();
@@ -59,5 +50,11 @@ public interface IEnvironment {
      * @return
      */
 	public float[] getActionFromMap(int discreteAction);
+	
+	public void reset();
+
+	double getDecayEpsilonFactor();
+
+	double getMinEpsilon();
 
  }

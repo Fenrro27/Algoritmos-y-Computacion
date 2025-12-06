@@ -4,9 +4,11 @@ import champ2011client.SensorModel;
 
 public class EnvGear implements IEnvironment {
 
-	double alpha;
-	double gamma;
-	double epsilon;
+	double alpha = 0.1; //0.99, 0.5, 0.1, 0.05;
+	double gamma = 0.99;
+	double epsilon = 0.5;
+	double minEpsilon = 0.1;
+	double decayEpsilonFactor = 0.05;
 
 	private final int NUM_STATES = 3;
 	private final int NUM_ACTIONS = 3;
@@ -24,11 +26,6 @@ public class EnvGear implements IEnvironment {
     	
     }
     
-	public EnvGear(double alpha, double gamma, double epsilon) {
-		this.alpha = alpha;
-		this.gamma = gamma;
-		this.epsilon = epsilon;
-	}
 
 	@Override
 	public String getName() {
@@ -152,11 +149,9 @@ public class EnvGear implements IEnvironment {
 	@Override
 	public boolean isEpisodeDone(SensorModel sensors) {
 		// 1. Salirse de la pista
-		if (Math.abs(sensors.getTrackPosition()) >= 1.3) {
+		if (Math.abs(sensors.getTrackPosition()) >= 1) {
 			return true;
 		}
-		// 2. Timeout (basado en ticks, difícil de replicar aquí,
-		// pero podemos usar el tiempo de vuelta)
 		if (sensors.getCurrentLapTime() > 200.0) { // Timeout de 200 segundos
 			return true;
 		}
@@ -164,10 +159,7 @@ public class EnvGear implements IEnvironment {
 		if (sensors.getLastLapTime() > 0.0) {
 			return true;
 		}
-		// 4. Choque (Deberías añadir esto)
-		if (sensors.getDamage() > 0) {
-			return true;
-		}
+		
 		return false;
 	}
 
@@ -194,6 +186,22 @@ public class EnvGear implements IEnvironment {
 
 		return ACTION_MAP[discreteAction];
 
+	}
+
+	@Override
+	public void reset() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public double getDecayEpsilonFactor() {
+		return decayEpsilonFactor;
+	}
+	
+	@Override
+	public double getMinEpsilon() {
+		return minEpsilon;
 	}
 
 }

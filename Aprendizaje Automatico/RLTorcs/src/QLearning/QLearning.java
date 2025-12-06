@@ -23,13 +23,22 @@ public class QLearning {
 
 	// Q-table
 	private double[][] qTable;
+	
+	// Decaymiento Epsilon
+	private double decayEpsilonFactor;
+	private double minEpsilon;
+	
+	private MonitorGrafico monitor;
 
-	public QLearning(int numStates, int numActions, double alpha, double gamma, double epsilon) {
+	public QLearning(int numStates, int numActions, double alpha, double gamma, double epsilon,double decayEpsilonFactor, double minEpsilon) {
 		this.alpha = alpha;
 		this.gamma = gamma;
 		this.epsilon = epsilon;
+		this.decayEpsilonFactor=decayEpsilonFactor;
+		this.minEpsilon=minEpsilon;
 		this.qTable = new double[numStates][numActions];
 		initializeRandomQTable();
+		initChart();
 
 	}
 
@@ -38,10 +47,25 @@ public class QLearning {
 		this.alpha = env.getAlpha();
 		this.gamma = env.getGamma();
 		this.epsilon = env.getEpsilon();
+		this.decayEpsilonFactor=env.getDecayEpsilonFactor();
+		this.minEpsilon=env.getMinEpsilon();
 		this.qTable = new double[env.getNumStates()][env.getNumActions()];
 		initializeRandomQTable();
-
-
+		initChart();
+	}
+	
+	private void initChart() {
+		// Creamos el gráfico y lo hacemos visible
+		this.monitor = new MonitorGrafico("Entrenamiento: " + ((name!=null)?name:"Agente"));
+		this.monitor.setVisible(true);
+	}
+	
+	// Método para llamar desde tu bucle principal para actualizar la gráfica
+	// Recomiendo llamarlo al final de cada episodio o cada X ticks
+	public void updatePlot(double currentReward) {
+		if(monitor != null) {
+			monitor.agregarDato(this.epsilon, currentReward);
+		}
 	}
 	
 	private void initializeRandomQTable() {
@@ -74,19 +98,27 @@ public class QLearning {
 	}
 
 	// Funcion para mirar al futuro
-	public void updateQTable(int state, int action, double reward, int nextState) {
-		double maxQNext = Double.NEGATIVE_INFINITY;
-		for (int nextAction = 0; nextAction < qTable[nextState].length; nextAction++) {
-			if (qTable[nextState][nextAction] > maxQNext) {
-				maxQNext = qTable[nextState][nextAction];
-			}
-		}
-		qTable[state][action] += alpha * (reward + gamma * maxQNext - qTable[state][action]);
+	public void updateQTable(int state, int action, double reward, int nextState, boolean isTerminal) {
+	    
+	    double maxQNext = 0.0; // Por defecto 0 si es terminal
+
+	    // Solo calculamos el futuro si NO hemos muerto/terminado
+	    if (!isTerminal) {
+	        maxQNext = Double.NEGATIVE_INFINITY;
+	        for (int nextAction = 0; nextAction < qTable[nextState].length; nextAction++) {
+	            if (qTable[nextState][nextAction] > maxQNext) {
+	                maxQNext = qTable[nextState][nextAction];
+	            }
+	        }
+	    }
+
+	    // Aplicamos la fórmula (ahora maxQNext será 0 si isTerminal es true)
+	    qTable[state][action] += alpha * (reward + gamma * maxQNext - qTable[state][action]);
 	}
 
-	public void decayEpsilon(double decayRate, double minEpsilon) {
-		System.out.println("Epsilon: " + epsilon);
-		epsilon = Math.max(minEpsilon, epsilon * decayRate);
+	public void decayEpsilon() {
+		epsilon = Math.max(minEpsilon, epsilon - decayEpsilonFactor);
+		System.out.println("\t- Epsilon: " + (float)epsilon);
 	}
 
 // Lógica de guardado y carga del archivo QLearning
@@ -134,7 +166,7 @@ public class QLearning {
 	 * State, Action0, Action1, Action2...
 	 */
 	public void saveQTableCSV() {
-		String filename = "QTable_"+name+".csv";
+		String filename = "Knowledge/QTable_"+name+".csv";
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
 			// 1. Escribir Cabecera
 			bw.write("State");
@@ -151,7 +183,7 @@ public class QLearning {
 				}
 				bw.newLine();
 			}
-			System.out.println("Q-Table guardada exitosamente en: " + filename);
+			System.out.println(LocalQLearningUtils.GREEN + "Q-Table guardada exitosamente en: " + filename + LocalQLearningUtils.RESET);
 		} catch (IOException e) {
 			System.err.println("Error al guardar Q-Table CSV: " + e.getMessage());
 		}
@@ -161,7 +193,8 @@ public class QLearning {
 	 * Carga una Q-Table desde un archivo CSV para continuar entrenamiento o
 	 * ejecutar.
 	 */
-	public void loadQTableCSV(String filename) {
+	public void loadQTableCSV() {
+		String filename = "Knowledge/QTable_"+name+".csv";
 		String line = "";
 		try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
 			// Saltamos la cabecera
@@ -185,9 +218,9 @@ public class QLearning {
 				}
 				row++;
 			}
-			System.out.println("Q-Table cargada exitosamente desde: " + filename);
+			System.out.println(LocalQLearningUtils.GREEN + "Q-Table cargada exitosamente desde: " + filename + LocalQLearningUtils.RESET);
 		} catch (IOException e) {
-			System.err.println("No se pudo cargar la Q-Table (¿es la primera vez?): " + e.getMessage());
+			System.err.println("No se pudo cargar la Q-Table: " + e.getMessage());
 		} catch (NumberFormatException e) {
 			System.err.println("Error de formato en el CSV: " + e.getMessage());
 		}
@@ -197,11 +230,11 @@ public class QLearning {
      * Guarda la POLÍTICA mostrando TODAS las mejores acciones en caso de empate.
      */
     public void savePolicyText() {
-		String filename = "Policy_"+name+".txt";
+		String filename = "Knowledge/Policy_"+name+".txt";
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
             bw.write("=== POLÍTICA APRENDIDA (Q-LEARNING) ===\n");
-            bw.write("State -> Best Action(s) [Q-Value]\n");
+            bw.write("-> State -> Best Action(s) [Q-Value]\n");
             bw.write("--------------------------------------\n");
 
             for (int i = 0; i < qTable.length; i++) {
@@ -222,9 +255,67 @@ public class QLearning {
                 // Escribimos en el archivo
                 bw.write(String.format("State %3d -> Actions: %-10s (Q: %.4f)\n", i, actionsStr.toString(), maxQ));
             }
-            System.out.println("Política guardada en: " + filename);
+            System.out.println(LocalQLearningUtils.GREEN + "Política guardada en: " + filename + LocalQLearningUtils.RESET);
         } catch (IOException e) {
             System.err.println("Error al guardar Policy TXT: " + e.getMessage());
         }
     }
+    
+    @Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		
+		// 1. Cabecera y Parámetros
+		sb.append("=== Q-Learning Agent: ").append((name != null) ? name : "Unknown").append(" ===\n");
+		sb.append(String.format("Params  -> Alpha: %.2f | Gamma: %.2f | Epsilon: %.4f\n", alpha, gamma, epsilon));
+		sb.append(String.format("Config  -> Decay: %.4f | MinEpsilon: %.4f\n", decayEpsilonFactor, minEpsilon));
+		
+		// 2. Dimensiones
+		int numStates = qTable.length;
+		int numActions = (numStates > 0) ? qTable[0].length : 0;
+		sb.append(String.format("Q-Table -> %d States x %d Actions\n", numStates, numActions));
+		sb.append("--------------------------------------------------\n");
+
+		// 3. Vista Previa de la Tabla (Para no saturar la consola)
+		// Solo mostramos los primeros 10 estados o menos si la tabla es pequeña
+		int previewLimit = Math.min(numStates, 10);
+		
+		sb.append("Preview (First ").append(previewLimit).append(" states):\n");
+		
+		for (int i = 0; i < previewLimit; i++) {
+			sb.append(String.format("State %-3d | ", i));
+			
+			// Buscamos la mejor acción para resaltarla visualmente (opcional pero útil)
+			double maxVal = Double.NEGATIVE_INFINITY;
+			int bestIdx = -1;
+			for(int k=0; k<numActions; k++) {
+				if(qTable[i][k] > maxVal) {
+					maxVal = qTable[i][k];
+					bestIdx = k;
+				}
+			}
+
+			// Imprimir valores
+			sb.append("[");
+			for (int j = 0; j < numActions; j++) {
+				// Formato: 6 espacios, 3 decimales. 
+				// Ponemos un asterisco (*) visual en la mejor acción
+				String valStr = String.format("%6.3f", qTable[i][j]);
+				if (j == bestIdx) {
+					sb.append(LocalQLearningUtils.GREEN).append(valStr).append("*").append(LocalQLearningUtils.RESET);
+				} else {
+					sb.append(valStr).append(" ");
+				}
+				
+				if (j < numActions - 1) sb.append(", ");
+			}
+			sb.append("]\n");
+		}
+
+		if (numStates > previewLimit) {
+			sb.append("... (").append(numStates - previewLimit).append(" states more hidden) ...\n");
+		}
+		
+		return sb.toString();
+	}
 }

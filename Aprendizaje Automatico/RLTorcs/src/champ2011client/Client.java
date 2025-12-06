@@ -22,18 +22,22 @@ public class Client {
 	private static int maxSteps;
 	private static Stage stage;
 	private static String trackName;
+	private static int timeoutCount = 0;
 
 	/**
-	 * @param args
-	 *            is used to define all the options of the client.
-	 *            <port:N> is used to specify the port for the connection (default is 3001)
-	 *            <host:ADDRESS> is used to specify the address of the host where the server is running (default is localhost)  
-	 *            <id:ClientID> is used to specify the ID of the client sent to the server (default is championship2009) 
-	 *            <verbose:on> is used to set verbose mode on (default is off)
-	 *            <maxEpisodes:N> is used to set the number of episodes (default is 1)
-	 *            <maxSteps:N> is used to set the max number of steps for each episode (0 is default value, that means unlimited number of steps)
-	 *            <stage:N> is used to set the current stage: 0 is WARMUP, 1 is QUALIFYING, 2 is RACE, others value means UNKNOWN (default is UNKNOWN)
-	 *            <trackName:name> is used to set the name of current track
+	 * @param args is used to define all the options of the client. <port:N> is used
+	 *             to specify the port for the connection (default is 3001)
+	 *             <host:ADDRESS> is used to specify the address of the host where
+	 *             the server is running (default is localhost) <id:ClientID> is
+	 *             used to specify the ID of the client sent to the server (default
+	 *             is championship2009) <verbose:on> is used to set verbose mode on
+	 *             (default is off) <maxEpisodes:N> is used to set the number of
+	 *             episodes (default is 1) <maxSteps:N> is used to set the max
+	 *             number of steps for each episode (0 is default value, that means
+	 *             unlimited number of steps) <stage:N> is used to set the current
+	 *             stage: 0 is WARMUP, 1 is QUALIFYING, 2 is RACE, others value
+	 *             means UNKNOWN (default is UNKNOWN) <trackName:name> is used to
+	 *             set the name of current track
 	 */
 	public static void main(String[] args) {
 		parseParameters(args);
@@ -43,7 +47,7 @@ public class Client {
 		Controller driver = load(args[0]);
 		driver.setStage(stage);
 		driver.setTrackName(trackName);
-		
+
 		/* Build init string */
 		float[] angles = driver.initAngles();
 		String initStr = clientId + "(init";
@@ -51,7 +55,7 @@ public class Client {
 			initStr = initStr + " " + angles[i];
 		}
 		initStr = initStr + ")";
-		
+
 		long curEpisode = 0;
 		boolean shutdownOccurred = false;
 		do {
@@ -76,7 +80,7 @@ public class Client {
 				inMsg = mySocket.receive(UDP_TIMEOUT);
 
 				if (inMsg != null) {
-
+					timeoutCount = 0;
 					/*
 					 * Check if race is ended (shutdown)
 					 */
@@ -98,18 +102,22 @@ public class Client {
 
 					Action action = new Action();
 					if (currStep < maxSteps || maxSteps == 0)
-						action = driver.control(new MessageBasedSensorModel(
-								inMsg));
+						action = driver.control(new MessageBasedSensorModel(inMsg));
 					else
 						action.restartRace = true;
 
 					currStep++;
 					mySocket.send(action.toString());
-				} else
-					System.out.println("Server did not respond within the timeout");
+				} else {
+					if ((++timeoutCount) > 20) {
+						System.err.println("Demasiado Timeout");
+						System.exit(0);
+					} // si hay 20 timeouts cerrar app
+					System.out.println("Server did not respond within the timeout (" + timeoutCount + "/20)");
+				}
 			}
 
-		} while (true /*++curEpisode < maxEpisodes */ && !shutdownOccurred);
+		} while (true /* ++curEpisode < maxEpisodes */ && !shutdownOccurred);
 
 		/*
 		 * Shutdown the controller
@@ -133,7 +141,7 @@ public class Client {
 		maxSteps = 0;
 		stage = Stage.UNKNOWN;
 		trackName = "unknown";
-		
+
 		for (int i = 1; i < args.length; i++) {
 			StringTokenizer st = new StringTokenizer(args[i], ":");
 			String entity = st.nextToken();
@@ -153,8 +161,7 @@ public class Client {
 				else if (value.equals(false))
 					verbose = false;
 				else {
-					System.out.println(entity + ":" + value
-							+ " is not a valid option");
+					System.out.println(entity + ":" + value + " is not a valid option");
 					System.exit(0);
 				}
 			}
@@ -170,16 +177,14 @@ public class Client {
 			if (entity.equals("maxEpisodes")) {
 				maxEpisodes = Integer.parseInt(value);
 				if (maxEpisodes <= 0) {
-					System.out.println(entity + ":" + value
-							+ " is not a valid option");
+					System.out.println(entity + ":" + value + " is not a valid option");
 					System.exit(0);
 				}
 			}
 			if (entity.equals("maxSteps")) {
 				maxSteps = Integer.parseInt(value);
 				if (maxSteps < 0) {
-					System.out.println(entity + ":" + value
-							+ " is not a valid option");
+					System.out.println(entity + ":" + value + " is not a valid option");
 					System.exit(0);
 				}
 			}
@@ -187,12 +192,11 @@ public class Client {
 	}
 
 	private static Controller load(String name) {
-		Controller controller=null;
+		Controller controller = null;
 		try {
-			controller = (Controller) (Object) Class.forName(name)
-					.newInstance();
+			controller = (Controller) (Object) Class.forName(name).newInstance();
 		} catch (ClassNotFoundException e) {
-			System.out.println(name	+ " is not a class name");
+			System.out.println(name + " is not a class name");
 			System.exit(0);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block

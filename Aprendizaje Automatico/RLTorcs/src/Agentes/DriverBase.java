@@ -176,10 +176,9 @@ public class DriverBase extends Controller{
 	        action.accelerate = 1.0;
 	        action.brake = 0;
 	        action.clutch = clutch;
-	        return action;
+	      //  return action;
 	    }
 
-	    else // car is not stuck
 	    {
 	    	// compute accel/brake command
 	        float accel_and_brake = getAccel(sensors);
