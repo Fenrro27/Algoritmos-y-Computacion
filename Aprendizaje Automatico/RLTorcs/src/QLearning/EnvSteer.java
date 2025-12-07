@@ -11,12 +11,12 @@ public class EnvSteer implements IEnvironment {
 	double decayEpsilonFactor = 0.01;
 
 	private final int numAngleBins = 5;
-	private final int numPosBins = 5;
+	private final int numPosBins = 3;
 	private final int NUM_STATES = numAngleBins * numPosBins;// 5 posiciones en la carretera x 7 angulos de la
 																// carretera
-	private final int NUM_ACTIONS = 7;
-	private final float[][] ACTION_MAP = { { -0.50f }, { -0.30f }, { -0.15f }, { 0.0f }, { 0.15f }, { 0.30f },
-			{ 0.50f } };
+	private final int NUM_ACTIONS = 5;
+	private final float[][] ACTION_MAP = { { -0.30f }, { -0.15f }, { 0.0f }, { 0.15f }, 
+			{ 0.30f } };
 
 	private int stuck = 0;
 	final int stuckTime = 25;
@@ -56,98 +56,40 @@ public class EnvSteer implements IEnvironment {
 		int p = discretizePosition(sensors.getTrackPosition());
 		int a = discretizeAngle(sensors.getAngleToTrackAxis());
 
-		switch (p) {
-		case 0:
-			switch (a) {
-			case 0:
-				return 0;
-			case 1:
-				return 1;
-			case 2:
-				return 2;
-			case 3:
-				return 3;
-			default:// caso 4
-				return 4;
+		int k = 0;
+		for (int i = 0; i < numPosBins; i++) {
+			for (int j = 0; j < numAngleBins; j++) {
+				if (p == i && a == j) {
+					return k;
+				} else {
+					k++;
+				}
 			}
-		case 1:
-			switch (a) {
-			case 0:
-				return 5;
-			case 1:
-				return 6;
-			case 2:
-				return 7;
-			case 3:
-				return 8;
-			default:// caso 4
-				return 9;
-			}
-		case 2:
-			switch (a) {
-			case 0:
-				return 10;
-			case 1:
-				return 11;
-			case 2:
-				return 12;
-			case 3:
-				return 13;
-			default:// caso 4
-				return 14;
-			}
-		case 3:
-			switch (a) {
-			case 0:
-				return 15;
-			case 1:
-				return 16;
-			case 2:
-				return 17;
-			case 3:
-				return 18;
-			default:// caso 4
-				return 19;
-			}
-		default:// caso 4
-			switch (a) {
-			case 0:
-				return 20;
-			case 1:
-				return 21;
-			case 2:
-				return 22;
-			case 3:
-				return 23;
-			default:// caso 4
-				return 24;
-
-			}
-
 		}
+
+		System.err.println("Error, No se ha podido discretizar el estado");
+		System.exit(-1);
+		return -1;
 
 	}
 
 	private int discretizePosition(double pos) {
-		if (pos < -0.6)
-			return 0;
+		//if (pos < -0.6) return 0;
 		if (pos < -0.2)
-			return 1;
-		if (pos < 0.2)
-			return 2;
-		if (pos < 0.6)
-			return 3;
-		return 4;
+			return 0;
+		if (pos < 0.2)		return 1;
+		//if (pos < 0.6)	return 3;
+		return 2;
 	}
 
 	private int discretizeAngle(double angle) {
-		if (angle < -0.4 /*-Math.PI / 4*/)
+		if (angle < -0.4)
 			return 0;
-		if (angle < -0.1/*-Math.PI / 6*/)
+		if (angle < -0.1)
 			return 1;
-		if (angle < 0.1/*Math.PI / 6*/)
+		if (angle < 0.1)
 			return 2;
-		if (angle < 0.4/*Math.PI / 4*/)
+		if (angle < 0.4)
 			return 3;
 		return 4;
 
@@ -284,5 +226,7 @@ public class EnvSteer implements IEnvironment {
 	public double getMinEpsilon() {
 		return minEpsilon;
 	}
+
+	
 
 }

@@ -114,6 +114,8 @@ public class QLearning {
 
 	    // Aplicamos la fórmula (ahora maxQNext será 0 si isTerminal es true)
 	    qTable[state][action] += alpha * (reward + gamma * maxQNext - qTable[state][action]);
+
+
 	}
 
 	public void decayEpsilon() {

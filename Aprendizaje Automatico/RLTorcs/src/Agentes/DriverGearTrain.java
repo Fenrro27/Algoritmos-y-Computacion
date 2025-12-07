@@ -22,9 +22,34 @@ public class DriverGearTrain extends AbstractTrainDriverBase {
 	@Override
 	public int getGear(SensorModel sensors) {
 		int newGear = sensors.getGear();
+			boolean isDone = env.isEpisodeDone(sensors);
+		int currentState = env.discretizeState(sensors);
+		double reward = env.calculateReward(sensors);
+
+		int nextAction = -1;
+
+		if (isInTestMode) {
+			nextAction = pol.getAccionIndex(currentState);
+			histTest.registrarEvento(currentState, nextAction);
+		} else {
+			// El agente elige la acción abstracta (int)
+			nextAction = agent.chooseAction(currentState);
+			histTrain.registrarEvento(currentState, nextAction);
+		}
+
 		
+		previousState = currentState;
+		previousAction = nextAction;
+
+		// B. Aprender
+		if (previousState != -1 && !isInTestMode) {
+			agent.updatePlot(reward);
+			agent.updateQTable(previousState, previousAction, reward, currentState, isDone);
+		}
+
+
 		 // 1. Lógica de Marchas (Controlada por el Agente Q-Learning)
-        switch (this.currentLearnedAction) {
+        switch (nextAction) {
             case 0: // Downshift
             	newGear = newGear - 1;
                 break;

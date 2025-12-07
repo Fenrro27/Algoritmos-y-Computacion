@@ -1,0 +1,11 @@
+=== POLÍTICA APRENDIDA (Q-LEARNING) ===
+-> State -> Best Action(s) [Q-Value]
+--------------------------------------
+State   0 -> Actions: {4}        (Q: 0,6985)
+State   1 -> Actions: {3}        (Q: 53,5293)
+State   2 -> Actions: {7}        (Q: 57,5933)
+State   3 -> Actions: {4}        (Q: 41,9681)
+State   4 -> Actions: {1}        (Q: 61,5550)
+State   5 -> Actions: {3}        (Q: 61,7856)
+State   6 -> Actions: {2}        (Q: 63,3827)
+State   7 -> Actions: {7}        (Q: 65,4773)

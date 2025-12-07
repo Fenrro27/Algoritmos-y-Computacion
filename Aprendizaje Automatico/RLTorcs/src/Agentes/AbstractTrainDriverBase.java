@@ -28,7 +28,7 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 	protected int previousState = -1;
 	protected int previousAction = -1;
 
-	protected int currentLearnedAction = -1;
+	//protected int currentLearnedAction = -1;
 
 	public void startTrain() {
 		histTest = new MonitorHistograma(env.getNumStates(), env.getNumActions(),
@@ -41,8 +41,10 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 
 	@Override
 	public void reset() {
+		//this.currentLearnedAction = -1;
+
 		isRestarting = false;
-		env.reset();
+		//env.reset();
 
 		// El episodio terminó (choque o salida)
 		System.out.println(LocalQLearningUtils.YELLOW + "Episodio Finalizado. (" + (nEpisodios + 1) + "/"
@@ -53,26 +55,26 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 		previousState = -1;
 		previousAction = -1;
 
+
+if (!isInTestMode) {
+			agent.decayEpsilon(); // agent.decayEpsilon(0.95, 0.05); // Reducimos exploración
+			agent.saveQTableCSV();
+			agent.savePolicyText();
+		}
 		if (nEpisodios >= nMaxEpisodios) {
 			// Lanzamos excepcion
 			System.out.println(LocalQLearningUtils.YELLOW + "!!! ALCANZADO MÁXIMO DE EPISODIOS (" + nMaxEpisodios
 					+ ") !!!" + LocalQLearningUtils.RESET);
 			System.out.println("Guardando estado final del aprendizaje...");
 
-			// 1. Guardar Tablas
-			agent.saveQTableCSV();
-			agent.savePolicyText();
+			
 
 			System.out.println(LocalQLearningUtils.BLUE + "FIN DEL ENTRENAMIENTO: Se completaron " + nMaxEpisodios
 					+ " episodios." + LocalQLearningUtils.RESET);
 			System.exit(0);
 		}
 
-		if (!isInTestMode) {
-			agent.decayEpsilon(); // agent.decayEpsilon(0.95, 0.05); // Reducimos exploración
-			agent.saveQTableCSV();
-			agent.savePolicyText();
-		}
+		
 
 		System.out.println("\n------------------------------------------------");
 		if (((nEpisodios + 1) % (trainingInterval)) == 0) { // Activamos el modo de entrenamiento
@@ -90,10 +92,6 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 
 	@Override
 	public void shutdown() {
-		// Aquí podrías guardar la Q-Table de aceleración
-		// System.out.println("Guardando tabla Q...");
-		// agent.saveQTableCSV();
-		// agent.savePolicyText();
 		System.out.println("Bye bye!");
 	}
 
@@ -104,17 +102,7 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 	public Action control(SensorModel sensors) {
 		if (!isRestarting) {
 
-			// --- 3. LÓGICA DE Q-LEARNING UNIVERSAL ---
-
-			// A. Obtener estado y recompensa
-			int currentState = env.discretizeState(sensors);
-			double reward = env.calculateReward(sensors);
 			boolean isDone = env.isEpisodeDone(sensors);
-			// B. Aprender
-			if (previousState != -1 && !isInTestMode) {
-				agent.updatePlot(reward);
-				agent.updateQTable(previousState, previousAction, reward, currentState, isDone);
-			}
 
 			// C. Decidir acción o Reiniciar
 			if (isDone) { //
@@ -122,26 +110,7 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 				Action resetAction = new Action();
 				resetAction.restartRace = true;
 				return resetAction;
-			} else {
-
-				int nextAction = -1;
-
-				if (isInTestMode) {
-					nextAction = pol.getAccionIndex(currentState);
-					histTest.registrarEvento(currentState, nextAction);
-				} else {
-					// El agente elige la acción abstracta (int)
-					nextAction = agent.chooseAction(currentState);
-					histTrain.registrarEvento(currentState, nextAction);
-				}
-
-				// GUARDAMOS LA ACCIÓN EN LA VARIABLE DE CLASE
-				// Las clases hijas leerán esto dentro de su Override de getAccel/getSteer
-				this.currentLearnedAction = nextAction;
-
-				previousState = currentState;
-				previousAction = nextAction;
-			}
+			} 
 
 			// D. EJECUTAR (Construcción estándar basada en métodos polimórficos)
 			// Esto replica la lógica final de DriverBase.control, pero llamando a tus
