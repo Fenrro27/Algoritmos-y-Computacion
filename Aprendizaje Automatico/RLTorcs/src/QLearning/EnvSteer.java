@@ -6,18 +6,17 @@ public class EnvSteer implements IEnvironment {
 
 	double alpha = 0.2;
 	double gamma = 0.8;
-	double epsilon = 0.8;
+	double epsilon = 0.3;
 	double minEpsilon = 0.3;
 	double decayEpsilonFactor = 0.01;
 
 	private final int numAngleBins = 5;
-	private final int numPosBins = 3;
+	private final int numPosBins = 5;
 	private final int NUM_STATES = numAngleBins * numPosBins;// 5 posiciones en la carretera x 7 angulos de la
 																// carretera
-	private final int NUM_ACTIONS = 7;
-	private final float[][] ACTION_MAP = { { -1 }, { -0.30f }, { -0.15f }, { 0.0f }, { 0.15f }, 
-			{ 0.30f },  { 1} };
-
+	private final int NUM_ACTIONS = 5;
+	private final float[][] ACTION_MAP = { { -0.40f },{ -0.15f },{ 0.0f },{ 0.15f } , { 0.40f } };
+	
 	private int stuck = 0;
 	final int stuckTime = 25;
 	final float stuckAngle = (float) 0.523598775; // PI/6
@@ -56,40 +55,98 @@ public class EnvSteer implements IEnvironment {
 		int p = discretizePosition(sensors.getTrackPosition());
 		int a = discretizeAngle(sensors.getAngleToTrackAxis());
 
-		int k = 0;
-		for (int i = 0; i < numPosBins; i++) {
-			for (int j = 0; j < numAngleBins; j++) {
-				if (p == i && a == j) {
-					return k;
-				} else {
-					k++;
-				}
+		switch (p) {
+		case 0:
+			switch (a) {
+			case 0:
+				return 0;
+			case 1:
+				return 1;
+			case 2:
+				return 2;
+			case 3:
+				return 3;
+			default:// caso 4
+				return 4;
 			}
-		}
+		case 1:
+			switch (a) {
+			case 0:
+				return 5;
+			case 1:
+				return 6;
+			case 2:
+				return 7;
+			case 3:
+				return 8;
+			default:// caso 4
+				return 9;
+			}
+		case 2:
+			switch (a) {
+			case 0:
+				return 10;
+			case 1:
+				return 11;
+			case 2:
+				return 12;
+			case 3:
+				return 13;
+			default:// caso 4
+				return 14;
+			}
+		case 3:
+			switch (a) {
+			case 0:
+				return 15;
+			case 1:
+				return 16;
+			case 2:
+				return 17;
+			case 3:
+				return 18;
+			default:// caso 4
+				return 19;
+			}
+		default:// caso 4
+			switch (a) {
+			case 0:
+				return 20;
+			case 1:
+				return 21;
+			case 2:
+				return 22;
+			case 3:
+				return 23;
+			default:// caso 4
+				return 24;
 
-		System.err.println("Error, No se ha podido discretizar el estado");
-		System.exit(-1);
-		return -1;
+			}
+
+		}
 
 	}
 
 	private int discretizePosition(double pos) {
-		//if (pos < -0.6) return 0;
-		if (pos < -0.2)
+		if (pos < -0.6)
 			return 0;
-		if (pos < 0.2)		return 1;
-		//if (pos < 0.6)	return 3;
-		return 2;
+		if (pos < -0.2)
+			return 1;
+		if (pos < 0.2)
+			return 2;
+		if (pos < 0.6)
+			return 3;
+		return 4;
 	}
 
 	private int discretizeAngle(double angle) {
-		if (angle < -0.4)
+		if (angle < -0.40)
 			return 0;
-		if (angle < -0.1)
+		if (angle < -0.15)
 			return 1;
-		if (angle < 0.1)
+		if (angle < 0.15)
 			return 2;
-		if (angle < 0.4)
+		if (angle < 0.40)
 			return 3;
 		return 4;
 
@@ -99,28 +156,38 @@ public class EnvSteer implements IEnvironment {
 	public double calculateReward(SensorModel sensors) {
 		double trackPosition = sensors.getTrackPosition();
 		double angle = sensors.getAngleToTrackAxis();
+		double alignmentBonus = 5.0 * Math.cos(angle);
 
+		double multiplicador =alignmentBonus;
+		
+		
 		// Castigo terminal
-		if (Double.isNaN(trackPosition) || Math.abs(trackPosition) > 0.98) {
-			if ((trackPosition * angle) > 0) {
-				return -1000.0 - Math.abs(angle) * 100;
-			} else {
-				return -1000.0;
-			}
+		if (Double.isNaN(trackPosition)) {
+			return -30.0;
 		}
+		if (Math.abs(trackPosition) > 0.80) {
+		    double restante = 1 - Math.abs(trackPosition); // cercano a 0 en el borde
+		    if (restante<0.025)
+		    	return -1000;
+		    double reward = -Math.exp(1 /(restante*8));      // cuanto más pequeño restante, más negativo
+		    return reward;
+		}
+
 
 		double distanceReward = 10.0 * (1.0 - Math.abs(trackPosition));
-		double anglePenalty = 0.0;
+		
 
-		if ((trackPosition * angle) > 0) {
-			// Castigamos proporcionalmente a qué tan mal orientado está
-			// y qué tan cerca del borde está.
-			anglePenalty = Math.abs(angle) * Math.abs(trackPosition) * 10.0;
+		 if(Math.abs(trackPosition)<=0.80) {
+			 double reward = 1 /(Math.abs(trackPosition));
+			 if ((reward)*multiplicador >300)
+				 return 300;
+			 return (reward)*multiplicador;
 		}
+		 return multiplicador;
 
 		// Premia ir recto (cos(0)=1). Ayuda en las rectas.
-		double alignmentBonus = 5.0 * Math.cos(angle);
-		return distanceReward + alignmentBonus - anglePenalty;
+		
+		
 	}
 
 	@Override
@@ -226,7 +293,5 @@ public class EnvSteer implements IEnvironment {
 	public double getMinEpsilon() {
 		return minEpsilon;
 	}
-
-	
 
 }

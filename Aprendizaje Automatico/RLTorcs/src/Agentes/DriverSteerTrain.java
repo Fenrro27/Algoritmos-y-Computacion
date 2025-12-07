@@ -20,6 +20,8 @@ public class DriverSteerTrain extends AbstractTrainDriverBase {
 
 	public DriverSteerTrain() {
 		nMaxEpisodios = 250;
+		 maxSpeedDist=7;
+		 maxSpeed=50;
 		System.out.println(LocalQLearningUtils.GREEN + "Iniciando DriverSteerTrain..." + LocalQLearningUtils.RESET);
 		this.env = new EnvSteer();
 		this.agent = new QLearning(env);

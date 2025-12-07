@@ -19,7 +19,7 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 
 	protected int nEpisodios = 0;
 	protected int nMaxEpisodios = 20;
-	protected int trainingInterval = 10;
+	protected int trainingInterval = 5;
 	protected boolean isInTestMode = false;
 
 	private boolean isRestarting = false;
