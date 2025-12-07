@@ -88,7 +88,7 @@ public class EnvAccel implements IEnvironment {
 		double speed = sensors.getSpeed(); // km/h
 
 		if (Double.isNaN(trackPosition) || Math.abs(trackPosition) > 0.98) {
-			return -1000.0;
+			return -100000.0;
 		}
 
 		double reward = 10*(speed / 200) + 10 * (1.0 - Math.abs(trackPosition));

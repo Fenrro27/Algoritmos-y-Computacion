@@ -14,7 +14,7 @@ public class DriverGearTest extends DriverBase{
 		this.env = new EnvGear();
 ;
 		politica = new Politica(env);
-		politica.loadPolicyText(null);
+		politica.loadPolicyText();
 	}
 
 	@Override

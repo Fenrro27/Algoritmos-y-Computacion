@@ -29,6 +29,10 @@ public class DriverGearTrain extends AbstractTrainDriverBase {
 		int nextAction = -1;
 
 		if (isInTestMode) {
+			System.out.println(agent);
+			System.out.println(pol.verQtableString());
+
+			
 			nextAction = pol.getAccionIndex(currentState);
 			histTest.registrarEvento(currentState, nextAction);
 		} else {
@@ -38,8 +42,6 @@ public class DriverGearTrain extends AbstractTrainDriverBase {
 		}
 
 		
-		previousState = currentState;
-		previousAction = nextAction;
 
 		// B. Aprender
 		if (previousState != -1 && !isInTestMode) {
@@ -47,6 +49,9 @@ public class DriverGearTrain extends AbstractTrainDriverBase {
 			agent.updateQTable(previousState, previousAction, reward, currentState, isDone);
 		}
 
+		
+		previousState = currentState;
+		previousAction = nextAction;
 
 		 // 1. Lógica de Marchas (Controlada por el Agente Q-Learning)
         switch (nextAction) {

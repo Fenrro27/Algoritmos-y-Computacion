@@ -14,9 +14,9 @@ public class EnvSteer implements IEnvironment {
 	private final int numPosBins = 3;
 	private final int NUM_STATES = numAngleBins * numPosBins;// 5 posiciones en la carretera x 7 angulos de la
 																// carretera
-	private final int NUM_ACTIONS = 5;
-	private final float[][] ACTION_MAP = { { -0.30f }, { -0.15f }, { 0.0f }, { 0.15f }, 
-			{ 0.30f } };
+	private final int NUM_ACTIONS = 7;
+	private final float[][] ACTION_MAP = { { -1 }, { -0.30f }, { -0.15f }, { 0.0f }, { 0.15f }, 
+			{ 0.30f },  { 1} };
 
 	private int stuck = 0;
 	final int stuckTime = 25;

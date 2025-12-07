@@ -12,7 +12,7 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 
 	// === 1. COMPONENTES DE Q-LEARNING ===
 	protected QLearning agent;
-	protected IEnvironment env; // Tu AccelEnv
+	protected IEnvironment env;
 	public Politica pol;
 	public MonitorHistograma histTrain;
 	public MonitorHistograma histTest;
@@ -28,7 +28,7 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 	protected int previousState = -1;
 	protected int previousAction = -1;
 
-	//protected int currentLearnedAction = -1;
+	// protected int currentLearnedAction = -1;
 
 	public void startTrain() {
 		histTest = new MonitorHistograma(env.getNumStates(), env.getNumActions(),
@@ -37,16 +37,13 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 				"Train - Trainind de " + env.getName());
 		histTest.setVisible(true);
 		histTrain.setVisible(true);
+		
 	}
 
 	@Override
 	public void reset() {
-		//this.currentLearnedAction = -1;
-
 		isRestarting = false;
-		//env.reset();
-
-		// El episodio terminó (choque o salida)
+		env.reset();
 		System.out.println(LocalQLearningUtils.YELLOW + "Episodio Finalizado. (" + (nEpisodios + 1) + "/"
 				+ nMaxEpisodios + ")" + LocalQLearningUtils.RESET);
 		nEpisodios++;
@@ -55,30 +52,23 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 		previousState = -1;
 		previousAction = -1;
 
-
-if (!isInTestMode) {
-			agent.decayEpsilon(); // agent.decayEpsilon(0.95, 0.05); // Reducimos exploración
+		if (!isInTestMode) {
+			agent.decayEpsilon();
 			agent.saveQTableCSV();
-			agent.savePolicyText();
+			pol.savePolicyText(agent.getQTable());
 		}
 		if (nEpisodios >= nMaxEpisodios) {
 			// Lanzamos excepcion
 			System.out.println(LocalQLearningUtils.YELLOW + "!!! ALCANZADO MÁXIMO DE EPISODIOS (" + nMaxEpisodios
 					+ ") !!!" + LocalQLearningUtils.RESET);
-			System.out.println("Guardando estado final del aprendizaje...");
-
-			
-
 			System.out.println(LocalQLearningUtils.BLUE + "FIN DEL ENTRENAMIENTO: Se completaron " + nMaxEpisodios
 					+ " episodios." + LocalQLearningUtils.RESET);
 			System.exit(0);
 		}
 
-		
-
 		System.out.println("\n------------------------------------------------");
 		if (((nEpisodios + 1) % (trainingInterval)) == 0) { // Activamos el modo de entrenamiento
-			pol.loadPolicyText(null);
+			pol.loadPolicyText();
 			isInTestMode = true;
 			System.out.println(LocalQLearningUtils.BLUE + "Iniciado Modo Test (Episodio " + (nEpisodios + 1) + ")"
 					+ LocalQLearningUtils.RESET);
@@ -104,55 +94,37 @@ if (!isInTestMode) {
 
 			boolean isDone = env.isEpisodeDone(sensors);
 
-			// C. Decidir acción o Reiniciar
-			if (isDone) { //
+			if (isDone) { 
 				isRestarting = true;
 				Action resetAction = new Action();
 				resetAction.restartRace = true;
 				return resetAction;
-			} 
-
-			// D. EJECUTAR (Construcción estándar basada en métodos polimórficos)
-			// Esto replica la lógica final de DriverBase.control, pero llamando a tus
-			// métodos
-
+			}
 			Action action = new Action();
-
-			// 1. Obtener valores llamando a los métodos (uno de ellos estará sobrecargado
-			// por el hijo)
 			float steer = getSteer(sensors);
 			int gear = getGear(sensors);
-			float accel_and_brake = getAccel(sensors); // Puede venir de heurística o de Q-Learning
+			float accel_and_brake = getAccel(sensors);
 
-			// 2. Normalización de dirección (lógica original)
 			if (steer < -1)
 				steer = -1;
 			if (steer > 1)
 				steer = 1;
-
-			// 3. Separación Acelerador/Freno (lógica original)
 			float accel, brake;
 			if (accel_and_brake > 0) {
 				accel = accel_and_brake;
 				brake = 0;
 			} else {
 				accel = 0;
-				// Aplicar ABS al freno (lógica original)
 				brake = filterABS(sensors, -accel_and_brake);
 			}
 
-			// 4. Embrague (lógica original)
 			clutch = clutching(sensors, clutch);
-
-			// 5. Asignar al objeto final
 			action.gear = gear;
 			action.steering = steer;
 			action.accelerate = accel;
 			action.brake = brake;
 			action.clutch = clutch;
-
 			return action;
-
 		}
 		return new Action();
 	}

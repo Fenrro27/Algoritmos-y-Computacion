@@ -1,7 +1,10 @@
 package QLearning;
 
 import java.io.BufferedReader;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,10 @@ public class Politica {
 
 		// Inicializamos a un valor muy bajo por defecto para que al cargar la política,
 		// las acciones no mencionadas no sean elegidas.
+		resetQTable();
+	}
+
+	void resetQTable() {
 		for (int i = 0; i < qTable.length; i++) {
 			for (int j = 0; j < qTable[i].length; j++) {
 				qTable[i][j] = Double.NEGATIVE_INFINITY;
@@ -43,8 +50,9 @@ public class Politica {
 		}
 	}
 
-	public void loadPolicyText(String customFilename) {
-		String filename = (customFilename != null) ? customFilename : "Knowledge/Policy_" + name + ".txt";
+	public void loadPolicyText() {
+		resetQTable();
+		String filename = "Knowledge/Policy_" + name + ".txt";
 
 		try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
 			String line;
@@ -159,6 +167,63 @@ public class Politica {
 		return getDefaultAction();
 	}
 
+	public void savePolicyText(double[][] qTableToSave) {
+		String filename = "Knowledge/Policy_" + name + ".txt";
+
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+			bw.write("=== POLÍTICA APRENDIDA (Q-LEARNING) ===\n");
+			bw.write("-> State -> Best Action(s) [Q-Value]\n");
+			bw.write("--------------------------------------\n");
+
+			for (int i = 0; i < qTableToSave.length; i++) {
+				// Obtenemos la lista de todas las mejores acciones
+				List<Integer> bestActions = getBestActionsList(qTableToSave, i);
+
+				// Obtenemos el valor Q (cualquiera de la lista sirve, todos son iguales al max)
+				double maxQ = qTableToSave[i][bestActions.get(0)];
+
+				// Formateamos la lista de acciones ej: "{0, 2}"
+				StringBuilder actionsStr = new StringBuilder("{");
+				for (int k = 0; k < bestActions.size(); k++) {
+					actionsStr.append(bestActions.get(k));
+					if (k < bestActions.size() - 1)
+						actionsStr.append(", ");
+				}
+				actionsStr.append("}");
+
+				// Escribimos en el archivo
+				bw.write(String.format("State %3d -> Actions: %-10s (Q: %.4f)\n", i, actionsStr.toString(), maxQ));
+			}
+			System.out.println(
+					LocalQLearningUtils.GREEN + "Política guardada en: " + filename + LocalQLearningUtils.RESET);
+		} catch (IOException e) {
+			System.err.println("Error al guardar Policy TXT: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Helper para obtener las mejores acciones de una Q-Table dada (para guardar).
+	 */
+	private List<Integer> getBestActionsList(double[][] table, int state) {
+		double maxQ = Double.NEGATIVE_INFINITY;
+		List<Integer> bestActions = new ArrayList<>();
+		double tolerance = 1e-5;
+
+		for (int action = 0; action < table[state].length; action++) {
+			double qVal = table[state][action];
+			if (qVal > maxQ + tolerance) {
+				maxQ = qVal;
+				bestActions.clear();
+				bestActions.add(action);
+			} else if (Math.abs(qVal - maxQ) < tolerance) {
+				bestActions.add(action);
+			}
+		}
+		if (bestActions.isEmpty())
+			bestActions.add(0);
+		return bestActions;
+	}
+
 	private float[] getDefaultAction() {
 		if (actionMap != null && actionMap.length > 0)
 			return actionMap[0];
@@ -209,21 +274,78 @@ public class Politica {
 		return 0;
 	}
 
+	public String verQtableString() {
+		StringBuilder sb = new StringBuilder();
+
+		// 1. Cabecera y Parámetros
+		sb.append("=== Q-Learning Agent: ").append((name != null) ? name : "Unknown").append(" ===\n");
+
+		// 2. Dimensiones
+		int numStates = qTable.length;
+		int numActions = (numStates > 0) ? qTable[0].length : 0;
+		sb.append(String.format("Q-Table -> %d States x %d Actions\n", numStates, numActions));
+		sb.append("--------------------------------------------------\n");
+
+		// 3. Vista Previa de la Tabla (Para no saturar la consola)
+		// Solo mostramos los primeros 10 estados o menos si la tabla es pequeña
+		int previewLimit = Math.min(numStates, 10);
+
+		sb.append("Preview (First ").append(previewLimit).append(" states):\n");
+
+		for (int i = 0; i < previewLimit; i++) {
+			sb.append(String.format("State %-3d | ", i));
+
+			// Buscamos la mejor acción para resaltarla visualmente (opcional pero útil)
+			double maxVal = Double.NEGATIVE_INFINITY;
+			int bestIdx = -1;
+			for (int k = 0; k < numActions; k++) {
+				if (qTable[i][k] > maxVal) {
+					maxVal = qTable[i][k];
+					bestIdx = k;
+				}
+			}
+
+			// Imprimir valores
+			sb.append("[");
+			for (int j = 0; j < numActions; j++) {
+				// Formato: 6 espacios, 3 decimales.
+				// Ponemos un asterisco (*) visual en la mejor acción
+				String valStr = String.format("%6.3f", qTable[i][j]);
+				if (j == bestIdx) {
+					sb.append(LocalQLearningUtils.GREEN).append(valStr).append("*").append(LocalQLearningUtils.RESET);
+				} else {
+					sb.append(valStr).append(" ");
+				}
+
+				if (j < numActions - 1)
+					sb.append(", ");
+			}
+			sb.append("]\n");
+		}
+
+		if (numStates > previewLimit) {
+			sb.append("... (").append(numStates - previewLimit).append(" states more hidden) ...\n");
+		}
+
+		return sb.toString();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("=== POLÍTICA: ").append(name).append(" ===\n");
-		
+
 		int totalStates = qTable.length;
 		int actionsPerState = (qTable.length > 0) ? qTable[0].length : 0;
 
-		sb.append("Dimensiones: ").append(totalStates).append(" estados x ").append(actionsPerState).append(" acciones.\n");
+		sb.append("Dimensiones: ").append(totalStates).append(" estados x ").append(actionsPerState)
+				.append(" acciones.\n");
 		sb.append("--------------------------------------------------\n");
 
 		// 2. Detalle de los estados aprendidos
 		// Si son demasiados, podrías poner un límite (ej: if (count > 500) break;)
 		int printCount = 0;
-		
+
 		for (int i = 0; i < totalStates; i++) {
 			boolean isVisited = false;
 			for (double val : qTable[i]) {
@@ -235,7 +357,7 @@ public class Politica {
 
 			if (isVisited) {
 				sb.append(String.format("State %-4d | ", i));
-				
+
 				// Obtenemos la mejor acción usando tu propia lógica
 				int bestIdx = getAccionIndex(i);
 				float[] realValues = getAccionValues(i);
@@ -245,7 +367,7 @@ public class Politica {
 				String actionStr = floatArrayToString(realValues);
 
 				sb.append(String.format("Best: [%d] %-10s | MaxQ: %6.2f | All Qs: ", bestIdx, actionStr, maxQ));
-				
+
 				// Imprimir todos los valores Q de ese estado
 				sb.append("[");
 				for (int j = 0; j < qTable[i].length; j++) {
@@ -255,10 +377,11 @@ public class Politica {
 					} else {
 						sb.append(String.format("%.2f", val));
 					}
-					if (j < qTable[i].length - 1) sb.append(", ");
+					if (j < qTable[i].length - 1)
+						sb.append(", ");
 				}
 				sb.append("]\n");
-				
+
 				printCount++;
 				// Opcional: Evitar spam masivo si hay demasiados
 				if (printCount > 200) {
@@ -267,17 +390,20 @@ public class Politica {
 				}
 			}
 		}
-		
+
 		return sb.toString();
 	}
 
-	// Método auxiliar privado para imprimir bonitos los arrays de float (las acciones reales)
+	// Método auxiliar privado para imprimir bonitos los arrays de float (las
+	// acciones reales)
 	private String floatArrayToString(float[] arr) {
-		if (arr == null) return "null";
+		if (arr == null)
+			return "null";
 		StringBuilder s = new StringBuilder("{");
 		for (int i = 0; i < arr.length; i++) {
 			s.append(arr[i]);
-			if (i < arr.length - 1) s.append(",");
+			if (i < arr.length - 1)
+				s.append(",");
 		}
 		s.append("}");
 		return s.toString();

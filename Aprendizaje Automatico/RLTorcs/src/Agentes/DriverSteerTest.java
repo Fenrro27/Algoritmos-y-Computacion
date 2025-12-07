@@ -16,7 +16,7 @@ public class DriverSteerTest extends DriverBase{
 		this.env = new EnvSteer();
 ;
 		politica = new Politica(env);
-		politica.loadPolicyText(null);
+		politica.loadPolicyText();
 		System.out.println(politica);
 		
 		monitor = new MonitorHistograma(env.getNumStates(), env.getNumActions(), "Monitor Interactivo (Click para detalle)");
