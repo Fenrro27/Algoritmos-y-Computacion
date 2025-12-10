@@ -1,27 +1,20 @@
 package Agentes;
 
+import java.util.Random;
+
 import QLearning.EnvAccel;
 import QLearning.LocalQLearningUtils;
 import QLearning.Politica;
 import QLearning.QLearning;
 import champ2011client.SensorModel;
 
-import champ2011client.Action;
-import java.util.Random;
-
 public class DriverAccelTrain extends AbstractTrainDriverBase {
 
-	// Login Warmup
 	private Random rand = new Random();
 	private float timeToWarmup = 3.0f + (20.0f - 3.0f) * rand.nextFloat();
 
-	// Frame Skip / Action Skipping
-	private final int SKIP_TICKS = 5;
-	private int ticksSinceLastUpdate = 0;
-	private int lastAction = -1; // Para guardar la ultima accion ejecutada
-
 	public DriverAccelTrain() {
-		nMaxEpisodios = 250;
+		nMaxEpisodios = 500;
 		System.out.println(LocalQLearningUtils.GREEN + "Iniciando DriverAccelTrain..." + LocalQLearningUtils.RESET);
 		this.env = new EnvAccel();
 		this.agent = new QLearning(env);
@@ -37,8 +30,7 @@ public class DriverAccelTrain extends AbstractTrainDriverBase {
 	public void reset() {
 		super.reset();
 		if (!isInTestMode) {
-			this.timeToWarmup = 3.0f + (20.0f - 3.0f) * rand.nextFloat();
-			this.ticksSinceLastUpdate = 0;
+			this.timeToWarmup = (20.0f) * rand.nextFloat();
 		} else {
 			this.timeToWarmup = 0.0f;
 		}
@@ -60,22 +52,10 @@ public class DriverAccelTrain extends AbstractTrainDriverBase {
 					+ String.format("%.2f/%.2f", sensors.getCurrentLapTime(), timeToWarmup));
 			return super.getAccel(sensors); // Si es tiempo de calentamiento usamos el metodo del padre
 		} else {
-			// FRAME SKIP LOGIC
-			if (ticksSinceLastUpdate < SKIP_TICKS && lastAction != -1) {
-				ticksSinceLastUpdate++;
-				//System.out.print("\rFrame Skip: " + ticksSinceLastUpdate + "/" + SKIP_TICKS);
-				// Retornamos la ultima accion sin aprender nada nuevo ni registrar evento
-				return env.getActionFromMap(lastAction)[0];
-			}
-			// Si nos toca ejecutar (o es la primera vez), reseteamos contador
-			ticksSinceLastUpdate = 0;
-
 			// El agente elige la acción abstracta (int)
 			nextAction = agent.chooseAction(currentState);
-			lastAction = nextAction; // Guardamos para el skip
 			histTrain.registrarEvento(currentState, nextAction);
 
-			
 			// B. Aprender
 			if (previousState != -1) {
 				agent.updatePlot(reward);
@@ -86,8 +66,6 @@ public class DriverAccelTrain extends AbstractTrainDriverBase {
 			previousAction = nextAction;
 
 		}
-
-		//System.out.print("\rEstado: " + currentState + ", Acción: " + nextAction + "         ");
 
 		return env.getActionFromMap(nextAction)[0];
 

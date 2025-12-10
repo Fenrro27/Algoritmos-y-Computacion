@@ -15,7 +15,7 @@ public class DriverSteerTest extends DriverBase{
 		System.out.println("Iniciando DriverSteerTest...");
 		this.env = new EnvSteer();
 	 maxSpeedDist=7;
-	 maxSpeed=300;
+	 maxSpeed=50;
 		politica = new Politica(env);
 		politica.loadPolicyText();
 		System.out.println(politica);

@@ -94,6 +94,10 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 
 			boolean isDone = env.isEpisodeDone(sensors);
 
+			float steer = getSteer(sensors);
+			int gear = getGear(sensors);
+			float accel_and_brake = getAccel(sensors);
+
 			if (isDone) { 
 				isRestarting = true;
 				Action resetAction = new Action();
@@ -101,10 +105,7 @@ public abstract class AbstractTrainDriverBase extends DriverBase {
 				return resetAction;
 			}
 			Action action = new Action();
-			float steer = getSteer(sensors);
-			int gear = getGear(sensors);
-			float accel_and_brake = getAccel(sensors);
-
+			
 			if (steer < -1)
 				steer = -1;
 			if (steer > 1)

@@ -1,25 +1,36 @@
 package QLearning;
 
-import java.util.Random;
-
 import champ2011client.SensorModel;
 
 public class EnvAccel implements IEnvironment {
 
 	double alpha = 0.2;
 	double gamma = 0.8;
-	double epsilon = 0.75;
-	double minEpsilon = 0.001;
-	double decayEpsilonFactor = 0.0035;
+	double epsilon = 0.7;
+	double minEpsilon = 0.3;
+	double decayEpsilonFactor = 0.001;
 
-	private final int numFrontalRayBins = 8;
-	private final int numSpeedBins = 5;
-	private final int NUM_STATES = numFrontalRayBins;// * numSpeedBins;
+	// 11 distance bins (0-200 in 20s) * 3 speed bins = 33 states
+	private final int NUM_STATES = 40;
 	// carretera
-	private final int NUM_ACTIONS = 8;
-	private final float[][] ACTION_MAP = { { 1f }, { 0.8f },
-			{ 0.4f }, { 0.2f }, { 0.1f },
-			{ 0f }, { -0.2f }, { -0.6f } };
+	// Constants for Reward Calculation
+	final float maxSpeedDist = 70;
+	final float maxSpeed = 150;
+	final float sin5 = (float) 0.08716;
+	final float cos5 = (float) 0.99619;
+
+	private final int NUM_ACTIONS = 9;
+	private final float[][] ACTION_MAP = {
+			{ 1f }, // 0: Full Accel
+			{ 0.5f }, // 1: Medium Accel
+			{ 0.2f }, // 2: Low Accel
+			{ 0.1f }, // 3: Coast
+			{ 0.0f }, // 4: Brake
+			{ -0.1f }, // 5: Coast
+			{ -0.2f }, // 6: Low Accel
+			{ -0.5f }, // 7: Medium Accel
+			{ -1f }, // 8: Full Brake
+	};
 
 	private int stuck = 0;
 	final int stuckTime = 25;
@@ -35,9 +46,9 @@ public class EnvAccel implements IEnvironment {
 	protected final double MIN_DELTA_DISTANCE = 0.2; // Metros avanzandos por tick
 	protected final int MAX_NO_PROGRESS_TICKS = 1000;
 
+	private double lastSpeed = 0;
 
 	public EnvAccel() {
-		
 
 	}
 
@@ -58,42 +69,73 @@ public class EnvAccel implements IEnvironment {
 
 	@Override
 	public int discretizeState(SensorModel sensors) {
-		int d = discretizeRay(sensors.getTrackEdgeSensors()[9]);
-		return d;
-	}
+		double speed = sensors.getSpeed();
+		double s9 = sensors.getTrackEdgeSensors()[9];
 
-	public int discretizeRay(double frontDist) {
-		// Distancias críticas para TORCS (Simplificadas)
-		if (frontDist < 20)
-			return 0; // Muy cerca (Frenada de emergencia)
-		else if (frontDist < 40)
-			return 1; // Cerca
-		else if (frontDist < 60)
-			return 2; // Media-Cerca
-		else if (frontDist < 80)
-			return 3; // Media
-		else if (frontDist < 100)
-			return 4; // Lejos
-		else if (frontDist < 120)
-			return 5; // Lejos
-		else if (frontDist < 140)
-			return 6; // Lejos
-		else
-			return 7; // Recta larga
+		int distState;
+		if (s9 < 20) {
+			distState = 0;
+		} else if (s9 < 40) {
+			distState = 1;
+		} else if (s9 < 60) {
+			distState = 2;
+		} else if (s9 < 80) {
+			distState = 3;
+		} else if (s9 < 100) {
+			distState = 4;
+		} else if (s9 < 120) {
+			distState = 5;
+		} else if (s9 < 140) {
+			distState = 6;
+		} else if (s9 < 160) {
+			distState = 7;
+		} else if (s9 < 180) {
+			distState = 8;
+		} else {
+			distState = 9;
+		}
+
+		int velState;
+		if (speed < 20) {
+			velState = 0;
+		} else if (speed < 40) {
+			velState = 1;
+		} else if (speed < 60) {
+			velState = 2;
+		} else {
+			velState = 3;
+		}
+
+		return distState * 4 + velState;
 	}
 
 	@Override
 	public double calculateReward(SensorModel sensors) {
-		double trackPosition = sensors.getTrackPosition(); // [-1, 1]
-		double speed = sensors.getSpeed(); // km/h
+		double speed = sensors.getSpeed();
+		double trackPos = sensors.getTrackPosition();
 
-		if (Double.isNaN(trackPosition) || Math.abs(trackPosition) > 0.98) {
-			return -100000.0;
+		double difSpeed = speed - lastSpeed;
+		lastSpeed = speed;
+
+		// Si te saliste, castigo máximo
+		if (Math.abs(trackPos) > 0.96f)
+			return -10000.0;
+
+		if (speed > 20)
+			return 10 * (Math.pow(1 / (1 + Math.abs(trackPos)), 4) * 0.7 + (speed / 200) * 0.3);
+		else if (speed <= 1) {
+			double plusReward = 0;
+			if (difSpeed > 0) {
+				plusReward = difSpeed;
+			}
+
+			return -200 + plusReward;
 		}
 
-		double reward = 10*(speed / 200) + 10 * (1.0 - Math.abs(trackPosition));
+		else {
 
-		return reward;
+			return  (speed -20.0)/2.0;
+		}
 	}
 
 	@Override
@@ -134,9 +176,9 @@ public class EnvAccel implements IEnvironment {
 			lastDistance = currentDistance;
 		}
 
-		if (noProgressCount > MAX_NO_PROGRESS_TICKS * 2) {
+		if (noProgressCount > MAX_NO_PROGRESS_TICKS*3) {
 			noAvance = true;
-			isDone = true;
+			 isDone = true;
 		}
 
 		if (isDone) {
@@ -144,7 +186,8 @@ public class EnvAccel implements IEnvironment {
 			System.out.println("\t- Posicion En Pista[-0.98,0.98]: " + posPista);
 			System.out.println("\t- Tiempo En Segundos[0,200]: " + timeoutSegundos);
 			System.out.println("\t- Ultima Vuelta; " + lastLap);
-			System.out.println("\t- No Avance Detectado (MAX_NO_PROGRESS_TICKS x 2): " + noAvance);
+			System.out.println("\t- No Avance Detectado (MAX_NO_PROGRESS_TICKS): " +
+			 noAvance);
 
 		}
 
@@ -185,6 +228,7 @@ public class EnvAccel implements IEnvironment {
 		// Resetear variables de control de avance
 		lastDistance = 0.0;
 		noProgressCount = 0;
+		lastSpeed=0;
 	}
 
 	@Override
@@ -196,7 +240,5 @@ public class EnvAccel implements IEnvironment {
 	public double getMinEpsilon() {
 		return minEpsilon;
 	}
-
-
 
 }
