@@ -105,16 +105,14 @@ public class RecolectorDriver extends DriverBase {
 				StringBuilder sb = new StringBuilder();
 
 				// --- CABECERAS SENSORES ---
-				sb.append("S_angle,S_damage,S_distFromStart,S_distRaced,");
+				sb.append("S_angle,");
 
-				// Arrays dinámicos (Focus suele ser 5, Opponents 36, Track 19, WheelSpin 4)
 				writeHeaderArray(sb, "S_focus", sensors.getFocusSensors().length);
 
-				sb.append("S_fuel,S_gear,S_lastLapTime,");
+				sb.append("S_gear,");
 
-				writeHeaderArray(sb, "S_opponents", sensors.getOpponentSensors().length);
 
-				sb.append("S_racePos,S_rpm,S_speed,");
+				sb.append("S_rpm,S_speed,");
 
 				writeHeaderArray(sb, "S_track", sensors.getTrackEdgeSensors().length);
 
@@ -125,8 +123,7 @@ public class RecolectorDriver extends DriverBase {
 				sb.append("S_z,");
 
 				// --- CABECERAS ACCIONES ---
-				// Solo Accel, Gear y Steer como pediste
-				sb.append("A_Accel,A_Gear,A_Steer");
+				sb.append("A_Accel,A_Brake,A_Gear,A_Steer");
 
 				logWriter.println(sb.toString());
 				headerWritten = true;
@@ -139,21 +136,11 @@ public class RecolectorDriver extends DriverBase {
 
 			// Sensores escalares
 			sb.append(sensors.getAngleToTrackAxis()).append(",");
-			sb.append(sensors.getDamage()).append(",");
-			sb.append(sensors.getDistanceFromStartLine()).append(",");
-			sb.append(sensors.getDistanceRaced()).append(",");
-
 			// Array Focus
 			writeDataArray(sb, sensors.getFocusSensors());
 
-			sb.append(sensors.getFuelLevel()).append(",");
 			sb.append(sensors.getGear()).append(","); // Gear del sensor (coche actual)
-			sb.append(sensors.getLastLapTime()).append(",");
 
-			// Array Opponents
-			writeDataArray(sb, sensors.getOpponentSensors());
-
-			sb.append(sensors.getRacePosition()).append(",");
 			sb.append(sensors.getRPM()).append(",");
 			sb.append(sensors.getSpeed()).append(",");
 
@@ -169,6 +156,7 @@ public class RecolectorDriver extends DriverBase {
 
 			// --- ACCIONES ---
 			sb.append(action.accelerate).append(",");
+			sb.append(action.brake).append(",");
 			sb.append(action.gear).append(","); // Gear de la acción (comando)
 			sb.append(action.steering); // Último valor sin coma
 

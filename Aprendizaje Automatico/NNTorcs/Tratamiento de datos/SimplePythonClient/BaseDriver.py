@@ -28,24 +28,24 @@ class BaseDriver(object):
         self.stuckCounter = 0
         self.bringingCartBack = 0
         
-        # --- 1. CARGA DEL MODELO ONNX ---
+       # Cargar los 3 cerebros independientes
         try:
-            self.session = ort.InferenceSession("cerebro_torcs.onnx")
-            self.input_name = self.session.get_inputs()[0].name
-            print("Modelo ONNX 'cerebro_torcs.onnx' cargado correctamente.")
+            self.sess_accel = ort.InferenceSession('cerebro_pedales.onnx')
+            self.sess_gear  = ort.InferenceSession('cerebro_gear.onnx')
+            self.sess_steer = ort.InferenceSession('cerebro_steer.onnx')
+            print('✅ Modelos ONNX cargados correctamente.')
         except Exception as e:
-            print(f"ERROR CRÍTICO: No se pudo cargar cerebro_torcs.onnx. {e}")
+            print(f'❌ Error cargando ONNX: {e}')
 
-        # 1. PARÁMETROS DEL SCALER
+            # 2. Parámetros del Scaler (Generados automáticamente del entrenamiento)
         self.scaler_mean = np.array([
-            -0.00263957, 12001.88324919, 2.36884057, 4215.67282191, 69.12843914, 7.45094105, 7.74585502, 9.14027928, 12.49982323, 20.31215073, 33.90397250, 38.32532014, 42.93307564, 48.28699416, 54.26070422, 45.89576537, 37.53944820, 30.33462463, 25.29204928, 17.59177768, 11.49857251, 8.26699998, 6.79200853, 6.50880179, -0.02396852, 54.29678862, 0.34235406
-        ])
+            -0.00190332, 2.64689548, 4415.54587640, 77.99133326, 7.61264134, 11.86988950, 19.37918404, 34.81733083, 42.00534021, 49.01516420, 54.86910626, 58.47841215, 48.82313349, 40.80773549, 33.84768239, 25.74177277, 17.33828542, 10.53945940, 7.62616021, 6.56810951, -0.04577084, 62.74958214, 0.34168767
+        ], dtype=np.float32)
 
         self.scaler_scale = np.array([
-            0.15238926, 11923.45048684, 1.11384091, 1390.99927651, 38.25446282, 5.44098766, 5.35231981, 7.84997748, 13.02409498, 20.69860243, 41.06600360, 41.58971757, 40.65189377, 41.48178039, 49.71002841, 39.75813860, 33.83892901, 26.37981927, 23.64064913, 18.13428878, 12.37523736, 7.00199228, 3.31698072, 3.11469822, 0.29888628, 33.82573413, 0.00414860
-        ])
-
-        
+            0.06401216, 1.08814601, 1059.84393089, 36.60614492, 5.30129321, 10.62789249, 19.33451569, 43.79186508, 45.40435988, 44.59295743, 44.68933850, 49.50425672, 40.23375292, 35.57198773, 31.09990037, 23.36153376, 17.99208135, 10.42618601, 5.30225932, 2.97124732, 0.32592006, 32.16390344, 0.00355665
+        ], dtype=np.float32)
+                
     def init(self, angles):
         # Initialization of the desired angles for the rangefinders
         i = 0
@@ -56,66 +56,75 @@ class BaseDriver(object):
     def Update(self, buffer):
         # 1. Parsear el buffer a objeto CarState (sensors)
         sensors = CarState.CarState(buffer)
-
-        # 2. IA: Si estamos bien, conduce la Red Neuronal
         
         # A) Construir el vector de estado (Debe ser IDÉNTICO al del entrenamiento)
         state = []
-        state.append(sensors.getAngle())              # S_angle
-        state.append(sensors.getDistRaced())          # S_distRaced
-        state.append(sensors.getGear())               # S_gear
-        state.append(sensors.getRpm())                # S_rpm
-        state.append(sensors.getSpeedX())             # S_speed
-        
-        # Sensores de pista (Ojo con los índices, deben coincidir con tu entrenamiento)
-        # Según tu código anterior: 0, 3, 4, 5... hasta 16
-        track_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
-        track_sensors = sensors.getTracks()
-        for idx in track_indices:
-            state.append(track_sensors[idx])
+        state.append(sensors.getAngle()) # S_angle
+        state.append(sensors.getGear()) # S_gear
+        state.append(sensors.getRpm()) # S_rpm
+        state.append(sensors.getSpeedX()) # S_speed
+        state.append(sensors.getTracks()[0]) # S_track_0
+        state.append(sensors.getTracks()[3]) # S_track_3
+        state.append(sensors.getTracks()[4]) # S_track_4
+        state.append(sensors.getTracks()[5]) # S_track_5
+        state.append(sensors.getTracks()[6]) # S_track_6
+        state.append(sensors.getTracks()[7]) # S_track_7
+        state.append(sensors.getTracks()[8]) # S_track_8
+        state.append(sensors.getTracks()[9]) # S_track_9
+        state.append(sensors.getTracks()[10]) # S_track_10
+        state.append(sensors.getTracks()[11]) # S_track_11
+        state.append(sensors.getTracks()[12]) # S_track_12
+        state.append(sensors.getTracks()[13]) # S_track_13
+        state.append(sensors.getTracks()[14]) # S_track_14
+        state.append(sensors.getTracks()[15]) # S_track_15
+        state.append(sensors.getTracks()[16]) # S_track_16
+        state.append(sensors.getTracks()[17]) # S_track_17
+        state.append(sensors.getTrackPos()) # S_trackPos
+        state.append(sensors.getWheelSpinVel(0)) # S_wheelSpinVel_0
+        state.append(sensors.getZ()[0]) # S_z
 
-        state.append(sensors.getTrackPos())           # S_trackPos
-        state.append(sensors.getZ()[0])                  # S_z
 
-        # B) Procesar para ONNX
-        input_vector = np.array(state, dtype=np.float32)
-        
-        # Normalizar: (Valor - Media) / Escala
-        input_norm = (input_vector - self.scaler_mean) / self.scaler_scale
-        input_norm = input_norm.astype(np.float32).reshape(1, -1) # Formato [1, 21]
+        # 2. Preprocesamiento (Escalado)
+        input_raw = np.array(state, dtype=np.float32)
+        input_norm = (input_raw - self.scaler_mean) / self.scaler_scale
+        input_onnx = input_norm.reshape(1, -1)
 
-        # C) Predicción
-        outputs = self.session.run(None, {self.input_name: input_norm})
-        
-        # El modelo es multi-output: [accel, gear, steer]
-        # outputs es una lista donde:
-        # outputs[0] es el tensor de aceleración (shape [1, 1])
-        # outputs[1] es el tensor de marcha (shape [1, 1])
-        # outputs[2] es el tensor de dirección (shape [1, 1])
-
+        # 3. Inferencia Independiente (3 Cerebros)
+        # Inicializamos variables por defecto
+        raw_pedals = [[0.0, 0.0]] # Accel, Brake
+        pred_gear = 1
+        pred_steer = 0.0
         try:
-            pred_accel = float(outputs[0][0][0])
-            pred_gear  = int(round(float(outputs[1][0][0])))
-            pred_steer = float(outputs[2][0][0])
+            # Nombre del input en ONNX
+            in_name_a = self.sess_accel.get_inputs()[0].name
+            in_name_g = self.sess_gear.get_inputs()[0].name
+            in_name_s = self.sess_steer.get_inputs()[0].name
+
+            # Ejecutamos cada red
+            # OJO: sess_accel devuelve [[Accel, Brake]]
+            raw_pedals = self.sess_accel.run(None, {in_name_a: input_onnx})[0]
+            pred_gear  = self.sess_gear.run(None,  {in_name_g: input_onnx})[0][0][0]
+            pred_steer = self.sess_steer.run(None, {in_name_s: input_onnx})[0][0][0]
+
         except Exception as e:
-            print(f"Error parseando salidas del modelo ONNX: {e}")
-            print(f"Salidas crudas: {outputs}")
-            # Fallback seguro
-            pred_accel = 0.5
-            pred_gear = 1
-            pred_steer = 0.0
+            print(f'❌ Error en inferencia: {e}')
 
-        print(f"Predicción IA -> Accel: {pred_accel:.2f}, Gear: {pred_gear}, Steer: {pred_steer:.2f}")
 
-        # E) Limitar valores físicos
-        accel = np.clip(pred_accel, 0.0, 1.0)
-        steer = np.clip(pred_steer, -1.0, 1.0)
-        gear  = max(1, min(6, int(round(pred_gear)))) # Marchas 1-6
+      
+        # 4. Procesado de Salida (Extracción y Limpieza)
+        # Desempaquetamos Pedales (Columna 0: Accel, Columna 1: Brake)
+        pred_accel = float(raw_pedals[0][0])
+        pred_brake = float(raw_pedals[0][1])
 
-        # F) Retornar control
-        # brake=0 porque asumimos que la red controla la velocidad soltando el acelerador
-        # o puedes entrenar una salida extra para freno.
-        action = CarControl.CarControl(accel=accel, brake=0, gear=gear, steer=steer, clutch=0, meta=0, focus=0)
+        # Aplicamos Clips (Límites físicos)
+        accel_out = np.clip(pred_accel, 0.0, 1.0)
+        brake_out = np.clip(pred_brake, 0.0, 1.0)
+        gear_out  = int(np.clip(np.round(pred_gear), 1, 6))
+        steer_out = np.clip(float(pred_steer), -1.0, 1.0)
+
+        # 5. Crear Acción Final
+        print("Accel: ", accel_out,"Brake: ", brake_out,"Gear: ", gear_out,"Steer: ", steer_out)
+        action = CarControl.CarControl(accel=accel_out, brake=brake_out, gear=gear_out, steer=steer_out, clutch=0, meta=0, focus=0)
         return str(action)
     
     def getInitAngles(self):
@@ -126,15 +135,3 @@ class BaseDriver(object):
     
     def onRestart(self):
         print ("Restarting the race!")
-
-    # Este método getGear se mantiene por si lo usa la lógica de recuperación
-    def getGear(self, sensors): 
-        gear = sensors.getGear()
-        rpm  = sensors.getRpm()
-        if gear < 1: return 1
-        if gear < 6 and rpm >= self.gearUp[gear-1]: return gear + 1
-        else:
-            if gear > 1 and rpm <= self.gearDown[gear-1]: return gear - 1
-            else: return gear
-        
-    
