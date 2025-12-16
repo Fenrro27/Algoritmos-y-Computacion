@@ -15,6 +15,9 @@ public class DriverAccelTrain extends AbstractTrainDriverBase {
 
 	public DriverAccelTrain() {
 		nMaxEpisodios = 500;
+		maxSpeedDist=30;
+		maxSpeed=40;
+		
 		System.out.println(LocalQLearningUtils.GREEN + "Iniciando DriverAccelTrain..." + LocalQLearningUtils.RESET);
 		this.env = new EnvAccel();
 		this.agent = new QLearning(env);

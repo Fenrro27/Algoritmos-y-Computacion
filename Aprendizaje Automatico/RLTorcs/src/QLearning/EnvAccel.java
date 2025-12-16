@@ -6,12 +6,11 @@ public class EnvAccel implements IEnvironment {
 
 	double alpha = 0.2;
 	double gamma = 0.8;
-	double epsilon = 0.7;
-	double minEpsilon = 0.3;
-	double decayEpsilonFactor = 0.001;
+	double epsilon = 0.8;
+	double minEpsilon = 0.2;
+	double decayEpsilonFactor = 0.002;
 
-	// 11 distance bins (0-200 in 20s) * 3 speed bins = 33 states
-	private final int NUM_STATES = 40;
+	private final int NUM_STATES = 20;
 	// carretera
 	// Constants for Reward Calculation
 	final float maxSpeedDist = 70;
@@ -19,17 +18,13 @@ public class EnvAccel implements IEnvironment {
 	final float sin5 = (float) 0.08716;
 	final float cos5 = (float) 0.99619;
 
-	private final int NUM_ACTIONS = 9;
+	private final int NUM_ACTIONS = 5;
 	private final float[][] ACTION_MAP = {
 			{ 1f }, // 0: Full Accel
-			{ 0.5f }, // 1: Medium Accel
-			{ 0.2f }, // 2: Low Accel
-			{ 0.1f }, // 3: Coast
-			{ 0.0f }, // 4: Brake
-			{ -0.1f }, // 5: Coast
-			{ -0.2f }, // 6: Low Accel
-			{ -0.5f }, // 7: Medium Accel
-			{ -1f }, // 8: Full Brake
+			{ 0.55f }, // 1: Medium Accel
+			{ 0f },
+			{ -0.45f }, // 2: No Accel
+			{ -0.9f }, // 8: Full Brake
 	};
 
 	private int stuck = 0;
@@ -45,8 +40,6 @@ public class EnvAccel implements IEnvironment {
 	protected final double MIN_SPEED_THRESHOLD = 5.0; // 5 km/h mínimo
 	protected final double MIN_DELTA_DISTANCE = 0.2; // Metros avanzandos por tick
 	protected final int MAX_NO_PROGRESS_TICKS = 1000;
-
-	private double lastSpeed = 0;
 
 	public EnvAccel() {
 
@@ -70,72 +63,103 @@ public class EnvAccel implements IEnvironment {
 	@Override
 	public int discretizeState(SensorModel sensors) {
 		double speed = sensors.getSpeed();
-		double s9 = sensors.getTrackEdgeSensors()[9];
+		double distance = sensors.getTrackEdgeSensors()[9];
 
+		// 1. DISCRETIZACIÓN DE VELOCIDAD (5 Niveles)
+		int speedState;
+		if (speed < 5.0) {
+			speedState = 0; // Atascado/Arranque
+		} else if (speed < 45.0) {
+			speedState = 1; // Lento
+		} else if (speed < 80.0) {
+			speedState = 2; // Medio
+		} else {
+			speedState = 3; // Muy Rápido / Top Speed
+		}
+
+		// 2. DISCRETIZACIÓN DE DISTANCIA (5 Niveles)
 		int distState;
-		if (s9 < 20) {
-			distState = 0;
-		} else if (s9 < 40) {
-			distState = 1;
-		} else if (s9 < 60) {
-			distState = 2;
-		} else if (s9 < 80) {
-			distState = 3;
-		} else if (s9 < 100) {
-			distState = 4;
-		} else if (s9 < 120) {
-			distState = 5;
-		} else if (s9 < 140) {
-			distState = 6;
-		} else if (s9 < 160) {
-			distState = 7;
-		} else if (s9 < 180) {
-			distState = 8;
+		if (distance < 20.0) {
+			distState = 0; // Crítico (Pánico)
+		} else if (distance < 45.0) {
+			distState = 1; // Peligro (Frenada)
+		} else if (distance < 75.0) {
+			distState = 2; // Precaución
+		} else if (distance < 120.0) {
+			distState = 3; // Vía libre
 		} else {
-			distState = 9;
+			distState = 4; // Recta infinita
 		}
-
-		int velState;
-		if (speed < 20) {
-			velState = 0;
-		} else if (speed < 40) {
-			velState = 1;
-		} else if (speed < 60) {
-			velState = 2;
-		} else {
-			velState = 3;
-		}
-
-		return distState * 4 + velState;
+		// 3. Combinar en un solo índice (0 a 8)
+		// Fórmula: speedState * 3 + distState
+		return speedState * 5 + distState;
 	}
+
+	// Variables calculadas automáticamente para LINEAL y SIGMOIDE
+	// --- Lógica para Velocidad (LINEAL) ---
+	double m_speed = 0.018382;
+	double c_speed = -0.869194;
+	// Formula: reward = m * speed + c
+
+	// --- Lógica para Distancia (SIGMOIDE) ---
+	double k_dist = 0.103472;
+	double mu_dist = 42.593600;
 
 	@Override
 	public double calculateReward(SensorModel sensors) {
 		double speed = sensors.getSpeed();
+		double frontDist = sensors.getTrackEdgeSensors()[9]; // Sensor central
 		double trackPos = sensors.getTrackPosition();
 
-		double difSpeed = speed - lastSpeed;
-		lastSpeed = speed;
-
-		// Si te saliste, castigo máximo
-		if (Math.abs(trackPos) > 0.96f)
-			return -10000.0;
-
-		if (speed > 20)
-			return 10 * (Math.pow(1 / (1 + Math.abs(trackPos)), 4) * 0.7 + (speed / 200) * 0.3);
-		else if (speed <= 1) {
-			double plusReward = 0;
-			if (difSpeed > 0) {
-				plusReward = difSpeed;
-			}
-
-			return -200 + plusReward;
+		// -----------------------------------------------------------
+		// 1. CONDICIÓN DE TERMINACIÓN (Salida de pista)
+		// -----------------------------------------------------------
+		if (Math.abs(trackPos) > 0.98) {
+			return -1000.0;
 		}
 
+		double reward = 0.0;
+
+		// -----------------------------------------------------------
+		// 2. LÓGICA DE CONDUCCIÓN (Estado y Recompensa integrados)
+		// -----------------------------------------------------------
+
+		// CASO 0: COCHE CASI PARADO (Velocidad < 5 km/h)
+		// Lógica: Si no se mueve, castigo constante (-10).
+		// Sumamos 'speed' para que intente llegar al menos a 5 km/h.
+		if (speed < 5.0) {
+			reward = -10.0 + speed;
+		}
+
+		// CASO 1: CRÍTICO (El muro está encima: Distancia < 0.4 * Velocidad)
+		// Lógica: La velocidad aquí es suicida. Castigo fuerte (-2 * v).
+		// Ejemplo: A 100 km/h, si tienes menos de 40m, recibes -200 puntos.
+		else if (frontDist < speed * 0.4) {
+			reward = -2.0 * speed;
+		}
+
+		// CASO 2: PELIGRO (Distancia corta: Distancia < 0.8 * Velocidad)
+		// Lógica: Vas demasiado rápido para frenar cómodo. Castigo leve.
+		// Incentiva a soltar el acelerador o frenar un poco.
+		else if (frontDist < speed * 0.8) {
+			reward = -0.5 * speed;
+		}
+
+		// CASO 3: PRECAUCIÓN (Distancia media: Distancia < 1.5 * Velocidad)
+		// Lógica: Tienes espacio pero no infinito. Recompensa positiva pequeña.
+		// Incentiva mantener velocidad pero sin volverse loco.
+		else if (frontDist < speed * 1.5) {
+			reward = 0.2 * speed;
+		}
+
+		// CASO 4: SEGURO (Vía Libre)
+		// Lógica: Tienes mucho espacio por delante.
+		// Aquí es donde maximizamos la recompensa. ¡Corre!
 		else {
-
-			return  (speed -20.0)/2.0;
+			reward = 1.0 * speed;
 		}
+
+		return reward;
 	}
 
 	@Override
@@ -176,9 +200,9 @@ public class EnvAccel implements IEnvironment {
 			lastDistance = currentDistance;
 		}
 
-		if (noProgressCount > MAX_NO_PROGRESS_TICKS*3) {
+		if (noProgressCount > MAX_NO_PROGRESS_TICKS * 3) {
 			noAvance = true;
-			 isDone = true;
+			isDone = true;
 		}
 
 		if (isDone) {
@@ -187,7 +211,7 @@ public class EnvAccel implements IEnvironment {
 			System.out.println("\t- Tiempo En Segundos[0,200]: " + timeoutSegundos);
 			System.out.println("\t- Ultima Vuelta; " + lastLap);
 			System.out.println("\t- No Avance Detectado (MAX_NO_PROGRESS_TICKS): " +
-			 noAvance);
+					noAvance);
 
 		}
 
@@ -228,7 +252,6 @@ public class EnvAccel implements IEnvironment {
 		// Resetear variables de control de avance
 		lastDistance = 0.0;
 		noProgressCount = 0;
-		lastSpeed=0;
 	}
 
 	@Override
