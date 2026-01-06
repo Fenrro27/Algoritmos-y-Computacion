@@ -27,7 +27,6 @@ public class EnvAccel implements IEnvironment {
 			{ -0.9f }, // 8: Full Brake
 	};
 
-	private int stuck = 0;
 	final int stuckTime = 25;
 	final float stuckAngle = (float) 0.523598775; // PI/6
 	private boolean isStuckState = false; // "Chivato" interno
@@ -247,7 +246,6 @@ public class EnvAccel implements IEnvironment {
 
 	@Override
 	public void reset() {
-		this.stuck = 0;
 		this.isStuckState = false;
 		// Resetear variables de control de avance
 		lastDistance = 0.0;

@@ -1,7 +1,6 @@
 package Agentes;
 
 import champ2011client.Controller;
-import champ2011client.Controller.Stage;
 import champ2011client.Action;
 import champ2011client.SensorModel;
 

@@ -17,7 +17,6 @@ public class EnvSteer implements IEnvironment {
 	private final int NUM_ACTIONS = 5;
 	private final float[][] ACTION_MAP = { { -0.40f },{ -0.15f },{ 0.0f },{ 0.15f } , { 0.40f } };
 	
-	private int stuck = 0;
 	final int stuckTime = 25;
 	final float stuckAngle = (float) 0.523598775; // PI/6
 	private boolean isStuckState = false; // "Chivato" interno
@@ -172,11 +171,8 @@ public class EnvSteer implements IEnvironment {
 		    double reward = -Math.exp(1 /(restante*8));      // cuanto más pequeño restante, más negativo
 		    return reward;
 		}
-
-
-		double distanceReward = 10.0 * (1.0 - Math.abs(trackPosition));
+		//double distanceReward = 10.0 * (1.0 - Math.abs(trackPosition));
 		
-
 		 if(Math.abs(trackPosition)<=0.80) {
 			 double reward = 1 /(Math.abs(trackPosition));
 			 if ((reward)*multiplicador >300)
@@ -276,7 +272,6 @@ public class EnvSteer implements IEnvironment {
 
 	@Override
 	public void reset() {
-		this.stuck = 0;
 		this.isStuckState = false;
 		// Resetear variables de control de avance
 		lastDistance = 0.0;

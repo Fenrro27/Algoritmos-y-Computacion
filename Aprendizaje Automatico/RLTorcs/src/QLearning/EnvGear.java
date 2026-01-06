@@ -4,28 +4,32 @@ import champ2011client.SensorModel;
 
 public class EnvGear implements IEnvironment {
 
-	double alpha = 0.1; //0.99, 0.5, 0.1, 0.05;
+	double alpha = 0.1; // 0.99, 0.5, 0.1, 0.05;
 	double gamma = 0.99;
 	double epsilon = 0.5;
-	double minEpsilon = 0.1;
-	double decayEpsilonFactor = 0.05;
+	double minEpsilon = 0.02;
+	double decayEpsilonFactor = 0.005;
 
-	private final int NUM_STATES = 3;
+	private final int NUM_STATES = 108;
 	private final int NUM_ACTIONS = 3;
-	private final float[][] ACTION_MAP = { { 0 }, { 1 }, { 2 } };
-	
-	//rpmGear
-	final int[]  rpmGearUp={5000,6000,6000,6500,7000,0};
-	final int[]  rpmGearDown={0,2500,3000,3000,3500,3500};
-	
-	//rpmVel
-	final double[] velGearUp   = { 60.0, 110.0, 160.0, 210.0, 250.0, 400.0 }; 
-    final double[] velGearDown = { 0.0,   40.0,  90.0, 140.0, 190.0, 230.0 };
+	private final float[][] ACTION_MAP = { { -1 }, { 0 }, { 1 } };
 
-    public EnvGear() {
-    	
-    }
-    
+	final int stuckTime = 25;
+	final float stuckAngle = (float) 0.523598775; // PI/6
+	private boolean isStuckState = false; // "Chivato" interno
+
+	// Variables para detectar si no avanza ===
+	protected double lastDistance = 0.0;
+	protected int noProgressCount = 0;
+
+	// Configuración:
+	protected final double MIN_SPEED_THRESHOLD = 5.0; // 5 km/h mínimo
+	protected final double MIN_DELTA_DISTANCE = 0.2; // Metros avanzandos por tick
+	protected final int MAX_NO_PROGRESS_TICKS = 1000;
+
+	public EnvGear() {
+
+	}
 
 	@Override
 	public String getName() {
@@ -44,123 +48,163 @@ public class EnvGear implements IEnvironment {
 
 	@Override
 	public int discretizeState(SensorModel sensors) {
-		double rpm = sensors.getRPM();
 		int gear = sensors.getGear();
+		double speed = sensors.getSpeed();
+		double rpm = sensors.getRPM();
 
-		// 1. Manejo de seguridad para marchas (N, R o errores)
-		if (gear < 1) return 0; // Tratamos N/R como RPM bajas para incitar a meter primera
+		// 1. Procesar Marcha (0 a 5)
+		int gearIndex = gear - 1;
+		if (gearIndex < 0)
+			gearIndex = 0;
+		if (gearIndex > 5)
+			gearIndex = 5;
 
-		// 2. Obtenemos los límites DE LA MARCHA ACTUAL (Igual que en Reward)
-		int idx = gear - 1;
-		if (idx >= rpmGearUp.length) idx = rpmGearUp.length - 1; // Protección array
+		// 2. Procesar Velocidad (0 a 150+) en 6 Bins
+		// Tamaño del bin = 150 / 6 = 25 km/h
+		int speedState;
 
-		double rMin = rpmGearDown[idx];
-		double rMax = rpmGearUp[idx];
-
-		// 3. Discretización RELATIVA
-		// Estado 0: RPM Bajas (Necesita bajar marcha o acelerar)
-		// Estado 1: RPM Óptimas (Mantener marcha)
-		// Estado 2: RPM Altas (Necesita subir marcha)
-		
-		if (rpm < rMin) {
-			return 0; // Under-revving
-		} else if (rpm > rMax) {
-			return 2; // Over-revving
+		if (speed < 25) {
+			speedState = 0; // 0 - 25 km/h
+		} else if (speed < 50) {
+			speedState = 1; // 25 - 50 km/h
+		} else if (speed < 75) {
+			speedState = 2; // 50 - 75 km/h
+		} else if (speed < 100) {
+			speedState = 3; // 75 - 100 km/h
+		} else if (speed < 125) {
+			speedState = 4; // 100 - 125 km/h
 		} else {
-			return 1; // Zona óptima
+			speedState = 5; // > 125 km/h (Incluye 150 y más)
 		}
+			
+
+		int rpmState;
+
+		if (rpm < 1800) {
+			rpmState = 0; // 0 - 2000 rpm
+		} else if (rpm < 8000) {
+			rpmState = 1; // 2000 - 4000 rpm
+		} else {
+			rpmState = 2; // > 6000 rpm
+		}
+
+
+		// 3. Estado Combinado
+		return ((gearIndex * 6) + speedState)*3 + rpmState;
+		//return gearIndex *3 + rpmState;
+
 	}
 
 	@Override
-	public double calculateReward(SensorModel sensors) {
-	    double rpm = sensors.getRPM();
-	    double speed = sensors.getSpeed(); // km/h
-	    int gear = sensors.getGear();
-	    
-	    double reward = 0.0;
+    public double calculateReward(SensorModel sensors) {
+        double rpm = sensors.getRPM();
+        double speed = sensors.getSpeed();
+        int gear = sensors.getGear();
 
-	    // 0. MANEJO DE CASOS ESPECIALES (Neutral o Marcha atrás)
-	    // Si el coche está en neutral o reversa, penalizamos si hay velocidad positiva 
-	    // o premiamos si está parado. Simplificaremos forzando a que busque ir hacia adelante.
-	    if (gear < 1) {
-	        // Si estamos en neutral pero el coche se mueve, castigo fuerte para que meta marcha
-	        if (speed > 5) return -1.0;
-	        return 0.0; 
-	    }
-	    
-	    // Índice para los arrays (gear 1 es índice 0)
-	    int idx = gear - 1;
-	    // Protección por si acaso llega una marcha rara (ej. 7)
-	    if (idx >= rpmGearUp.length) idx = rpmGearUp.length - 1;
+        // 1. RECOMPENSA BASE: Velocidad (Queremos que corra)
+        double reward = Math.abs(speed) / 10.0;
 
-	    // 1. OBTENER LÍMITES DINÁMICOS PARA LA MARCHA ACTUAL
-	    double rMin = rpmGearDown[idx];
-	    double rMax = rpmGearUp[idx];
-	    
-	    
+        // 2. BONUS ZONA DE POTENCIA
+        // Premiamos mantener el motor alegre para facilitar la aceleración
+        if (rpm >= 2500 && rpm <= 7500) {
+            reward += 5.0;
+        }
 
-	    // 2. RECOMPENSA BASE: ¿ESTAMOS EN EL RANGO RPM IDEAL?
-	    // Si estamos dentro del rango [rMin, rMax], damos recompensa positiva.
-	    // Si nos salimos, penalizamos proporcionalmente a qué tan lejos estamos.
-	    
-	    if (rpm >= rMin && rpm <= rMax) {
-	        // --- DENTRO DE LA ZONA DE PODER ---
-	        // Damos una recompensa alta (0.5). 
-	        // Además, premiamos estar cerca del límite superior (donde hay más potencia) 
-	        // pero sin pasarse.
-	        double range = rMax - rMin;
-	        if(range == 0) range = 1; // Evitar div 0
-	        
-	        // Normalizamos dónde estamos dentro del rango (0.0 a 1.0)
-	        double positionInBand = (rpm - rMin) / range;
-	        
-	        // Preferimos estar en la mitad superior del rango (más potencia), 
-	        // así que sumamos un bonus pequeño.
-	        reward += 0.5 + (positionInBand * 0.2); 
-	        
-	    } else {
-	        // --- FUERA DE LA ZONA (CAMBIO NECESARIO) ---
-	        // Penalización por estar fuera.
-	        // Calculamos la distancia al límite más cercano.
-	        double dist = 0;
-	        if (rpm < rMin) dist = rMin - rpm;
-	        else dist = rpm - rMax;
-	        
-	        // Normalizamos el castigo (ej: si te pasas por 2000 rpm es castigo máximo)
-	        double penalty = Math.min(1.0, dist / 2000.0);
-	        reward -= penalty * 0.8; // Castigo fuerte pero no total
-	    }
- 
-	    // 5. PENALIZACIONES CRÍTICAS (LÍMITES DUROS)
-	    // Motor a punto de calarse (< 1000 RPM) o corte de inyección (> 9500)
-	    if (rpm < 1000) reward = -1.0; // Fallo catastrófico inminente
-	    if (rpm > 9500) reward = -1.0; // Daño motor
+        // 3. CASTIGOS CLÁSICOS (RPM)
+        // Castigos suaves para guiarle, pero no determinantes
+        if (rpm < 1800 && gear > 1) reward -= 3.0; // Ahogo leve (Lugging)
+        if (rpm > 8500) reward -= 3.0;             // Aviso de línea roja
 
-	    // 6. CLIPPING FINAL
-	    // Aseguramos que la recompensa se mantenga entre -1 y 1 para estabilidad matemática del Q-Learning
-	    if (reward > 1.0) reward = 1.0;
-	    if (reward < -1.0) reward = -1.0;
+        // ============================================================
+        // 4. EL "PORTERO" (Filtro de Velocidad Mínima para TODAS las marchas)
+        // ============================================================
+        // Si el coche está en una marcha alta sin la velocidad mínima necesaria,
+        // significa que no tiene par motor para acelerar. Castigo severo.
+        
+        boolean marchaIncorrecta = false;
 
-	    return reward;
-	}
+        // Marcha 1ª: Siempre permitida (es para salir de 0).
+        // Marcha 2ª: Exige mínimo ~35 km/h. Si vas a 20 km/h, mete 1ª.
+        if (gear == 1 && speed > 25) marchaIncorrecta = true;
+		else if (gear == 2 && speed < 25) marchaIncorrecta = true;
+        // Marcha 3ª: Exige mínimo ~65 km/h.
+        else if (gear == 3 && speed < 50) marchaIncorrecta = true;
+        // Marcha 4ª: Exige mínimo ~100 km/h.
+        else if (gear == 4 && speed < 75) marchaIncorrecta = true;
+        // Marcha 5ª: Exige mínimo ~140 km/h.
+        else if (gear == 5 && speed < 100) marchaIncorrecta = true;
+        // Marcha 6ª: Exige mínimo ~175 km/h.
+        else if (gear == 6 && speed < 125) marchaIncorrecta = true;
 
 
+        // APLICAR CASTIGO DEL PORTERO
+        if (marchaIncorrecta) {
+            reward -= 5.0; // ¡Baja de marcha ya!
+        }
+        // ============================================================
+
+        // 5. CASTIGOS CRÍTICOS (Game Over / Desastre)
+        if (rpm >= 9400) return -50.0;  // Romper motor
+        if (speed < -5.0) return -10.0; // Ir marcha atrás
+
+        return reward;
+    }
 
 	@Override
 	public boolean isEpisodeDone(SensorModel sensors) {
-		// 1. Salirse de la pista
-		if (Math.abs(sensors.getTrackPosition()) >= 1) {
-			return true;
+		double posPista = sensors.getTrackPosition();
+		double timeoutSegundos = sensors.getCurrentLapTime();
+		double lastLap = sensors.getLastLapTime();
+		boolean noAvance = false;
+
+		boolean isDone = false;
+
+		if (isStuckState) {
+			isDone = true;
 		}
-		if (sensors.getCurrentLapTime() > 200.0) { // Timeout de 200 segundos
-			return true;
+		// 1. Salirse de la pista
+		if (Double.isNaN(posPista) || Math.abs(posPista) > 0.98) {
+			isDone = true;
+		}
+		// 2. Timeout (basado en ticks, difícil de replicar aquí,
+		// pero podemos usar el tiempo de vuelta)
+		if (timeoutSegundos > 400.0) { // Timeout de 200 segundos
+			isDone = true;
 		}
 		// 3. Vuelta completada
-		if (sensors.getLastLapTime() > 0.0) {
-			return true;
+		if (lastLap > 0.0) {
+			isDone = true;
 		}
-		
-		return false;
+
+		// DETECCIÓN DE "NO AVANCE"
+		if (sensors.getDistanceFromStartLine() > 0) {
+			double currentDistance = sensors.getDistanceRaced();
+			double deltaDist = currentDistance - lastDistance;
+
+			if (sensors.getSpeed() < MIN_SPEED_THRESHOLD && deltaDist < MIN_DELTA_DISTANCE) {
+				noProgressCount++;
+			} else {
+				if (noProgressCount > 0)
+					noProgressCount--;
+			}
+			lastDistance = currentDistance;
+		}
+
+		if (noProgressCount > MAX_NO_PROGRESS_TICKS) {
+			noAvance = true;
+			isDone = true;
+		}
+
+		if (isDone) {
+			System.out.println("\t- Estado De Stuck: " + isStuckState);
+			System.out.println("\t- Posicion En Pista[-1,1]: " + posPista);
+			System.out.println("\t- Tiempo En Segundos[0,200]: " + timeoutSegundos);
+			System.out.println("\t- Ultima Vuelta; " + lastLap);
+			System.out.println("\t- No Avance Detectado: " + noAvance);
+
+		}
+
+		return isDone;
 	}
 
 	@Override
@@ -177,10 +221,12 @@ public class EnvGear implements IEnvironment {
 	public double getEpsilon() {
 		return epsilon;
 	}
+
 	@Override
-	public float[][] getActionMap(){
+	public float[][] getActionMap() {
 		return ACTION_MAP;
 	}
+
 	@Override
 	public float[] getActionFromMap(int discreteAction) {
 
@@ -190,21 +236,21 @@ public class EnvGear implements IEnvironment {
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
-		
+		this.isStuckState = false;
+		// Resetear variables de control de avance
+		lastDistance = 0.0;
+		noProgressCount = 0;
+
 	}
 
 	@Override
 	public double getDecayEpsilonFactor() {
 		return decayEpsilonFactor;
 	}
-	
+
 	@Override
 	public double getMinEpsilon() {
 		return minEpsilon;
 	}
-
-
-
 
 }
