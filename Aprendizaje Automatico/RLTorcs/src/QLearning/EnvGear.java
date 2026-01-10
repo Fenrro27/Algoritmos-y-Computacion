@@ -82,7 +82,7 @@ public class EnvGear implements IEnvironment {
 
 		if (rpm < 1800) {
 			rpmState = 0; // 0 - 2000 rpm
-		} else if (rpm < 8000) {
+		} else if (rpm < 7500) {
 			rpmState = 1; // 2000 - 4000 rpm
 		} else {
 			rpmState = 2; // > 6000 rpm
@@ -106,7 +106,7 @@ public class EnvGear implements IEnvironment {
 
         // 2. BONUS ZONA DE POTENCIA
         // Premiamos mantener el motor alegre para facilitar la aceleración
-        if (rpm >= 2500 && rpm <= 7500) {
+        if (rpm >= 2500 && rpm <= 7000) {
             reward += 5.0;
         }
 
