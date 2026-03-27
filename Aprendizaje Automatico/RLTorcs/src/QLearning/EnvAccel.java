@@ -11,8 +11,6 @@ public class EnvAccel implements IEnvironment {
 	double decayEpsilonFactor = 0.002;
 
 	private final int NUM_STATES = 20;
-	// carretera
-	// Constants for Reward Calculation
 	final float maxSpeedDist = 70;
 	final float maxSpeed = 150;
 	final float sin5 = (float) 0.08716;
@@ -20,16 +18,16 @@ public class EnvAccel implements IEnvironment {
 
 	private final int NUM_ACTIONS = 5;
 	private final float[][] ACTION_MAP = {
-			{ 1f }, // 0: Full Accel
-			{ 0.55f }, // 1: Medium Accel
+			{ 1f }, 
+			{ 0.55f }, 
 			{ 0f },
-			{ -0.45f }, // 2: No Accel
-			{ -0.9f }, // 8: Full Brake
+			{ -0.45f },
+			{ -0.9f }, 
 	};
 
 	final int stuckTime = 25;
 	final float stuckAngle = (float) 0.523598775; // PI/6
-	private boolean isStuckState = false; // "Chivato" interno
+	private boolean isStuckState = false; 
 
 	// Variables para detectar si no avanza ===
 	protected double lastDistance = 0.0;
@@ -64,7 +62,6 @@ public class EnvAccel implements IEnvironment {
 		double speed = sensors.getSpeed();
 		double distance = sensors.getTrackEdgeSensors()[9];
 
-		// 1. DISCRETIZACIÓN DE VELOCIDAD (5 Niveles)
 		int speedState;
 		if (speed < 5.0) {
 			speedState = 0; // Atascado/Arranque
@@ -73,15 +70,14 @@ public class EnvAccel implements IEnvironment {
 		} else if (speed < 80.0) {
 			speedState = 2; // Medio
 		} else {
-			speedState = 3; // Muy Rápido / Top Speed
+			speedState = 3; // Muy Rápido
 		}
 
-		// 2. DISCRETIZACIÓN DE DISTANCIA (5 Niveles)
 		int distState;
 		if (distance < 20.0) {
-			distState = 0; // Crítico (Pánico)
+			distState = 0; // Crítico
 		} else if (distance < 45.0) {
-			distState = 1; // Peligro (Frenada)
+			distState = 1; // Peligro
 		} else if (distance < 75.0) {
 			distState = 2; // Precaución
 		} else if (distance < 120.0) {
@@ -89,18 +85,13 @@ public class EnvAccel implements IEnvironment {
 		} else {
 			distState = 4; // Recta infinita
 		}
-		// 3. Combinar en un solo índice (0 a 8)
-		// Fórmula: speedState * 3 + distState
 		return speedState * 5 + distState;
 	}
 
-	// Variables calculadas automáticamente para LINEAL y SIGMOIDE
-	// --- Lógica para Velocidad (LINEAL) ---
+
 	double m_speed = 0.018382;
 	double c_speed = -0.869194;
-	// Formula: reward = m * speed + c
 
-	// --- Lógica para Distancia (SIGMOIDE) ---
 	double k_dist = 0.103472;
 	double mu_dist = 42.593600;
 
@@ -110,54 +101,28 @@ public class EnvAccel implements IEnvironment {
 		double frontDist = sensors.getTrackEdgeSensors()[9]; // Sensor central
 		double trackPos = sensors.getTrackPosition();
 
-		// -----------------------------------------------------------
-		// 1. CONDICIÓN DE TERMINACIÓN (Salida de pista)
-		// -----------------------------------------------------------
+		
 		if (Math.abs(trackPos) > 0.98) {
 			return -1000.0;
 		}
 
 		double reward = 0.0;
 
-		// -----------------------------------------------------------
-		// 2. LÓGICA DE CONDUCCIÓN (Estado y Recompensa integrados)
-		// -----------------------------------------------------------
-
-		// CASO 0: COCHE CASI PARADO (Velocidad < 5 km/h)
-		// Lógica: Si no se mueve, castigo constante (-10).
-		// Sumamos 'speed' para que intente llegar al menos a 5 km/h.
 		if (speed < 5.0) {
 			reward = -10.0 + speed;
 		}
-
-		// CASO 1: CRÍTICO (El muro está encima: Distancia < 0.4 * Velocidad)
-		// Lógica: La velocidad aquí es suicida. Castigo fuerte (-2 * v).
-		// Ejemplo: A 100 km/h, si tienes menos de 40m, recibes -200 puntos.
-		else if (frontDist < speed * 0.4) {
+		else if (frontDist < speed * 0.4) { // Peligro Inminente. Vas demasiado rápido para el poco espacio que tienes
 			reward = -2.0 * speed;
 		}
-
-		// CASO 2: PELIGRO (Distancia corta: Distancia < 0.8 * Velocidad)
-		// Lógica: Vas demasiado rápido para frenar cómodo. Castigo leve.
-		// Incentiva a soltar el acelerador o frenar un poco.
-		else if (frontDist < speed * 0.8) {
+		else if (frontDist < speed * 0.8) { // Precaución. Te estás acercando a algo y sigues yendo rápido
 			reward = -0.5 * speed;
 		}
-
-		// CASO 3: PRECAUCIÓN (Distancia media: Distancia < 1.5 * Velocidad)
-		// Lógica: Tienes espacio pero no infinito. Recompensa positiva pequeña.
-		// Incentiva mantener velocidad pero sin volverse loco.
-		else if (frontDist < speed * 1.5) {
+		else if (frontDist < speed * 1.5) { // Zona Segura. Tienes espacio razonable
 			reward = 0.2 * speed;
 		}
-
-		// CASO 4: SEGURO (Vía Libre)
-		// Lógica: Tienes mucho espacio por delante.
-		// Aquí es donde maximizamos la recompensa. ¡Corre!
-		else {
+		else { // Recta Libre. Tienes mucho espacio por delante
 			reward = 1.0 * speed;
 		}
-
 		return reward;
 	}
 
@@ -172,20 +137,16 @@ public class EnvAccel implements IEnvironment {
 		if (isStuckState) {
 			isDone = true;
 		}
-		// 1. Salirse de la pista
 		if (Double.isNaN(posPista) || Math.abs(posPista) > 0.98) {
 			isDone = true;
 		}
-		// pero podemos usar el tiempo de vuelta)
 		if (timeoutSegundos > 200.0) { // Timeout de 200 segundos
 			isDone = true;
 		}
-		// 3. Vuelta completada
 		if (lastLap > 0.0) {
 			isDone = true;
 		}
 
-		// DETECCIÓN DE "NO AVANCE"
 		if (sensors.getDistanceFromStartLine() > 0) {
 			double currentDistance = sensors.getDistanceRaced();
 			double deltaDist = currentDistance - lastDistance;

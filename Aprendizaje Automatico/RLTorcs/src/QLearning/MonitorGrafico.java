@@ -25,7 +25,6 @@ public class MonitorGrafico extends JFrame {
         serieEpsilon = new XYSeries("Epsilon");
         serieReward = new XYSeries("Recompensa");
 
-        // --- EL REQUISITO DE LOS 20 DATOS ---
         // Esto hace que JFreeChart borre automáticamente los datos viejos
         serieEpsilon.setMaximumItemCount(1000);
         serieReward.setMaximumItemCount(1000);
@@ -44,11 +43,6 @@ public class MonitorGrafico extends JFrame {
 
         // 4. Configuración Avanzada (Doble Eje Y)
         XYPlot plot = chart.getXYPlot();
-
-        //NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-        //    rangeAxis.setAutoRange(false); 
-        // Fijamos el rango estricto de -20 a 20
-        //rangeAxis.setRange(-20.0, 20.0); // <--- AQUÍ ESTÁ LA MAGIA
         
         // --- EJE SECUNDARIO PARA EPSILON (Derecha) ---
         NumberAxis axis2 = new NumberAxis("Epsilon");
@@ -76,7 +70,6 @@ public class MonitorGrafico extends JFrame {
     }
 
     public void agregarDato(double epsilon, double reward) {
-        // SwingUtilities asegura que la GUI se actualice en el hilo correcto
         SwingUtilities.invokeLater(() -> {
             iteracion++;
             serieEpsilon.add(iteracion, epsilon);

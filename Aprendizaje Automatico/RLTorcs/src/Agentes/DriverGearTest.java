@@ -11,8 +11,8 @@ public class DriverGearTest extends DriverBase {
 	Politica politica;
 	IEnvironment env;
 	MonitorHistograma monitor;
-	private int ticksSinceLastShift = 0;
-	private final int TICKS_COOLDOWN = 400;
+	private final int TICKS_COOLDOWN = 100;
+	private int ticksSinceLastShift = TICKS_COOLDOWN-50; // Nos aseguramos q la primera vez pueda cambiar
 
 	public DriverGearTest() {
 	 maxSpeedDist=150;
@@ -36,10 +36,9 @@ public class DriverGearTest extends DriverBase {
         int currentGear = sensors.getGear();
 		ticksSinceLastShift++;
 
-        // 2. VERIFICAR COOLDOWN
-        // Si no han pasado suficientes ticks de simulación...
+       
         if (ticksSinceLastShift < TICKS_COOLDOWN) {
-            return currentGear; // Salimos sin pensar
+            return currentGear; 
         }
 
 		monitor.registrarEvento(state, index);
@@ -57,7 +56,7 @@ public class DriverGearTest extends DriverBase {
         // Solo reseteamos cooldown si hubo cambio real
         if (targetGear != currentGear) {
        
-        ticksSinceLastShift = 0; // ¡RESET!
+        ticksSinceLastShift = 0; 
 		}
         return targetGear;
 

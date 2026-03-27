@@ -92,19 +92,18 @@ public class MonitorGear extends JFrame {
 
     private void initCSVWriter() {
         try {
-            // A. Crear directorio si no existe
+            // Crear directorio si no existe
             File directory = new File(FOLDER_NAME);
             if (!directory.exists()) {
                 directory.mkdirs();
             }
 
-            // B. Crear el archivo
+            // Crear el archivo
             File file = new File(directory, FILE_NAME);
             
-            // C. Abrir flujo de escritura (false = sobrescribir archivo cada vez que arranques)
             logWriter = new PrintWriter(new FileWriter(file, false));
             
-            // D. Escribir Cabecera
+            // Escribir Cabecera
             logWriter.println("STEP;RPM;SPEED;GEAR;REWARD");
             logWriter.flush(); // Forzar escritura en disco
             
@@ -116,7 +115,6 @@ public class MonitorGear extends JFrame {
         }
     }
 
-    // --- MÉTODOS DE CREACIÓN DE GRÁFICOS (Sin cambios) ---
     private JFreeChart createChartRPM() {
         XYSeriesCollection dataset = new XYSeriesCollection(seriesRPM);
         JFreeChart chart = ChartFactory.createXYLineChart("Motor (RPM)", "Tiempo", "RPM", dataset, PlotOrientation.VERTICAL, false, true, false);
@@ -184,11 +182,8 @@ public class MonitorGear extends JFrame {
     public void update(SensorModel sensors, double reward, int actionGear) {
         timeStep++;
 
-        // 1. ESCRIBIR EN CSV
         if (logWriter != null) {
-            // Usamos String.format con Locale.US si quieres puntos decimales (.) 
-            // o default si prefieres comas (,) dependiendo de tu Excel.
-            // Aquí uso formato estándar con punto decimal.
+
             logWriter.printf("%d;%.0f;%.0f;%d;%.2f%n", 
                 timeStep, 
                 sensors.getRPM(), 
@@ -197,12 +192,10 @@ public class MonitorGear extends JFrame {
                 reward
             );
             
-            // Hacemos flush cada vez para asegurar que si el programa crashea,
-            // los datos se hayan guardado en el disco.
             logWriter.flush();
         }
 
-        // 2. ACTUALIZAR GRÁFICAS
+        // ACTUALIZAR GRÁFICAS
         SwingUtilities.invokeLater(() -> {
             seriesRPM.add(timeStep, sensors.getRPM());
             seriesSpeed.add(timeStep, sensors.getSpeed());

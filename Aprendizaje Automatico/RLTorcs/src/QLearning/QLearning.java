@@ -15,7 +15,6 @@ import java.util.List;
  */
 
 public class QLearning {
-	// QLearning parameters
 	private double alpha; // learning rate
 	private double gamma; // discount factor
 	private double epsilon; // exploration rate
@@ -24,7 +23,6 @@ public class QLearning {
 	// Q-table
 	private double[][] qTable;
 
-	// Decaymiento Epsilon
 	private double decayEpsilonFactor;
 	private double minEpsilon;
 
@@ -56,13 +54,10 @@ public class QLearning {
 	}
 
 	private void initChart() {
-		// Creamos el gráfico y lo hacemos visible
 		this.monitor = new MonitorGrafico("Entrenamiento: " + ((name != null) ? name : "Agente"));
 		this.monitor.setVisible(true);
 	}
 
-	// Método para llamar desde tu bucle principal para actualizar la gráfica
-	// Recomiendo llamarlo al final de cada episodio o cada X ticks
 	public void updatePlot(double currentReward) {
 		if (monitor != null) {
 			monitor.agregarDato(this.epsilon, currentReward);
@@ -72,9 +67,6 @@ public class QLearning {
 	private void initializeRandomQTable() {
 		for (int i = 0; i < qTable.length; i++) {
 			for (int j = 0; j < qTable[i].length; j++) {
-				// Math.random() devuelve [0.0, 1.0)
-				// Multiplicamos por 2 -> [0.0, 2.0)
-				// Restamos 1 -> [-1.0, 1.0)
 				qTable[i][j] = (Math.random() * 2.0) - 1.0;
 			}
 		}
@@ -82,10 +74,8 @@ public class QLearning {
 
 	public int chooseAction(int state) {
 		if (Math.random() < epsilon) {
-			// Explore: choose a random action
 			return (int) (Math.random() * qTable[state].length);
 		} else {
-			// Exploit: choose the best action from Q-table
 			double maxQ = Double.NEGATIVE_INFINITY;
 			int bestAction = 0;
 			for (int action = 0; action < qTable[state].length; action++) {
@@ -98,12 +88,10 @@ public class QLearning {
 		}
 	}
 
-	// Funcion para mirar al futuro
 	public void updateQTable(int state, int action, double reward, int nextState, boolean isTerminal) {
 
-		double maxQNext = 0.0; // Por defecto 0 si es terminal
+		double maxQNext = 0.0;
 
-		// Solo calculamos el futuro si NO hemos muerto/terminado
 		if (!isTerminal) {
 			maxQNext = Double.NEGATIVE_INFINITY;
 			for (int nextAction = 0; nextAction < qTable[nextState].length; nextAction++) {
@@ -113,7 +101,6 @@ public class QLearning {
 			}
 		}
 
-		// Aplicamos la fórmula (ahora maxQNext será 0 si isTerminal es true)
 		qTable[state][action] += alpha * (reward + gamma * maxQNext - qTable[state][action]);
 
 	}
@@ -123,16 +110,7 @@ public class QLearning {
 		System.out.println("\t- Epsilon: " + (float) epsilon);
 	}
 
-	// Lógica de guardado y carga del archivo QLearning
 
-	// ===================================================================
-	// === GESTIÓN DE ARCHIVOS (CSV y TXT) ===
-	// ===================================================================
-
-	/**
-	 * Devuelve una LISTA con todas las acciones que tienen el Q-Value máximo.
-	 * Útil para manejar empates y para guardar la política correctamente.
-	 */
 	public List<Integer> getBestActionsList(int state) {
 		double maxQ = Double.NEGATIVE_INFINITY;
 		List<Integer> bestActions = new ArrayList<>();
@@ -144,7 +122,6 @@ public class QLearning {
 			double qVal = qTable[state][action];
 
 			if (qVal > maxQ + tolerance) {
-				// Nuevo máximo encontrado
 				maxQ = qVal;
 				bestActions.clear();
 				bestActions.add(action);
@@ -154,7 +131,6 @@ public class QLearning {
 			}
 		}
 
-		// Seguridad por si la lista está vacía (no debería ocurrir)
 		if (bestActions.isEmpty()) {
 			bestActions.add(0);
 		}
@@ -162,21 +138,18 @@ public class QLearning {
 		return bestActions;
 	}
 
-	/**
-	 * Guarda la Q-Table completa en formato CSV (Comma Separated Values). Formato:
-	 * State, Action0, Action1, Action2...
-	 */
+
 	public void saveQTableCSV() {
 		String filename = "Knowledge/QTable_" + name + ".csv";
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
-			// 1. Escribir Cabecera
+			// Escribir Cabecera
 			bw.write("State");
 			for (int i = 0; i < qTable[0].length; i++) {
 				bw.write(",Action_" + i);
 			}
 			bw.newLine();
 
-			// 2. Escribir Datos
+			// Escribir Datos
 			for (int i = 0; i < qTable.length; i++) {
 				bw.write(String.valueOf(i)); // Estado ID
 				for (int j = 0; j < qTable[i].length; j++) {
@@ -191,10 +164,7 @@ public class QLearning {
 		}
 	}
 
-	/**
-	 * Carga una Q-Table desde un archivo CSV para continuar entrenamiento o
-	 * ejecutar.
-	 */
+
 	public void loadQTableCSV() {
 		String filename = "Knowledge/QTable_" + name + ".csv";
 		String line = "";
@@ -205,9 +175,7 @@ public class QLearning {
 			int row = 0;
 			while ((line = br.readLine()) != null && row < qTable.length) {
 				String[] values = line.split(",");
-				// values[0] es el estado, values[1..N] son las acciones
 
-				// Validación básica de dimensiones
 				if (values.length - 1 != qTable[row].length) {
 					System.err.println("Advertencia: El CSV tiene diferente número de acciones que el agente.");
 				}
@@ -237,19 +205,16 @@ public class QLearning {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 
-		// 1. Cabecera y Parámetros
+		// Cabecera y Parámetros
 		sb.append("=== Q-Learning Agent: ").append((name != null) ? name : "Unknown").append(" ===\n");
 		sb.append(String.format("Params  -> Alpha: %.2f | Gamma: %.2f | Epsilon: %.4f\n", alpha, gamma, epsilon));
 		sb.append(String.format("Config  -> Decay: %.4f | MinEpsilon: %.4f\n", decayEpsilonFactor, minEpsilon));
 
-		// 2. Dimensiones
 		int numStates = qTable.length;
 		int numActions = (numStates > 0) ? qTable[0].length : 0;
 		sb.append(String.format("Q-Table -> %d States x %d Actions\n", numStates, numActions));
 		sb.append("--------------------------------------------------\n");
 
-		// 3. Vista Previa de la Tabla (Para no saturar la consola)
-		// Solo mostramos los primeros 10 estados o menos si la tabla es pequeña
 		int previewLimit = Math.min(numStates, 10);
 
 		sb.append("Preview (First ").append(previewLimit).append(" states):\n");
@@ -257,7 +222,6 @@ public class QLearning {
 		for (int i = 0; i < previewLimit; i++) {
 			sb.append(String.format("State %-3d | ", i));
 
-			// Buscamos la mejor acción para resaltarla visualmente (opcional pero útil)
 			double maxVal = Double.NEGATIVE_INFINITY;
 			int bestIdx = -1;
 			for (int k = 0; k < numActions; k++) {
@@ -267,7 +231,6 @@ public class QLearning {
 				}
 			}
 
-			// Imprimir valores
 			sb.append("[");
 			for (int j = 0; j < numActions; j++) {
 				// Formato: 6 espacios, 3 decimales.

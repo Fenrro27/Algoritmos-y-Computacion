@@ -5,7 +5,7 @@ Modified to use ONNX Neural Network
 import SimplePythonClient.CarControl as CarControl
 import SimplePythonClient.CarState as CarState
 import numpy as np
-import onnxruntime as ort  # Necesario para leer el modelo
+import onnxruntime as ort  
 
 class tstage:
     WARMUP = 0
@@ -37,7 +37,7 @@ class BaseDriver(object):
         except Exception as e:
             print(f'❌ Error cargando ONNX: {e}')
 
-            # 2. Parámetros del Scaler (Generados automáticamente del entrenamiento)
+            # Parámetros del Scaler (Generados automáticamente del entrenamiento)
         self.scaler_mean = np.array([
             -0.00190332, 2.64689548, 4415.54587640, 77.99133326, 7.61264134, 11.86988950, 19.37918404, 34.81733083, 42.00534021, 49.01516420, 54.86910626, 58.47841215, 48.82313349, 40.80773549, 33.84768239, 25.74177277, 17.33828542, 10.53945940, 7.62616021, 6.56810951, -0.04577084, 62.74958214, 0.34168767
         ], dtype=np.float32)
@@ -52,12 +52,12 @@ class BaseDriver(object):
         for i in range(0,len(angles)):
             angles[i]=-90+i*10    
     
-    # --- AQUÍ OCURRE LA MAGIA ---
+    
     def Update(self, buffer):
-        # 1. Parsear el buffer a objeto CarState (sensors)
+        # Parsear el buffer a objeto CarState (sensors)
         sensors = CarState.CarState(buffer)
         
-        # A) Construir el vector de estado (Debe ser IDÉNTICO al del entrenamiento)
+        # Construir el vector de estado IDÉNTICO al del entrenamiento
         state = []
         state.append(sensors.getAngle()) # S_angle
         state.append(sensors.getGear()) # S_gear
@@ -84,12 +84,12 @@ class BaseDriver(object):
         state.append(sensors.getZ()[0]) # S_z
 
 
-        # 2. Preprocesamiento (Escalado)
+        # Preprocesamiento (Escalado)
         input_raw = np.array(state, dtype=np.float32)
         input_norm = (input_raw - self.scaler_mean) / self.scaler_scale
         input_onnx = input_norm.reshape(1, -1)
 
-        # 3. Inferencia Independiente (3 Cerebros)
+        # Inferencia Independiente (3 Cerebros)
         # Inicializamos variables por defecto
         raw_pedals = [[0.0, 0.0]] # Accel, Brake
         pred_gear = 1
@@ -101,7 +101,6 @@ class BaseDriver(object):
             in_name_s = self.sess_steer.get_inputs()[0].name
 
             # Ejecutamos cada red
-            # OJO: sess_accel devuelve [[Accel, Brake]]
             raw_pedals = self.sess_accel.run(None, {in_name_a: input_onnx})[0]
             pred_gear  = self.sess_gear.run(None,  {in_name_g: input_onnx})[0][0][0]
             pred_steer = self.sess_steer.run(None, {in_name_s: input_onnx})[0][0][0]
@@ -111,18 +110,18 @@ class BaseDriver(object):
 
 
       
-        # 4. Procesado de Salida (Extracción y Limpieza)
+        # Procesado de Salida (Extracción y Limpieza)
         # Desempaquetamos Pedales (Columna 0: Accel, Columna 1: Brake)
         pred_accel = float(raw_pedals[0][0])
         pred_brake = float(raw_pedals[0][1])
 
-        # Aplicamos Clips (Límites físicos)
+        # Aplicamos límites físicos
         accel_out = np.clip(pred_accel, 0.0, 1.0)
         brake_out = np.clip(pred_brake, 0.0, 1.0)
         gear_out  = int(np.clip(np.round(pred_gear), 1, 6))
         steer_out = np.clip(float(pred_steer), -1.0, 1.0)
 
-        # 5. Crear Acción Final
+        
         print("Accel: ", accel_out,"Brake: ", brake_out,"Gear: ", gear_out,"Steer: ", steer_out)
         action = CarControl.CarControl(accel=accel_out, brake=brake_out, gear=gear_out, steer=steer_out, clutch=0, meta=0, focus=0)
         return str(action)

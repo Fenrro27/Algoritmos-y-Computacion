@@ -13,7 +13,6 @@ public class DriverSteerTrain extends AbstractTrainDriverBase {
 	private Random rand = new Random();
 	private float timeToWarmup = 3.0f + (20.0f - 3.0f) * rand.nextFloat();
 
-	// Frame Skip / Action Skipping
 	private final int SKIP_TICKS = 5;
 	private int ticksSinceLastUpdate = 0;
 	private int lastAction = -1; // Para guardar la ultima accion ejecutada
@@ -26,7 +25,7 @@ public class DriverSteerTrain extends AbstractTrainDriverBase {
 		this.env = new EnvSteer();
 		this.agent = new QLearning(env);
 		this.pol = new Politica(env);
-		agent.loadQTableCSV();// Cargamos para volver a entrenar y ajustar mas
+		agent.loadQTableCSV();
 		System.out.println("Entrenamiento configurado: " + env.getName());
 
 		System.out.println(agent);
@@ -62,22 +61,18 @@ public class DriverSteerTrain extends AbstractTrainDriverBase {
 					+ String.format("%.2f/%.2f", sensors.getCurrentLapTime(), timeToWarmup));
 			return super.getSteer(sensors); // Si es tiempo de calentamiento usamos el metodo del padre
 		} else {
-			// FRAME SKIP LOGIC
 			if (ticksSinceLastUpdate < SKIP_TICKS && lastAction != -1) {
 				ticksSinceLastUpdate++;
-				// System.out.print("\rFrame Skip: " + ticksSinceLastUpdate + "/" + SKIP_TICKS);
 				// Retornamos la ultima accion sin aprender nada nuevo ni registrar evento
 				return env.getActionFromMap(lastAction)[0];
 			}
 			// Si nos toca ejecutar (o es la primera vez), reseteamos contador
 			ticksSinceLastUpdate = 0;
 
-			// El agente elige la acción abstracta (int)
 			nextAction = agent.chooseAction(currentState);
-			lastAction = nextAction; // Guardamos para el skip
+			lastAction = nextAction; 
 			histTrain.registrarEvento(currentState, nextAction);
 
-			// B. Aprender
 			if (previousState != -1) {
 				agent.updatePlot(reward);
 				agent.updateQTable(previousState, previousAction, reward, currentState, isDone);
@@ -88,8 +83,6 @@ public class DriverSteerTrain extends AbstractTrainDriverBase {
 
 		}
 
-		// System.out.print("\rEstado: " + currentState + ", Acción: " + nextAction + "
-		// ");
 
 		return env.getActionFromMap(nextAction)[0];
 

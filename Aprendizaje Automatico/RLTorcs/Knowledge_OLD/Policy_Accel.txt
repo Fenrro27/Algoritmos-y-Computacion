@@ -1,0 +1,23 @@
+=== POLÍTICA APRENDIDA (Q-LEARNING) ===
+-> State -> Best Action(s) [Q-Value]
+--------------------------------------
+State   0 -> Actions: {0}        (Q: -4,9415)
+State   1 -> Actions: {0}        (Q: -6,5325)
+State   2 -> Actions: {0}        (Q: 8,2305)
+State   3 -> Actions: {0}        (Q: 1,2814)
+State   4 -> Actions: {0}        (Q: -4,2598)
+State   5 -> Actions: {2}        (Q: 17,4369)
+State   6 -> Actions: {2}        (Q: 52,8001)
+State   7 -> Actions: {0}        (Q: 70,9502)
+State   8 -> Actions: {1}        (Q: 72,9524)
+State   9 -> Actions: {0}        (Q: 92,2913)
+State  10 -> Actions: {3}        (Q: -5,6339)
+State  11 -> Actions: {3}        (Q: 22,7289)
+State  12 -> Actions: {4}        (Q: 100,8516)
+State  13 -> Actions: {4}        (Q: 176,0373)
+State  14 -> Actions: {0}        (Q: 318,1617)
+State  15 -> Actions: {2}        (Q: 0,7603)
+State  16 -> Actions: {4}        (Q: 0,7742)
+State  17 -> Actions: {3}        (Q: 57,1156)
+State  18 -> Actions: {3}        (Q: 132,5145)
+State  19 -> Actions: {4}        (Q: 366,5485)

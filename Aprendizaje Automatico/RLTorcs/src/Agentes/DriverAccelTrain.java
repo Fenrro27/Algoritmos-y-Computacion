@@ -13,9 +13,8 @@ public class DriverAccelTrain extends AbstractTrainDriverBase {
 	private Random rand = new Random();
 	private float timeToWarmup = 3.0f + (20.0f - 3.0f) * rand.nextFloat();
 
-	// Frame Skip / Action Skipping
 	private final int SKIP_TICKS = 5;
-	private int ticksSinceLastUpdate = 0;
+	private int ticksSinceLastUpdate = SKIP_TICKS;
 	private float lastActionFloat = 0; // Para guardar la ultima accion ejecutada
 
 	public DriverAccelTrain() {
@@ -39,6 +38,7 @@ public class DriverAccelTrain extends AbstractTrainDriverBase {
 		super.reset();
 		if (!isInTestMode) {
 			this.timeToWarmup = (20.0f) * rand.nextFloat();
+			this.ticksSinceLastUpdate = 0;
 		} else {
 			this.timeToWarmup = 0.0f;
 		}
@@ -67,11 +67,9 @@ public class DriverAccelTrain extends AbstractTrainDriverBase {
 			nextAction = pol.getAccionIndex(currentState);
 			histTest.registrarEvento(currentState, nextAction);
 		} else {
-			// El agente elige la acción abstracta (int)
 			nextAction = agent.chooseAction(currentState);
 			histTrain.registrarEvento(currentState, nextAction);
 
-			// B. Aprender
 			if (previousState != -1) {
 				agent.updatePlot(reward);
 				agent.updateQTable(previousState, previousAction, reward, currentState, isDone);

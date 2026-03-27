@@ -85,9 +85,6 @@ public class MonitorHistograma extends JFrame {
         cardLayout.show(mainPanelCards, "VISTA_ESTADOS");
     }
 
-    /**
-     * NUEVO MÉTODO: Ahora recibe el estado Y la acción tomada.
-     */
     public void registrarEvento(int state, int actionIndex) {
         if (state >= 0 && state < numStates && actionIndex >= 0 && actionIndex < numActions) {
             // 1. Actualizar datos globales
@@ -144,7 +141,7 @@ public class MonitorHistograma extends JFrame {
 
 
     // ==============================================================================
-    // CLASE INTERNA GENERICA PARA DIBUJAR BARRAS (Reutilizable para ambos histogramas)
+    // CLASE INTERNA GENERICA PARA DIBUJAR BARRAS 
     // ==============================================================================
     private class PanelBarrasGenerico extends JPanel {
         private int[] datosADibujar;

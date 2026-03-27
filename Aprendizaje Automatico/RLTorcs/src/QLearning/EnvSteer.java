@@ -19,7 +19,7 @@ public class EnvSteer implements IEnvironment {
 	
 	final int stuckTime = 25;
 	final float stuckAngle = (float) 0.523598775; // PI/6
-	private boolean isStuckState = false; // "Chivato" interno
+	private boolean isStuckState = false; 
 
 	// Variables para detectar si no avanza ===
 	protected double lastDistance = 0.0;
@@ -198,16 +198,15 @@ public class EnvSteer implements IEnvironment {
 		if (isStuckState) {
 			isDone = true;
 		}
-		// 1. Salirse de la pista
+
 		if (Double.isNaN(posPista) || Math.abs(posPista) > 0.98) {
 			isDone = true;
 		}
-		// 2. Timeout (basado en ticks, difícil de replicar aquí,
-		// pero podemos usar el tiempo de vuelta)
+		
 		if (timeoutSegundos > 400.0) { // Timeout de 200 segundos
 			isDone = true;
 		}
-		// 3. Vuelta completada
+		// Vuelta completada
 		if (lastLap > 0.0) {
 			isDone = true;
 		}

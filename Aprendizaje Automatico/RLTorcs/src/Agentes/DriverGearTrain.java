@@ -9,8 +9,8 @@ import champ2011client.SensorModel;
 
 public class DriverGearTrain extends AbstractTrainDriverBase {
     
-private int ticksSinceLastShift = 0;
-private final int TICKS_COOLDOWN = 400;
+private final int TICKS_COOLDOWN = 100;
+private int ticksSinceLastShift = TICKS_COOLDOWN-50; // Nos aseguramos q la primera vez pueda cambiar
 private MonitorGear monitorGear;
 
 
@@ -35,17 +35,14 @@ private MonitorGear monitorGear;
     public int getGear(SensorModel sensors) {
         int currentGear = sensors.getGear();
 
-        // 1. ACTUALIZAR CONTADOR (Siempre sumamos 1 tick en cada llamada)
         ticksSinceLastShift++;
 
-        // 2. VERIFICAR COOLDOWN
-        // Si no han pasado suficientes ticks de simulación...
-        if (ticksSinceLastShift < TICKS_COOLDOWN) {
+   
+        if (ticksSinceLastShift < TICKS_COOLDOWN ) {
 			monitorGear.update(sensors, lastReward, currentGear);
-            return currentGear; // Salimos sin pensar
+            return currentGear; 
         }
 
-        // --- A PARTIR DE AQUI, EL AGENTE "DESPIERTA" ---
 
         boolean isDone = env.isEpisodeDone(sensors);
         int currentState = env.discretizeState(sensors);
@@ -53,13 +50,11 @@ private MonitorGear monitorGear;
 
         int nextAction = -1;
 
-        // B. Aprender
         if (previousState != -1 && !isInTestMode) {
             agent.updatePlot(reward);
             agent.updateQTable(previousState, previousAction, reward, currentState, isDone);
         }
 
-        // C. Decidir
         if (isInTestMode) {
             nextAction = pol.getAccionIndex(currentState);
             histTest.registrarEvento(currentState, nextAction);
@@ -72,7 +67,6 @@ private MonitorGear monitorGear;
         previousAction = nextAction;
 		lastReward = reward;
 
-        // 3. EJECUTAR LÓGICA Y RESETEAR CONTADOR SI ES NECESARIO
       
 
 		int accion = (int) env.getActionFromMap(nextAction)[0];
@@ -85,7 +79,7 @@ private MonitorGear monitorGear;
         if (targetGear > 6) targetGear = 6;
 
 		if (targetGear != currentGear) {
-        ticksSinceLastShift = 0; // ¡RESET!
+        ticksSinceLastShift = 0; 
 		monitorGear.update(sensors, reward, targetGear);
 		}
         return targetGear;

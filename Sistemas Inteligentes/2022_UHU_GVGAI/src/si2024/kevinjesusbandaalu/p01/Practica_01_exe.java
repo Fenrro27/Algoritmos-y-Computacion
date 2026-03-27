@@ -38,7 +38,7 @@ public class Practica_01_exe {
 					String[][] games = Utils.readGames(spGamesCollection);
 
 					// Game settings
-					boolean visuals = false;
+					boolean visuals = true;
 					int seed = new Random().nextInt();
 
 					// Game and level to play
