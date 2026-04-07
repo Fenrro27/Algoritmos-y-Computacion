@@ -202,7 +202,10 @@ public class Mundo84 implements IMundo {
 	    System.out.print("    ");
 	    for (int x = 0; x < ancho; x++)
 	        System.out.print(String.format("%2d", x));
-	    System.out.println("\n    " + "--".repeat(ancho));
+		
+	    System.out.print("\n    ");
+	    for (int i = 0; i < ancho; i++) System.out.print("--");
+	    System.out.println();
 
 	    for (int y = 0; y < alto; y++) {
 	        // Índice de fila

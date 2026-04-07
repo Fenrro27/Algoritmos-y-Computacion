@@ -47,11 +47,13 @@ public class Practica_01_exe {
         }
 
         // --- GENERACIÓN DEL INFORME FINAL ---
-        System.out.println("\n\n" + "=".repeat(50));
+        System.out.println("\n");
+System.out.println("==================================================");
+
         System.out.println("        RESUMEN ESTADÍSTICO POR NIVEL");
-        System.out.println("=".repeat(50));
+System.out.println("==================================================");
         System.out.println(String.format("%-10s | %-12s | %-12s", "NIVEL", "% VICTORIA", "MEDIA PUNTOS"));
-        System.out.println("-".repeat(50));
+        System.out.println("-----------------------------------------------------");
 
         int victoriasGlobales = 0;
         double puntosGlobales = 0;
@@ -71,14 +73,14 @@ public class Practica_01_exe {
         double winRateGlobal = (victoriasGlobales / (double)totalPartidas) * 100;
         double scoreGlobal = puntosGlobales / totalPartidas;
 
-        System.out.println("=".repeat(50));
+        System.out.println("==================================================");
         System.out.println("             RESUMEN GLOBAL");
-        System.out.println("=".repeat(50));
+        System.out.println("==================================================");
         System.out.println("Total Partidas:     " + totalPartidas);
         System.out.println("Victorias Totales:  " + victoriasGlobales);
         System.out.println("Win Rate Global:    " + String.format("%.2f", winRateGlobal) + "%");
         System.out.println("Media Score Global: " + String.format("%.2f", scoreGlobal));
-        System.out.println("=".repeat(50));
+        System.out.println("==================================================");
 
         System.exit(0);
     }
