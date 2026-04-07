@@ -1,4 +1,4 @@
-package si2026.kevinjesusbandaalu.p01;
+package si2026.kevinjesusbandaalu.p02;
 
 import core.game.StateObservation;
 import core.player.AbstractPlayer;
