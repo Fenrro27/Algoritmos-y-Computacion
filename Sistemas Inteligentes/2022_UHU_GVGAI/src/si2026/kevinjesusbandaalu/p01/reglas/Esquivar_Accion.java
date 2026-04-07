@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import core.game.Observation;
 import ontology.Types.ACTIONS;
-import si2026.kevinjesusbandaalu.common.IAccion;
 import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.IAccion;
 import si2026.kevinjesusbandaalu.p01.Mundo84;
 import tools.Vector2d;
 

@@ -1,8 +1,8 @@
 package si2026.kevinjesusbandaalu.p01.reglas;
 
 import core.game.Observation;
-import si2026.kevinjesusbandaalu.common.ICondicion;
 import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.ICondicion;
 import si2026.kevinjesusbandaalu.p01.Mundo84;
 
 public class Esquivar_Condicion implements ICondicion {

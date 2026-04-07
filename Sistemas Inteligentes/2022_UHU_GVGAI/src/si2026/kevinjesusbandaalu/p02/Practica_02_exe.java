@@ -12,8 +12,8 @@ public class Practica_02_exe {
         String spGamesCollection = "examples/all_games_sp.csv";
         String[][] games = Utils.readGames(spGamesCollection);
 
-        boolean visuals = false;
-        int gameIdx = 84;
+        boolean visuals = true;
+        int gameIdx = 83;
         int partidasPorNivel = 100; 
         
         // Arrays para guardar los resultados de cada uno de los 5 niveles

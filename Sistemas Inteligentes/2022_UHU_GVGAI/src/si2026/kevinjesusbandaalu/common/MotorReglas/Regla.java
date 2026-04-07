@@ -1,7 +1,8 @@
-package si2026.kevinjesusbandaalu.common;
+package si2026.kevinjesusbandaalu.common.MotorReglas;
 
 import java.util.List;
 import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
 
 public class Regla {
 

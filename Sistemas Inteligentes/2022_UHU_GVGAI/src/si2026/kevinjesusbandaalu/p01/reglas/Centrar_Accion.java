@@ -2,8 +2,8 @@ package si2026.kevinjesusbandaalu.p01.reglas;
 
 import java.util.List;
 import ontology.Types.ACTIONS;
-import si2026.kevinjesusbandaalu.common.IAccion;
 import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.IAccion;
 import si2026.kevinjesusbandaalu.common.aStar.AStar;
 import si2026.kevinjesusbandaalu.common.aStar.Node;
 import si2026.kevinjesusbandaalu.p01.Mundo84;

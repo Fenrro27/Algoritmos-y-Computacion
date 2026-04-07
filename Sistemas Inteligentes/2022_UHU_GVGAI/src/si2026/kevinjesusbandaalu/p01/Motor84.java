@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import si2026.kevinjesusbandaalu.common.*;
+import si2026.kevinjesusbandaalu.common.MotorReglas.IAccion;
+import si2026.kevinjesusbandaalu.common.MotorReglas.ICondicion;
+import si2026.kevinjesusbandaalu.common.MotorReglas.Regla;
 import si2026.kevinjesusbandaalu.p01.reglas.*;
 
 public class Motor84 extends Motor {
