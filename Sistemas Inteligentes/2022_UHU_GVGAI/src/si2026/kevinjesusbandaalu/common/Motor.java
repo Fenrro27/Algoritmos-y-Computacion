@@ -12,6 +12,7 @@ public abstract class Motor {
 	public ACTIONS Pensar(IMundo mundo) {
 		for (Regla r : reglas) {
 			if (r.seCumple(mundo)) {
+			//	System.out.println(r.toString());
 				return r.getAccion().doAction(mundo);
 			}
 		}

@@ -18,6 +18,9 @@ public class Mundo84 implements IMundo {
 	public Vector2d MiPosicion;
 	public Vector2d miOrientacion;
 	public int Bloque, columnas, filas;
+	
+    public final int nEnemigos = 2;
+
 
 	public Mundo84(StateObservation stateObs) {
 		Bloque = stateObs.getBlockSize();
@@ -64,7 +67,7 @@ public class Mundo84 implements IMundo {
 						objetosIntocables.add(obs);
 					} else if (obs.category == 1) {
 						enemigos.add(obs);
-					} else if (obs.category == 4 && obs.itype == 3) {
+					} else if (obs.category == 4 && obs.itype == 3 || obs.category == 4 && obs.itype == 0  ) {
 						objetosIntocables.add(obs);
 					}
 

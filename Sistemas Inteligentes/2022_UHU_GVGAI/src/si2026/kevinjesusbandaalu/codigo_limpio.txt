@@ -1,0 +1,1856 @@
+
+========================================
+FILE: common\IMundo.java
+========================================
+package si2026.kevinjesusbandaalu.common;
+
+import core.game.StateObservation;
+import ontology.Types.ACTIONS;
+
+public interface IMundo {
+
+	public void AnalizarEntorno(StateObservation stateObs);
+
+}
+
+========================================
+FILE: common\Motor.java
+========================================
+package si2026.kevinjesusbandaalu.common;
+
+import java.util.List;
+
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.MotorReglas.Regla;
+
+public abstract class Motor {
+	protected List<Regla> reglas;
+
+	public ACTIONS Pensar(IMundo mundo) {
+		for (Regla r : reglas) {
+			if (r.seCumple(mundo)) {
+				System.out.println(r.toString());
+				return r.getAccion().doAction(mundo);
+			}
+		}
+		return null;
+	}
+}
+
+========================================
+FILE: common\arbolDecision\ArbolDecision.java
+========================================
+package si2026.kevinjesusbandaalu.common.arbolDecision;
+
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.Motor;
+
+public abstract class ArbolDecision extends Motor {
+
+	protected NodoArbol raiz;
+
+	public ACTIONS Pensar(IMundo m) {
+
+		NodoArbol nodoActual=raiz;
+
+		while(!nodoActual.esHoja()) {
+			nodoActual = nodoActual.decidir(m);
+		}
+
+		return nodoActual.getAccion(m);
+	}
+}
+
+========================================
+FILE: common\arbolDecision\NodoAccion.java
+========================================
+package si2026.kevinjesusbandaalu.common.arbolDecision;
+
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.IAccion;
+
+public class NodoAccion extends NodoArbol {
+
+	public IAccion accion;
+
+	public NodoAccion(IAccion accion) {
+		this.accion=accion;
+		this.de=null;
+		this.iz=null;
+	}
+
+	@Override
+	public ACTIONS getAccion(IMundo m) {
+		return this.accion.doAction(m);
+	}
+
+}
+
+========================================
+FILE: common\arbolDecision\NodoArbol.java
+========================================
+package si2026.kevinjesusbandaalu.common.arbolDecision;
+
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.ICondicion;
+
+public abstract class NodoArbol {
+
+	public ICondicion c;
+	public NodoArbol iz, de;
+
+	public NodoArbol decidir(IMundo m) {
+		if(c.seCumple(m)) {
+			return this.de;
+		}
+		else {
+			return this.iz;
+		}
+	}
+
+	public boolean esHoja() {
+		return iz == null && de == null;
+	}
+
+	public abstract ACTIONS getAccion(IMundo m);
+
+}
+
+========================================
+FILE: common\arbolDecision\NodoDecision.java
+========================================
+package si2026.kevinjesusbandaalu.common.arbolDecision;
+
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.ICondicion;
+
+public class NodoDecision extends NodoArbol {
+
+	public NodoDecision(ICondicion c, NodoArbol derecha, NodoArbol izquierda) {
+		this.c=c; 
+		this.de=derecha; 
+		this.iz=izquierda;
+
+	}
+
+	@Override
+	public ACTIONS getAccion(IMundo m) {
+		return null;
+	}
+
+}
+
+========================================
+FILE: common\aStar\AStar.java
+========================================
+package si2026.kevinjesusbandaalu.common.aStar;
+
+import java.util.*;
+
+public class AStar {
+	private static int DEFAULT_HV_COST = 10; 
+	private static int DEFAULT_DIAGONAL_COST = 14;
+	private int hvCost;
+	private int diagonalCost;
+	private Node[][] searchArea;
+	private PriorityQueue<Node> openList;
+	private Set<Node> closedSet;
+	private Node initialNode;
+	private Node finalNode;
+
+	public AStar(int rows, int cols, Node initialNode, Node finalNode, int hvCost, int diagonalCost) {
+		this.hvCost = hvCost;
+		this.diagonalCost = diagonalCost;
+		setInitialNode(initialNode);
+		setFinalNode(finalNode);
+		this.searchArea = new Node[rows][cols];
+		this.openList = new PriorityQueue<Node>(new Comparator<Node>() {
+			@Override
+			public int compare(Node node0, Node node1) {
+				return Integer.compare(node0.getF(), node1.getF());
+			}
+		});
+		setNodes();
+		this.closedSet = new HashSet<>();
+	}
+
+	public AStar(int rows, int cols, Node initialNode, Node finalNode) {
+		this(rows, cols, initialNode, finalNode, DEFAULT_HV_COST, DEFAULT_DIAGONAL_COST);
+	}
+
+	private void setNodes() {
+		for (int i = 0; i < searchArea.length; i++) {
+			for (int j = 0; j < searchArea[0].length; j++) {
+				Node node = new Node(i, j);
+				node.calculateHeuristic(getFinalNode());
+				this.searchArea[i][j] = node;
+			}
+		}
+	}
+
+	public void setBlocks(int[][] blocksArray) {
+		for (int i = 0; i < blocksArray.length; i++) {
+			int row = blocksArray[i][0];
+			int col = blocksArray[i][1];
+			setBlock(row, col);
+		}
+	}
+
+	public List<Node> findPath() {
+		openList.add(initialNode);
+		while (!isEmpty(openList)) {
+			Node currentNode = openList.poll();
+			closedSet.add(currentNode);
+			if (isFinalNode(currentNode)) {
+				return getPath(currentNode);
+			} else {
+				addAdjacentNodes(currentNode);
+			}
+		}
+		return new ArrayList<Node>();
+	}
+
+	private List<Node> getPath(Node currentNode) {
+		List<Node> path = new ArrayList<Node>();
+		path.add(currentNode);
+		Node parent;
+		while ((parent = currentNode.getParent()) != null) {
+			path.add(0, parent);
+			currentNode = parent;
+		}
+		return path;
+	}
+
+	private void addAdjacentNodes(Node currentNode) {
+		addAdjacentUpperRow(currentNode);
+		addAdjacentMiddleRow(currentNode);
+		addAdjacentLowerRow(currentNode);
+	}
+
+	private void addAdjacentLowerRow(Node currentNode) {
+		int row = currentNode.getRow();
+		int col = currentNode.getCol();
+		int lowerRow = row + 1;
+		if (lowerRow < getSearchArea().length) {
+
+			if (col - 1 >= 0) {
+
+			}
+			if (col + 1 < getSearchArea()[0].length) {
+
+			}
+
+			checkNode(currentNode, col, lowerRow, getHvCost());
+		}
+
+	}
+
+	private void addAdjacentMiddleRow(Node currentNode) {
+		int row = currentNode.getRow();
+		int col = currentNode.getCol();
+		int middleRow = row;
+		if (col - 1 >= 0) {
+			checkNode(currentNode, col - 1, middleRow, getHvCost());
+		}
+		if (col + 1 < getSearchArea()[0].length) {
+			checkNode(currentNode, col + 1, middleRow, getHvCost());
+		}
+	}
+
+	private void addAdjacentUpperRow(Node currentNode) {
+		int row = currentNode.getRow();
+		int col = currentNode.getCol();
+		int upperRow = row - 1;
+		if (upperRow >= 0) {
+
+			if (col - 1 >= 0) {
+
+			}
+			if (col + 1 < getSearchArea()[0].length) {
+
+			}
+
+			checkNode(currentNode, col, upperRow, getHvCost());
+		}
+	}
+
+	private void checkNode(Node currentNode, int col, int row, int cost) {
+		Node adjacentNode = getSearchArea()[row][col];
+		if (!adjacentNode.isBlock() && !getClosedSet().contains(adjacentNode)) {
+			if (!getOpenList().contains(adjacentNode)) {
+				adjacentNode.setNodeData(currentNode, cost);
+				getOpenList().add(adjacentNode);
+			} else {
+				boolean changed = adjacentNode.checkBetterPath(currentNode, cost);
+				if (changed) {
+
+					getOpenList().remove(adjacentNode);
+					getOpenList().add(adjacentNode);
+				}
+			}
+		}
+	}
+
+	private boolean isFinalNode(Node currentNode) {
+		return currentNode.equals(finalNode);
+	}
+
+	private boolean isEmpty(PriorityQueue<Node> openList) {
+		return openList.size() == 0;
+	}
+
+	private void setBlock(int row, int col) {
+		this.searchArea[row][col].setBlock(true);
+	}
+
+	public Node getInitialNode() {
+		return initialNode;
+	}
+
+	public void setInitialNode(Node initialNode) {
+		this.initialNode = initialNode;
+	}
+
+	public Node getFinalNode() {
+		return finalNode;
+	}
+
+	public void setFinalNode(Node finalNode) {
+		this.finalNode = finalNode;
+	}
+
+	public Node[][] getSearchArea() {
+		return searchArea;
+	}
+
+	public void setSearchArea(Node[][] searchArea) {
+		this.searchArea = searchArea;
+	}
+
+	public PriorityQueue<Node> getOpenList() {
+		return openList;
+	}
+
+	public void setOpenList(PriorityQueue<Node> openList) {
+		this.openList = openList;
+	}
+
+	public Set<Node> getClosedSet() {
+		return closedSet;
+	}
+
+	public void setClosedSet(Set<Node> closedSet) {
+		this.closedSet = closedSet;
+	}
+
+	public int getHvCost() {
+		return hvCost;
+	}
+
+	public void setHvCost(int hvCost) {
+		this.hvCost = hvCost;
+	}
+
+	private int getDiagonalCost() {
+		return diagonalCost;
+	}
+
+	private void setDiagonalCost(int diagonalCost) {
+		this.diagonalCost = diagonalCost;
+	}
+}
+
+========================================
+FILE: common\aStar\Node.java
+========================================
+package si2026.kevinjesusbandaalu.common.aStar;
+
+import tools.Vector2d;
+
+public class Node {
+
+    private int g; 
+    private int f; 
+    private int h; 
+    private int row;
+    private int col;
+    private boolean isBlock;
+    private Node parent;
+
+    public Node(Vector2d v) {
+    	this.row= (int)v.y;
+    	this.col= (int)v.x;
+
+    }
+    public Node(int row, int col) {
+        super();
+        this.row = row;
+        this.col = col;
+    }
+
+    public void calculateHeuristic(Node finalNode) {
+        this.h = Math.abs(finalNode.getRow() - getRow()) + Math.abs(finalNode.getCol() - getCol());
+    }
+
+    public void setNodeData(Node currentNode, int cost) {
+        int gCost = currentNode.getG() + cost;
+        setParent(currentNode);
+        setG(gCost);
+        calculateFinalCost();
+    }
+
+    public boolean checkBetterPath(Node currentNode, int cost) {
+        int gCost = currentNode.getG() + cost;
+        if (gCost < getG()) {
+            setNodeData(currentNode, cost);
+            return true;
+        }
+        return false;
+    }
+
+    private void calculateFinalCost() {
+        int finalCost = getG() + getH();
+        setF(finalCost);
+    }
+
+    @Override
+    public boolean equals(Object arg0) {
+        Node other = (Node) arg0;
+        return this.getRow() == other.getRow() && this.getCol() == other.getCol();
+    }
+
+    @Override
+    public String toString() {
+        return "Node [row=" + row + ", col=" + col + "]";
+    }
+
+    public int getH() {
+        return h;
+    }
+
+    public void setH(int h) {
+        this.h = h;
+    }
+
+    public int getG() {
+        return g;
+    }
+
+    public void setG(int g) {
+        this.g = g;
+    }
+
+    public int getF() {
+        return f;
+    }
+
+    public void setF(int f) {
+        this.f = f;
+    }
+
+    public Node getParent() {
+        return parent;
+    }
+
+    public void setParent(Node parent) {
+        this.parent = parent;
+    }
+
+    public boolean isBlock() {
+        return isBlock;
+    }
+
+    public void setBlock(boolean isBlock) {
+        this.isBlock = isBlock;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public void setCol(int col) {
+        this.col = col;
+    }
+}
+
+========================================
+FILE: common\MotorReglas\IAccion.java
+========================================
+package si2026.kevinjesusbandaalu.common.MotorReglas;
+
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+
+public interface IAccion {
+
+	public ACTIONS doAction(IMundo m);
+}
+
+========================================
+FILE: common\MotorReglas\ICondicion.java
+========================================
+package si2026.kevinjesusbandaalu.common.MotorReglas;
+
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+
+public interface ICondicion {
+
+	public boolean seCumple(IMundo m);
+
+	@Override
+	public String toString();
+
+}
+
+========================================
+FILE: common\MotorReglas\Regla.java
+========================================
+package si2026.kevinjesusbandaalu.common.MotorReglas;
+
+import java.util.List;
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+
+public class Regla {
+
+	private List<ICondicion> antecedentes;
+
+	private IAccion accion;
+
+	public Regla(List<ICondicion> ant, IAccion accion) {
+		this.antecedentes=ant;
+		this.accion=accion;
+
+	}
+
+	public boolean seCumple(IMundo m) {
+
+		for (ICondicion condicion : antecedentes) {
+
+			if (!condicion.seCumple(m))
+				return false;
+		}
+		return true;
+
+	}
+
+	public IAccion getAccion() {
+		return accion;
+	}
+
+	@Override
+	public String toString() {
+		String s="";
+		for(ICondicion condicion : antecedentes) {
+			s=s+condicion;
+
+		}
+		return s;
+	}
+
+}
+
+========================================
+FILE: p00\Jugador1.java
+========================================
+package si2026.kevinjesusbandaalu.p00;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
+import core.game.StateObservation;
+import core.player.AbstractPlayer;
+import ontology.Types;
+import ontology.Types.ACTIONS;
+import tools.ElapsedCpuTimer;
+
+public class Jugador1 extends AbstractPlayer {
+
+	List<ACTIONS> camino;
+	int indice=0;
+
+	public Jugador1(StateObservation arg0, ElapsedCpuTimer arg1) {
+		camino = new ArrayList<Types.ACTIONS>();
+
+		for(int i = 0; i<12; i++)
+			camino.add(ACTIONS.ACTION_LEFT);
+
+		for(int i = 0; i<5; i++)
+			camino.add(ACTIONS.ACTION_UP);
+
+		for(int i = 0; i<2; i++)
+			camino.add(ACTIONS.ACTION_RIGHT);
+
+		for(int i = 0; i<2; i++)
+			camino.add(ACTIONS.ACTION_LEFT);
+
+		for(int i = 0; i<2; i++)
+			camino.add(ACTIONS.ACTION_DOWN);
+
+		for(int i = 0; i<12; i++)
+			camino.add(ACTIONS.ACTION_RIGHT);
+
+		for(int i = 0; i<2; i++)
+			camino.add(ACTIONS.ACTION_UP);
+
+		for(int i = 0; i<9; i++)
+			camino.add(ACTIONS.ACTION_LEFT);
+
+		for(int i = 0; i<2; i++)
+			camino.add(ACTIONS.ACTION_UP);
+
+		for(int i = 0; i<9; i++)
+			camino.add(ACTIONS.ACTION_RIGHT);		
+
+		for(int i = 0; i<2; i++)
+			camino.add(ACTIONS.ACTION_UP);
+
+		for(int i = 0; i<12; i++)
+			camino.add(ACTIONS.ACTION_LEFT);
+
+		for(int i = 0; i<2; i++)
+			camino.add(ACTIONS.ACTION_DOWN);
+
+	}
+
+	@Override
+	public ACTIONS act(StateObservation arg0, ElapsedCpuTimer arg1) {
+
+		return camino.get(indice++);
+	}
+
+}
+
+========================================
+FILE: p00\Practica_00_exe.java
+========================================
+ package si2026.kevinjesusbandaalu.p00;
+
+import java.util.Random;
+
+import tools.Utils;
+import tracks.ArcadeMachine;
+
+public class Practica_00_exe {
+
+    public static void main(String[] args) {
+
+		String p1 = "si2026.kevinjesusbandaalu.p00.Jugador1";
+
+		String spGamesCollection =  "examples/all_games_sp.csv";
+		String[][] games = Utils.readGames(spGamesCollection);
+
+		boolean visuals = true;
+		int seed = new Random().nextInt();
+
+		int gameIdx  = 50;
+		int levelIdx = 0; 
+
+		String gameName = games[gameIdx][1];
+		String game = games[gameIdx][0];
+		String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
+
+ 		ArcadeMachine.runOneGame(game, level1, visuals, p1, null, seed, 0);
+
+		System.exit(0);
+
+    }
+}
+
+========================================
+FILE: p01\Jugador1.java
+========================================
+package si2026.kevinjesusbandaalu.p01;
+
+import core.game.StateObservation;
+import core.player.AbstractPlayer;
+import ontology.Types.ACTIONS;
+import tools.ElapsedCpuTimer;
+import si2026.kevinjesusbandaalu.common.*;
+
+public class Jugador1 extends AbstractPlayer {
+
+	public Jugador1(StateObservation stateObs, ElapsedCpuTimer arg1) {
+	}
+
+	@Override
+	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer arg1) {
+		IMundo mundoJugador = new Mundo84(stateObs);
+		Motor84 motorJugador = new Motor84();
+
+		mundoJugador.AnalizarEntorno(stateObs);
+		return motorJugador.Pensar(mundoJugador);
+
+	}
+
+}
+
+========================================
+FILE: p01\Motor84.java
+========================================
+package si2026.kevinjesusbandaalu.p01;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import si2026.kevinjesusbandaalu.common.*;
+import si2026.kevinjesusbandaalu.common.MotorReglas.IAccion;
+import si2026.kevinjesusbandaalu.common.MotorReglas.ICondicion;
+import si2026.kevinjesusbandaalu.common.MotorReglas.Regla;
+import si2026.kevinjesusbandaalu.p01.reglas.*;
+
+public class Motor84 extends Motor {
+
+	public Motor84() {
+		reglas = new ArrayList<>();
+
+		List<ICondicion> list_esqCond = new ArrayList<ICondicion>();
+		list_esqCond.add( new Esquivar_Condicion());
+		reglas.add(new Regla(list_esqCond,(IAccion) new Esquivar_Accion()));
+
+		List<ICondicion> list_orientCond = new ArrayList<ICondicion>();
+		list_orientCond.add( new Orientar_Condicion());
+		reglas.add(new Regla(list_orientCond,(IAccion) new Orientar_Accion()));
+
+		List<ICondicion> list_dispCond = new ArrayList<ICondicion>();
+		list_dispCond.add( new Disparar_Condicion());
+		reglas.add(new Regla(list_dispCond,(IAccion) new Disparar_Accion()));
+
+		List<ICondicion> list_centCond = new ArrayList<ICondicion>();
+		list_centCond.add( new Centrar_Condicion());
+		reglas.add(new Regla(list_centCond,(IAccion) new Centrar_Accion()));
+
+	}
+
+}
+
+========================================
+FILE: p01\Mundo84.java
+========================================
+package si2026.kevinjesusbandaalu.p01;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import core.game.Observation;
+import core.game.StateObservation;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import tools.Vector2d;
+
+public class Mundo84 implements IMundo {
+
+	public List<Observation> lasers;
+	public List<Observation> enemigos;
+	public List<Observation> objetosIntocables; 
+
+	public Observation enemigoMasCercano;
+	public Vector2d MiPosicion;
+	public Vector2d miOrientacion;
+	public int Bloque, columnas, filas;
+
+    public final int nEnemigos = 2;
+
+	public Mundo84(StateObservation stateObs) {
+		Bloque = stateObs.getBlockSize();
+		columnas = stateObs.getWorldDimension().width / Bloque;
+		filas = stateObs.getWorldDimension().height / Bloque;
+		lasers = new ArrayList<>();
+		enemigos = new ArrayList<>();
+		objetosIntocables = new ArrayList<Observation>();
+
+	}
+
+	@Override
+	public void AnalizarEntorno(StateObservation stateObs) {
+
+		Vector2d Pos = stateObs.getAvatarPosition().copy();
+		MiPosicion = new Vector2d(Pos.x / Bloque, Pos.y / Bloque);
+		miOrientacion = stateObs.getAvatarOrientation();
+
+		lasers.clear();
+		enemigos.clear();
+		objetosIntocables.clear();
+
+		ArrayList<Observation>[] npcTypeLists = stateObs.getNPCPositions();
+		if (npcTypeLists != null) {
+			for (ArrayList<Observation> npsList : npcTypeLists) {
+				if (npsList != null) {
+					enemigos.addAll(npsList);
+				}
+			}
+		}
+		ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
+		for (int x = 0; x < grid.length; x++) {
+			for (int y = 0; y < grid[x].length; y++) {
+				for (Observation obs : grid[x][y]) {
+
+					if (obs.category == 6) { 
+
+						lasers.add(obs);
+						objetosIntocables.add(obs);
+					} else if (obs.category == 1) {
+						enemigos.add(obs);
+					} else if (obs.category == 4 && obs.itype == 3 || obs.category == 4 && obs.itype == 0  ) {
+						objetosIntocables.add(obs);
+					}
+
+				}
+			}
+		}
+		enemigoMasCercano = getEnemigoMasCercano();
+
+	}
+
+	private Observation getEnemigoMasCercano() {
+		if (enemigos == null || enemigos.isEmpty())
+			return null;
+		Observation masCercano = null;
+		double distMin = Double.MAX_VALUE;
+		for (Observation e : enemigos) {
+			Vector2d posE = new Vector2d(e.position.x / Bloque, e.position.y / Bloque);
+			double dist = MiPosicion.dist(posE);
+			if (dist < distMin) {
+				distMin = dist;
+				masCercano = e;
+			}
+		}
+		return masCercano;
+	}
+
+	private java.util.HashMap<String, String> diccionarioLetras = new java.util.HashMap<>();
+
+	public void obtenerObservacionesAnalizadas(StateObservation stateObs) {
+		List<Observation> distintas = new ArrayList<>();
+		java.util.HashSet<String> tiposVistos = new java.util.HashSet<>();
+		ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
+
+		for (int x = 0; x < grid.length; x++) {
+			for (int y = 0; y < grid[x].length; y++) {
+				for (Observation obs : grid[x][y]) {
+					String clave = obs.category + "-" + obs.itype;
+					if (!tiposVistos.contains(clave)) {
+						distintas.add(obs);
+						tiposVistos.add(clave);
+
+						asignarLetraADiccionario(obs);
+					}
+				}
+			}
+		}
+
+		pintarTerreno(stateObs);
+	}
+
+	private void asignarLetraADiccionario(Observation o) {
+		String clave = o.category + "-" + o.itype;
+		if (diccionarioLetras.containsKey(clave))
+			return;
+
+		String letra = "?"; 
+		switch (o.category) {
+		case 0: {
+			switch (o.itype) {
+			case 1: {
+				letra ="Y";
+				break;
+			}
+			default:
+				System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+			}
+			break;
+		}
+		case 3: {
+			switch (o.itype) {
+			case 13: {
+				letra ="2";
+				break;
+			}
+			case 14: {letra ="3";
+				break;
+			}
+
+			case 12: {letra ="4";
+				break;
+			}
+			case 15: {letra ="5";
+				break;
+			}
+			default:
+				System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+			}
+			break;
+		}
+		case 4: {
+			switch (o.itype) {
+			case 0: {letra ="P";
+				break;
+			}
+			case 2: {letra ="";
+				break;
+			}
+			case 3: {letra ="M";
+				break;
+			}
+			case 4: {letra ="P";
+				break;
+			}
+			default:
+				System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+			}
+			break;
+		}case 6:
+		{
+			letra = "-";
+			System.out.println("itype: "+o.itype);
+
+			break;
+		}
+		default:
+			System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+		}
+
+		diccionarioLetras.put(clave, letra);
+	}
+
+	private void pintarTerreno(StateObservation stateObs) {
+	    ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
+	    int ancho = grid.length;
+	    int alto = grid[0].length;
+
+	    System.out.println("\n=== MAPA DEL TERRENO ===");
+
+	    System.out.print("    ");
+	    for (int x = 0; x < ancho; x++)
+	        System.out.print(String.format("%2d", x));
+
+	    System.out.print("\n    ");
+	    for (int i = 0; i < ancho; i++) System.out.print("--");
+	    System.out.println();
+
+	    for (int y = 0; y < alto; y++) {
+
+	        System.out.print(String.format("%2d |", y));
+
+	        for (int x = 0; x < ancho; x++) {
+	            ArrayList<Observation> obsEnCelda = grid[x][y];
+
+	            if (obsEnCelda.isEmpty()) {
+	                System.out.print(" ."); 
+	            } else {
+	                String letraElegida = null;
+
+	                for (Observation o : obsEnCelda) {
+	                    String clave = o.category + "-" + o.itype;
+	                    if (diccionarioLetras.containsKey(clave)) {
+	                        String letraDict = diccionarioLetras.get(clave);
+
+	                        if (letraDict != null && !letraDict.trim().isEmpty() && !letraDict.equals("?")) {
+	                            letraElegida = letraDict;
+	                            break; 
+	                        }
+	                    }
+	                }
+
+	                if (letraElegida == null) {
+	                    letraElegida = " ";
+	                }
+
+	                if (obsEnCelda.size() > 1) {
+
+	                    System.out.print(" " + letraElegida); 
+	                } else {
+	                    System.out.print(" " + letraElegida);
+	                }
+	            }
+	        }
+	        System.out.println();
+	    }
+	    System.out.println("========================\n");
+	}
+
+}
+
+========================================
+FILE: p01\Practica_01_exe.java
+========================================
+package si2026.kevinjesusbandaalu.p01;
+
+import java.util.Random;
+import tools.Utils;
+import tracks.ArcadeMachine;
+
+public class Practica_01_exe {
+
+    public static void main(String[] args) {
+
+        String p1 = "si2026.kevinjesusbandaalu.p01.Jugador1";
+        String spGamesCollection = "examples/all_games_sp.csv";
+        String[][] games = Utils.readGames(spGamesCollection);
+
+        boolean visuals = true;
+        int gameIdx = 84;
+        int partidasPorNivel = 100; 
+
+        int[] victoriasPorNivel = new int[5];
+        double[] puntosPorNivel = new double[5];
+        double[] ticksPorNivel = new double[5]; 
+
+        System.out.println("Iniciando simulación masiva: 5 niveles x 100 partidas...");
+
+        for (int levelIdx = 0; levelIdx < 5; levelIdx++) {
+            System.out.println("\nEjecutando Nivel " + levelIdx + "...");
+
+            for (int i = 0; i < partidasPorNivel; i++) {
+                int seed = new Random().nextInt();
+                String gameName = games[gameIdx][1];
+                String gamePath = games[gameIdx][0];
+                String levelPath = gamePath.replace(gameName, gameName + "_lvl" + levelIdx);
+
+                double[] resultado = ArcadeMachine.runOneGame(gamePath, levelPath, visuals, p1, null, seed, 0);
+
+                if (resultado[0] >= 1.0) {
+                    victoriasPorNivel[levelIdx]++;
+                }
+                puntosPorNivel[levelIdx] += resultado[1];
+                ticksPorNivel[levelIdx] += resultado[2]; 
+
+                if ((i + 1) % 25 == 0) System.out.println((i + 1) + "% ");
+            }
+            System.out.println("-> OK");
+        }
+
+        System.out.println("\n");
+        System.out.println("======================================================================");
+        System.out.println("                RESUMEN ESTADÍSTICO POR NIVEL");
+        System.out.println("======================================================================");
+        System.out.println(String.format("%-10s | %-12s | %-12s | %-12s", "NIVEL", "% VICTORIA", "MEDIA PUNTOS", "MEDIA TICKS"));
+        System.out.println("----------------------------------------------------------------------");
+
+        int victoriasGlobales = 0;
+        double puntosGlobales = 0;
+        double ticksGlobales = 0; 
+
+        for (int n = 0; n < 5; n++) {
+            double winRate = (victoriasPorNivel[n] / (double)partidasPorNivel) * 100;
+            double avgScore = puntosPorNivel[n] / partidasPorNivel;
+            double avgTicks = ticksPorNivel[n] / partidasPorNivel; 
+
+            victoriasGlobales += victoriasPorNivel[n];
+            puntosGlobales += puntosPorNivel[n];
+            ticksGlobales += ticksPorNivel[n];
+
+            System.out.println(String.format("Nivel %d    | %9.2f%%   | %12.2f | %12.2f", n, winRate, avgScore, avgTicks));
+        }
+
+        int totalPartidas = partidasPorNivel * 5;
+        double winRateGlobal = (victoriasGlobales / (double)totalPartidas) * 100;
+        double scoreGlobal = puntosGlobales / totalPartidas;
+        double ticksGlobalAvg = ticksGlobales / totalPartidas; 
+
+        System.out.println("======================================================================");
+        System.out.println("                         RESUMEN GLOBAL");
+        System.out.println("======================================================================");
+        System.out.println("Total Partidas:     " + totalPartidas);
+        System.out.println("Victorias Totales:  " + victoriasGlobales);
+        System.out.println("Win Rate Global:    " + String.format("%.2f", winRateGlobal) + "%");
+        System.out.println("Media Score Global: " + String.format("%.2f", scoreGlobal));
+        System.out.println("Media Ticks Global: " + String.format("%.2f", ticksGlobalAvg)); 
+        System.out.println("======================================================================");
+
+        System.exit(0);
+    }
+}
+
+========================================
+FILE: p01\reglas\Centrar_Accion.java
+========================================
+package si2026.kevinjesusbandaalu.p01.reglas;
+
+import java.util.List;
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.IAccion;
+import si2026.kevinjesusbandaalu.common.aStar.AStar;
+import si2026.kevinjesusbandaalu.common.aStar.Node;
+import si2026.kevinjesusbandaalu.p01.Mundo84;
+import core.game.Observation;
+import tools.Vector2d;
+
+public class Centrar_Accion implements IAccion {
+
+	private Mundo84 mundo;
+
+	@Override
+	public ACTIONS doAction(IMundo m) {
+		this.mundo = (Mundo84) m;
+		Observation enemigo = mundo.enemigoMasCercano;
+		Vector2d objetivo = null;
+
+		if (enemigo != null) {
+
+			int ex = (int) (enemigo.position.x / mundo.Bloque);
+			int ey = (int) (enemigo.position.y / mundo.Bloque);
+
+			objetivo = buscarPuntoAcechoValido(ex, ey);
+		}
+
+		if (objetivo == null) {
+			objetivo = new Vector2d(mundo.columnas / 2, mundo.filas / 2);
+		}
+
+		int[][] obstaculos = extraerObstaculos();
+
+		List<Node> camino = buscarCamino(mundo.MiPosicion, objetivo, obstaculos);
+
+		if (camino != null && camino.size() > 1) {
+			Node siguientePaso = camino.get(1);
+			return determinarAccion(mundo.MiPosicion, new Vector2d(siguientePaso.getCol(), siguientePaso.getRow()));
+		}
+
+		return ACTIONS.ACTION_NIL;
+	}
+
+	private Vector2d buscarPuntoAcechoValido(int ex, int ey) {
+
+		int[][] patrulla = { { 2, 0 }, { 2, -1 }, { 2, -2 }, { 1, -2 }, { 0, -2 }, { -1, -2 }, { -2, -2 }, { -2, -1 },
+				{ -2, 0 }, { -2, 1 }, { -2, 2 }, { -1, 2 }, { 0, 2 }, { 1, 2 }, { 2, 2 }, { 2, 1 } };
+
+		for (int[] p : patrulla) {
+			int tx = ex + p[0];
+			int ty = ey + p[1];
+
+			if (tx >= 0 && tx < mundo.columnas && ty >= 0 && ty < mundo.filas) {
+				if (!esPosicionBloqueada(tx, ty)) {
+					return new Vector2d(tx, ty);
+				}
+			}
+		}
+		return null;
+	}
+
+	private int[][] extraerObstaculos() {
+		int size = mundo.objetosIntocables.size();
+		int[][] obs = new int[size][2];
+		for (int i = 0; i < size; i++) {
+			Observation o = mundo.objetosIntocables.get(i);
+			obs[i][0] = (int) (o.position.y / mundo.Bloque);
+			obs[i][1] = (int) (o.position.x / mundo.Bloque);
+		}
+		return obs;
+	}
+
+	private boolean esPosicionBloqueada(int x, int y) {
+		for (Observation obs : mundo.objetosIntocables) {
+			int ox = (int) (obs.position.x / mundo.Bloque);
+			int oy = (int) (obs.position.y / mundo.Bloque);
+			if (ox == x && oy == y)
+				return true;
+		}
+		return false;
+	}
+
+	private List<Node> buscarCamino(Vector2d inicio, Vector2d fin, int[][] bloques) {
+		Node nIni = new Node(inicio);
+		Node nFin = new Node(fin);
+		AStar aStar = new AStar(mundo.filas, mundo.columnas, nIni, nFin);
+		aStar.setBlocks(bloques);
+		return aStar.findPath();
+	}
+
+	private ACTIONS determinarAccion(Vector2d actual, Vector2d siguiente) {
+		int dx = (int) siguiente.x - (int) actual.x;
+		int dy = (int) siguiente.y - (int) actual.y;
+		if (dx == 1)
+			return ACTIONS.ACTION_RIGHT;
+		if (dx == -1)
+			return ACTIONS.ACTION_LEFT;
+		if (dy == 1)
+			return ACTIONS.ACTION_DOWN;
+		if (dy == -1)
+			return ACTIONS.ACTION_UP;
+		return ACTIONS.ACTION_NIL;
+	}
+
+}
+
+========================================
+FILE: p01\reglas\Centrar_Condicion.java
+========================================
+package si2026.kevinjesusbandaalu.p01.reglas;
+
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.ICondicion;
+
+public class Centrar_Condicion implements ICondicion {
+
+    @Override
+    public boolean seCumple(IMundo m) {
+       return true;
+    }
+
+    @Override
+	public String toString() {
+		return "Centrar";
+	}
+}
+
+========================================
+FILE: p01\reglas\Disparar_Accion.java
+========================================
+package si2026.kevinjesusbandaalu.p01.reglas;
+
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.IAccion;
+import ontology.Types.ACTIONS;
+
+public class Disparar_Accion implements IAccion {
+
+	@Override
+	public ACTIONS doAction(IMundo m) {
+
+		return ACTIONS.ACTION_USE;
+	}
+
+}
+
+========================================
+FILE: p01\reglas\Disparar_Condicion.java
+========================================
+package si2026.kevinjesusbandaalu.p01.reglas;
+
+import core.game.Observation;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.ICondicion;
+import si2026.kevinjesusbandaalu.p01.Mundo84;
+
+public class Disparar_Condicion implements ICondicion {
+
+    private static final double RANGO_DISPARO = 6.0;
+
+    @Override
+    public boolean seCumple(IMundo m) {
+        Mundo84 mundo = (Mundo84) m;
+        Observation enemigo = mundo.enemigoMasCercano;
+
+        if (enemigo == null) return false;
+
+        double dist = mundo.MiPosicion.dist(new tools.Vector2d(enemigo.position.x / mundo.Bloque, 
+                                                              enemigo.position.y / mundo.Bloque));
+
+        return dist <= RANGO_DISPARO && estaAlineado(mundo, enemigo);
+    }
+
+    private boolean estaAlineado(Mundo84 mundo, Observation e) {
+        double ex = e.position.x / mundo.Bloque;
+        double ey = e.position.y / mundo.Bloque;
+
+        if (mundo.miOrientacion.x > 0) return Math.abs(ey - mundo.MiPosicion.y) < 1.0 && ex > mundo.MiPosicion.x;
+        if (mundo.miOrientacion.x < 0) return Math.abs(ey - mundo.MiPosicion.y) < 1.0 && ex < mundo.MiPosicion.x;
+        if (mundo.miOrientacion.y > 0) return Math.abs(ex - mundo.MiPosicion.x) < 1.0 && ey > mundo.MiPosicion.y;
+        if (mundo.miOrientacion.y < 0) return Math.abs(ex - mundo.MiPosicion.x) < 1.0 && ey < mundo.MiPosicion.y;
+
+        return false;
+    }
+
+    @Override
+	public String toString() {
+		return "Disparar";
+	}
+}
+
+========================================
+FILE: p01\reglas\Esquivar_Accion.java
+========================================
+package si2026.kevinjesusbandaalu.p01.reglas;
+
+import java.util.HashMap;
+import java.util.Map;
+import core.game.Observation;
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.IAccion;
+import si2026.kevinjesusbandaalu.p01.Mundo84;
+import tools.Vector2d;
+
+public class Esquivar_Accion implements IAccion {
+
+    private final Map<ACTIONS, Vector2d> movimientos;
+
+    public Esquivar_Accion() {
+        movimientos = new HashMap<>();
+        movimientos.put(ACTIONS.ACTION_UP, new Vector2d(0, -1));
+        movimientos.put(ACTIONS.ACTION_DOWN, new Vector2d(0, 1));
+        movimientos.put(ACTIONS.ACTION_LEFT, new Vector2d(-1, 0));
+        movimientos.put(ACTIONS.ACTION_RIGHT, new Vector2d(1, 0));
+        movimientos.put(ACTIONS.ACTION_NIL, new Vector2d(0, 0));
+    }
+
+    @Override
+    public ACTIONS doAction(IMundo m) {
+        Mundo84 mundo = (Mundo84) m;
+        if (mundo.lasers == null || mundo.lasers.isEmpty()) return ACTIONS.ACTION_NIL;
+
+        int miX = (int) mundo.MiPosicion.x;
+        int miY = (int) mundo.MiPosicion.y;
+
+        ACTIONS mejorAccion = ACTIONS.ACTION_NIL;
+        double mejorPuntuacion = -Double.MAX_VALUE;
+
+        for (Map.Entry<ACTIONS, Vector2d> entrada : movimientos.entrySet()) {
+            ACTIONS act = entrada.getKey();
+            Vector2d mov = entrada.getValue();
+
+            int futX = miX + (int) mov.x;
+            int futY = miY + (int) mov.y;
+
+            if (futX < 0 || futX >= mundo.columnas || futY < 0 || futY >= mundo.filas) continue;
+            if (esPosicionBloqueada(mundo, futX, futY)) continue;
+
+            double puntuacion = evaluarSeguridadPosicion(mundo, futX, futY);
+
+            if (act != ACTIONS.ACTION_NIL) puntuacion += 0.1;
+
+            if (puntuacion > mejorPuntuacion) {
+                mejorPuntuacion = puntuacion;
+                mejorAccion = act;
+            }
+        }
+
+        return mejorAccion;
+    }
+
+    private double evaluarSeguridadPosicion(Mundo84 mundo, int x, int y) {
+        double puntuacion = 0;
+
+        for (Observation laser : mundo.lasers) {
+            int lx = (int) (laser.position.x / mundo.Bloque);
+            int ly = (int) (laser.position.y / mundo.Bloque);
+
+            int distManhattan = Math.abs(x - lx) + Math.abs(y - ly);
+
+            if (lx == x || ly == y) {
+
+                puntuacion -= (100.0 / (distManhattan + 1));
+            } else {
+
+                puntuacion += 10.0;
+            }
+
+            puntuacion += distManhattan * 0.5;
+        }
+
+        return puntuacion;
+    }
+
+    private boolean esPosicionBloqueada(Mundo84 mundo, int x, int y) {
+
+        for (Observation obj : mundo.objetosIntocables) {
+            if ((int)(obj.position.x / mundo.Bloque) == x && (int)(obj.position.y / mundo.Bloque) == y) return true;
+        }
+
+        for (Observation en : mundo.enemigos) {
+            if ((int)(en.position.x / mundo.Bloque) == x && (int)(en.position.y / mundo.Bloque) == y) return true;
+        }
+        return false;
+    }
+}
+
+========================================
+FILE: p01\reglas\Esquivar_Condicion.java
+========================================
+package si2026.kevinjesusbandaalu.p01.reglas;
+
+import core.game.Observation;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.ICondicion;
+import si2026.kevinjesusbandaalu.p01.Mundo84;
+
+public class Esquivar_Condicion implements ICondicion {
+
+    private static final double RADIO_PELIGRO = 3.0;
+
+    @Override
+    public boolean seCumple(IMundo m) {
+        Mundo84 mundo = (Mundo84) m;
+
+        if (mundo.lasers == null || mundo.lasers.isEmpty()) {
+            return false;
+        }
+
+        double miX = mundo.MiPosicion.x;
+        double miY = mundo.MiPosicion.y;
+
+        for (Observation laser : mundo.lasers) {
+
+            double laserX = laser.position.x / mundo.Bloque;
+            double laserY = laser.position.y / mundo.Bloque;
+
+            double distancia = Math.sqrt(Math.pow(laserX - miX, 2) + Math.pow(laserY - miY, 2));
+
+            if (distancia <= RADIO_PELIGRO) {
+                return true; 
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+	public String toString() {
+		return "Esquivar";
+	}
+}
+
+========================================
+FILE: p01\reglas\Orientar_Accion.java
+========================================
+package si2026.kevinjesusbandaalu.p01.reglas;
+
+import core.game.Observation;
+import ontology.Types.ACTIONS;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.IAccion;
+import si2026.kevinjesusbandaalu.p01.Mundo84;
+import tools.Vector2d;
+
+public class Orientar_Accion implements IAccion {
+
+	@Override
+	public ACTIONS doAction(IMundo m) {
+		Mundo84 mundo = (Mundo84) m;
+
+		Observation enemigo = mundo.enemigoMasCercano;
+		if (enemigo == null) return ACTIONS.ACTION_NIL;
+
+		double relX = (enemigo.position.x / mundo.Bloque) - mundo.MiPosicion.x;
+		double relY = (enemigo.position.y / mundo.Bloque) - mundo.MiPosicion.y;
+
+		if (relX >= 0 && relY >= 0) {
+			return ACTIONS.ACTION_RIGHT;
+		} 
+		else if (relX > 0 && relY < 0) {
+			return ACTIONS.ACTION_UP;
+		} 
+		else if (relX <= 0 && relY <= 0) {
+			return ACTIONS.ACTION_LEFT;
+		} 
+		else if (relX < 0 && relY > 0) {
+			return ACTIONS.ACTION_DOWN;
+		}
+
+		return ACTIONS.ACTION_NIL;
+	}
+}
+
+========================================
+FILE: p01\reglas\Orientar_Condicion.java
+========================================
+package si2026.kevinjesusbandaalu.p01.reglas;
+
+import core.game.Observation;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import si2026.kevinjesusbandaalu.common.MotorReglas.ICondicion;
+import si2026.kevinjesusbandaalu.p01.Mundo84;
+import tools.Vector2d;
+
+public class Orientar_Condicion implements ICondicion {
+
+    @Override
+    public boolean seCumple(IMundo m) {
+        Mundo84 mundo = (Mundo84) m;
+        Observation enemigo = mundo.enemigoMasCercano;
+
+        if (enemigo == null) return false;
+
+        double relX = (enemigo.position.x / mundo.Bloque) - mundo.MiPosicion.x;
+        double relY = (enemigo.position.y / mundo.Bloque) - mundo.MiPosicion.y;
+
+        if (Math.abs(relY) < 1.0) { 
+            if (relX > 0 && mundo.miOrientacion.x > 0.9) return false; 
+            if (relX < 0 && mundo.miOrientacion.x < -0.9) return false; 
+        }
+        if (Math.abs(relX) < 1.0) { 
+            if (relY > 0 && mundo.miOrientacion.y > 0.9) return false; 
+            if (relY < 0 && mundo.miOrientacion.y < -0.9) return false; 
+        }
+
+        Vector2d dirDeseada = new Vector2d(0, 0);
+
+        if (Math.abs(relX) > Math.abs(relY)) {
+
+            dirDeseada.set(relX > 0 ? 1 : -1, 0);
+        } else {
+
+            dirDeseada.set(0, relY > 0 ? 1 : -1);
+        }
+
+        boolean yaOrientado = Math.abs(mundo.miOrientacion.x - dirDeseada.x) < 0.1 && 
+                              Math.abs(mundo.miOrientacion.y - dirDeseada.y) < 0.1;
+
+        return !yaOrientado;
+    }
+
+    @Override
+	public String toString() {
+		return "Orientar";
+	}
+}
+
+========================================
+FILE: p02\Jugador1.java
+========================================
+package si2026.kevinjesusbandaalu.p02;
+
+import core.game.StateObservation;
+import core.player.AbstractPlayer;
+import ontology.Types.ACTIONS;
+import tools.ElapsedCpuTimer;
+
+public class Jugador1 extends AbstractPlayer {
+
+	Mundo83 mundo83;
+
+	public Jugador1(StateObservation stateObs, ElapsedCpuTimer arg1) {
+		mundo83 = new Mundo83(stateObs);
+
+	}
+
+	@Override
+	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer arg1) {
+		mundo83.AnalizarEntorno(stateObs);
+		return null;
+
+	}
+
+}
+
+========================================
+FILE: p02\Motor83.java
+========================================
+package si2026.kevinjesusbandaalu.p02;
+
+import si2026.kevinjesusbandaalu.common.arbolDecision.ArbolDecision;
+
+public class Motor83 extends ArbolDecision{
+
+	public Motor83() {
+
+	}
+
+}
+
+========================================
+FILE: p02\Mundo83.java
+========================================
+package si2026.kevinjesusbandaalu.p02;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import core.game.Observation;
+import core.game.StateObservation;
+import si2026.kevinjesusbandaalu.common.IMundo;
+import tools.Vector2d;
+
+public class Mundo83 implements IMundo {
+
+	public Vector2d MiPosicion;
+	public Vector2d miOrientacion;
+	public int Bloque, columnas, filas;
+
+	public List<Observation> lasers;
+	public List<Observation> enemigos;
+
+	public Mundo83(StateObservation stateObs) {
+		Bloque = stateObs.getBlockSize();
+		columnas = stateObs.getWorldDimension().width / Bloque;
+		filas = stateObs.getWorldDimension().height / Bloque;
+
+		lasers = new ArrayList<>();
+		enemigos = new ArrayList<>();
+
+	}
+
+	@Override
+	public void AnalizarEntorno(StateObservation stateObs) {
+
+		Vector2d Pos = stateObs.getAvatarPosition().copy();
+		MiPosicion = new Vector2d(Pos.x / Bloque, Pos.y / Bloque);
+		miOrientacion = stateObs.getAvatarOrientation();
+
+		lasers.clear();
+	    enemigos.clear();
+
+		obtenerObservacionesAnalizadas(stateObs);
+
+	}
+
+	private java.util.HashMap<String, String> diccionarioLetras = new java.util.HashMap<>();
+
+	public void obtenerObservacionesAnalizadas(StateObservation stateObs) {
+		List<Observation> distintas = new ArrayList<>();
+		java.util.HashSet<String> tiposVistos = new java.util.HashSet<>();
+		ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
+
+		for (int x = 0; x < grid.length; x++) {
+			for (int y = 0; y < grid[x].length; y++) {
+				for (Observation obs : grid[x][y]) {
+
+					if (obs.category == 3) {
+	                    enemigos.add(obs);
+	                } 
+	                else if (obs.category == 6) {
+	                    lasers.add(obs);
+	                }
+
+					String clave = obs.category + "-" + obs.itype;
+					if (!tiposVistos.contains(clave)) {
+						distintas.add(obs);
+						tiposVistos.add(clave);
+
+						asignarLetraADiccionario(obs);
+					}
+				}
+			}
+		}
+
+		pintarTerreno(stateObs);
+	}
+
+	private void asignarLetraADiccionario(Observation o) {
+		String clave = o.category + "-" + o.itype;
+		if (diccionarioLetras.containsKey(clave))
+			return;
+
+		String letra = "?"; 
+		switch (o.category) {
+		case 2: { 
+			switch (o.itype) {
+			case 6: {
+				letra = "H";
+				break;
+			}
+			case 7: {
+				letra = "H";
+				break;
+			}
+
+			case 9: { 
+				letra = "h";
+				break;
+			}
+			default:
+				System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+			}
+			break;
+		}
+		case 3: { 
+			switch (o.itype) {
+			case 15: { 
+				letra = "E";
+				break;
+			}
+			case 17: { 
+				letra = "B";
+				break;
+			}
+			default:
+				System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+			}
+			break;
+		}
+		case 4: {
+			switch (o.itype) {
+			case 2: {
+				letra = "_";
+				break;
+			}
+			case 3: {
+				letra = " ";
+				break;
+			}
+			default:
+				System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+			}
+			break;
+		}
+		case 6: { 
+			switch (o.itype) {
+			case 14: {
+				letra = "Y";
+				break;
+			}
+			case 16: {
+				letra = "Y";
+				break;
+			}
+			default:
+				System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+			}
+			break;
+		}
+		default:
+			System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+		}
+
+		diccionarioLetras.put(clave, letra);
+	}
+
+	private void pintarTerreno(StateObservation stateObs) {
+		ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
+		int ancho = grid.length;
+		int alto = grid[0].length;
+
+		System.out.println("\n=== MAPA DEL TERRENO ===");
+
+		System.out.print("    ");
+		for (int x = 0; x < ancho; x++)
+			System.out.print(String.format("%2d", x));
+
+		System.out.print("\n    ");
+		for (int i = 0; i < ancho; i++)
+			System.out.print("--");
+		System.out.println();
+
+		for (int y = 0; y < alto; y++) {
+
+			System.out.print(String.format("%2d |", y));
+
+			for (int x = 0; x < ancho; x++) {
+				ArrayList<Observation> obsEnCelda = grid[x][y];
+
+				if (obsEnCelda.isEmpty()) {
+					System.out.print(" ."); 
+				} else {
+					String letraElegida = null;
+
+					for (Observation o : obsEnCelda) {
+						String clave = o.category + "-" + o.itype;
+						if (diccionarioLetras.containsKey(clave)) {
+							String letraDict = diccionarioLetras.get(clave);
+
+							if (letraDict != null && !letraDict.trim().isEmpty() && !letraDict.equals("?")) {
+								letraElegida = letraDict;
+								break; 
+							}
+						}
+					}
+
+					if (letraElegida == null) {
+						letraElegida = " ";
+					}
+
+					if (obsEnCelda.size() > 1) {
+
+						System.out.print(" " + letraElegida);
+					} else {
+						System.out.print(" " + letraElegida);
+					}
+				}
+			}
+			System.out.println();
+		}
+		System.out.println("========================\n");
+	}
+}
+
+========================================
+FILE: p02\Practica_02_exe.java
+========================================
+package si2026.kevinjesusbandaalu.p02;
+
+import java.util.Random;
+import tools.Utils;
+import tracks.ArcadeMachine;
+
+public class Practica_02_exe {
+
+    public static void main(String[] args) {
+
+        String p1 = "si2026.kevinjesusbandaalu.p02.Jugador1";
+        String spGamesCollection = "examples/all_games_sp.csv";
+        String[][] games = Utils.readGames(spGamesCollection);
+
+        boolean visuals = true;
+        int gameIdx = 83;
+        int partidasPorNivel = 100; 
+
+        int[] victoriasPorNivel = new int[5];
+        double[] puntosPorNivel = new double[5];
+
+        System.out.println("Iniciando simulación masiva: 5 niveles x 100 partidas...");
+
+        for (int levelIdx = 0; levelIdx < 5; levelIdx++) {
+            System.out.println("\nEjecutando Nivel " + levelIdx + "...");
+
+            for (int i = 0; i < partidasPorNivel; i++) {
+                int seed = new Random().nextInt();
+                String gameName = games[gameIdx][1];
+                String gamePath = games[gameIdx][0];
+                String levelPath = gamePath.replace(gameName, gameName + "_lvl" + levelIdx);
+
+                double[] resultado = ArcadeMachine.runOneGame(gamePath, levelPath, visuals, p1, null, seed, 0);
+
+                if (resultado[0] >= 1.0) {
+                    victoriasPorNivel[levelIdx]++;
+                }
+                puntosPorNivel[levelIdx] += resultado[1];
+
+                if ((i + 1) % 25 == 0) System.out.println((i + 1) + "% ");
+            }
+            System.out.println("-> OK");
+        }
+
+        System.out.println("\n");
+System.out.println("==================================================");
+
+        System.out.println("        RESUMEN ESTADÍSTICO POR NIVEL");
+System.out.println("==================================================");
+        System.out.println(String.format("%-10s | %-12s | %-12s", "NIVEL", "% VICTORIA", "MEDIA PUNTOS"));
+        System.out.println("-----------------------------------------------------");
+
+        int victoriasGlobales = 0;
+        double puntosGlobales = 0;
+
+        for (int n = 0; n < 5; n++) {
+            double winRate = (victoriasPorNivel[n] / (double)partidasPorNivel) * 100;
+            double avgScore = puntosPorNivel[n] / partidasPorNivel;
+
+            victoriasGlobales += victoriasPorNivel[n];
+            puntosGlobales += puntosPorNivel[n];
+
+            System.out.println(String.format("Nivel %d    | %9.2f%%   | %11.2f", n, winRate, avgScore));
+        }
+
+        int totalPartidas = partidasPorNivel * 5;
+        double winRateGlobal = (victoriasGlobales / (double)totalPartidas) * 100;
+        double scoreGlobal = puntosGlobales / totalPartidas;
+
+        System.out.println("==================================================");
+        System.out.println("             RESUMEN GLOBAL");
+        System.out.println("==================================================");
+        System.out.println("Total Partidas:     " + totalPartidas);
+        System.out.println("Victorias Totales:  " + victoriasGlobales);
+        System.out.println("Win Rate Global:    " + String.format("%.2f", winRateGlobal) + "%");
+        System.out.println("Media Score Global: " + String.format("%.2f", scoreGlobal));
+        System.out.println("==================================================");
+
+        System.exit(0);
+    }
+}

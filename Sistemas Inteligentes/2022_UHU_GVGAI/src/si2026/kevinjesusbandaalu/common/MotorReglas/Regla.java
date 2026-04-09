@@ -37,5 +37,14 @@ public class Regla {
 		return accion;
 	}
 	
+	@Override
+	public String toString() {
+		String s="";
+		for(ICondicion condicion : antecedentes) {
+			s=s+condicion;
+			
+		}
+		return s;
+	}
 
 }

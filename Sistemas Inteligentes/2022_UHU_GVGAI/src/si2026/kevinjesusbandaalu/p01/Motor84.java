@@ -18,12 +18,7 @@ public class Motor84 extends Motor {
 		List<ICondicion> list_esqCond = new ArrayList<ICondicion>();
 		list_esqCond.add( new Esquivar_Condicion());
 		reglas.add(new Regla(list_esqCond,(IAccion) new Esquivar_Accion()));
-		
-		// Regla centrar
-		List<ICondicion> list_centCond = new ArrayList<ICondicion>();
-		list_centCond.add( new Centrar_Condicion());
-		reglas.add(new Regla(list_centCond,(IAccion) new Centrar_Accion()));
-		
+	
 		// Regla Orientacion
 		List<ICondicion> list_orientCond = new ArrayList<ICondicion>();
 		list_orientCond.add( new Orientar_Condicion());
@@ -33,6 +28,12 @@ public class Motor84 extends Motor {
 		List<ICondicion> list_dispCond = new ArrayList<ICondicion>();
 		list_dispCond.add( new Disparar_Condicion());
 		reglas.add(new Regla(list_dispCond,(IAccion) new Disparar_Accion()));
+	
+		
+		// Regla centrar
+		List<ICondicion> list_centCond = new ArrayList<ICondicion>();
+		list_centCond.add( new Centrar_Condicion());
+		reglas.add(new Regla(list_centCond,(IAccion) new Centrar_Accion()));
 		
 		
 	}

@@ -11,103 +11,90 @@ import tools.Vector2d;
 
 public class Esquivar_Accion implements IAccion {
 
-	private Map<ACTIONS, Vector2d> movimientos;
-	
-	public Esquivar_Accion() {
-		movimientos = new HashMap<>();
-		movimientos.put(ACTIONS.ACTION_UP, new Vector2d(0, -1));
-		movimientos.put(ACTIONS.ACTION_DOWN, new Vector2d(0, 1));
-		movimientos.put(ACTIONS.ACTION_LEFT, new Vector2d(-1, 0));
-		movimientos.put(ACTIONS.ACTION_RIGHT, new Vector2d(1, 0));
-	}
-	
-	@Override
-	public ACTIONS doAction(IMundo m) {
-		Mundo84 mundo = (Mundo84) m;
-		
-		if (mundo.lasers == null || mundo.lasers.isEmpty()) return ACTIONS.ACTION_NIL;
+    private final Map<ACTIONS, Vector2d> movimientos;
 
-		int miX = (int) mundo.MiPosicion.x;
-		int miY = (int) mundo.MiPosicion.y;
+    public Esquivar_Accion() {
+        movimientos = new HashMap<>();
+        movimientos.put(ACTIONS.ACTION_UP, new Vector2d(0, -1));
+        movimientos.put(ACTIONS.ACTION_DOWN, new Vector2d(0, 1));
+        movimientos.put(ACTIONS.ACTION_LEFT, new Vector2d(-1, 0));
+        movimientos.put(ACTIONS.ACTION_RIGHT, new Vector2d(1, 0));
+        movimientos.put(ACTIONS.ACTION_NIL, new Vector2d(0, 0));
+    }
 
-		// 1. Encontrar la bala más cercana que nos amenaza actualmente
-		Observation balaAmenaza = getBalaMasCercanaEnTrayectoria(mundo, miX, miY);
-		if (balaAmenaza == null) return ACTIONS.ACTION_NIL;
+    @Override
+    public ACTIONS doAction(IMundo m) {
+        Mundo84 mundo = (Mundo84) m;
+        if (mundo.lasers == null || mundo.lasers.isEmpty()) return ACTIONS.ACTION_NIL;
 
-		int lx = (int)(balaAmenaza.position.x / mundo.Bloque);
-		int ly = (int)(balaAmenaza.position.y / mundo.Bloque);
+        int miX = (int) mundo.MiPosicion.x;
+        int miY = (int) mundo.MiPosicion.y;
 
-		ACTIONS mejorAccion = ACTIONS.ACTION_NIL;
-		double mejorPuntuacion = -Double.MAX_VALUE;
+        ACTIONS mejorAccion = ACTIONS.ACTION_NIL;
+        double mejorPuntuacion = -Double.MAX_VALUE;
 
-		// 2. Evaluar cada movimiento posible
-		for (Map.Entry<ACTIONS, Vector2d> mov : movimientos.entrySet()) {
-			int futX = miX + (int) mov.getValue().x;
-			int futY = miY + (int) mov.getValue().y;
+        // Evaluamos quedarse quieto y las 4 direcciones
+        for (Map.Entry<ACTIONS, Vector2d> entrada : movimientos.entrySet()) {
+            ACTIONS act = entrada.getKey();
+            Vector2d mov = entrada.getValue();
+            
+            int futX = miX + (int) mov.x;
+            int futY = miY + (int) mov.y;
 
-			// Filtros básicos: límites y muros
-			if (futX < 0 || futX >= mundo.columnas || futY < 0 || futY >= mundo.filas) continue;
-			if (esPosicionIntocable(mundo, futX, futY)) continue;
+            // 1. Filtros de seguridad básicos
+            if (futX < 0 || futX >= mundo.columnas || futY < 0 || futY >= mundo.filas) continue;
+            if (esPosicionBloqueada(mundo, futX, futY)) continue;
 
-			double puntuacion = 0;
+            // 2. Cálculo de puntuación de seguridad
+            double puntuacion = evaluarSeguridadPosicion(mundo, futX, futY);
 
-			// Lógica de escape: ¿La nueva fila/columna está libre de CUALQUIER láser?
-			boolean filaLibre = esTrayectoriaSegura(mundo, -1, futY);
-			boolean colLibre = esTrayectoriaSegura(mundo, futX, -1);
+            // 3. Pequeño bono por movimiento para no quedarse estático si hay peligro igual
+            if (act != ACTIONS.ACTION_NIL) puntuacion += 0.1;
 
-			// --- PRIORIDAD 1: Moverse a un eje totalmente limpio ---
-			if (lx == miX) { // Amenaza Vertical -> Busco cambiar a Columna Segura
-				if (futX != miX && colLibre) puntuacion += 10000; 
-				else if (futX != miX) puntuacion += 1000; // Columna con bala, pero al menos salgo de la actual
-			} else { // Amenaza Horizontal -> Busco cambiar a Fila Segura
-				if (futY != miY && filaLibre) puntuacion += 10000;
-				else if (futY != miY) puntuacion += 1000; // Fila con bala, pero al menos salgo de la actual
-			}
+            if (puntuacion > mejorPuntuacion) {
+                mejorPuntuacion = puntuacion;
+                mejorAccion = act;
+            }
+        }
 
-			// --- PRIORIDAD 2: Alejarse de la bala más cercana (Desempate) ---
-			double distFutura = Math.sqrt(Math.pow(futX - lx, 2) + Math.pow(futY - ly, 2));
-			puntuacion += distFutura;
+        return mejorAccion;
+    }
 
-			if (puntuacion > mejorPuntuacion) {
-				mejorPuntuacion = puntuacion;
-				mejorAccion = mov.getKey();
-			}
-		}
+    private double evaluarSeguridadPosicion(Mundo84 mundo, int x, int y) {
+        double puntuacion = 0;
 
-		return mejorAccion;
-	}
+        for (Observation laser : mundo.lasers) {
+            int lx = (int) (laser.position.x / mundo.Bloque);
+            int ly = (int) (laser.position.y / mundo.Bloque);
 
-	// Comprueba si en una fila o columna específica hay ALGÚN láser
-	private boolean esTrayectoriaSegura(Mundo84 mundo, int x, int y) {
-		for (Observation laser : mundo.lasers) {
-			int lx = (int)(laser.position.x / mundo.Bloque);
-			int ly = (int)(laser.position.y / mundo.Bloque);
-			if (x != -1 && lx == x) return false; // Columna comprometida
-			if (y != -1 && ly == y) return false; // Fila comprometida
-		}
-		return true;
-	}
+            // Distancia de Manhattan a la bala
+            int distManhattan = Math.abs(x - lx) + Math.abs(y - ly);
 
-	private Observation getBalaMasCercanaEnTrayectoria(Mundo84 mundo, int miX, int miY) {
-		Observation cercana = null;
-		double dMin = Double.MAX_VALUE;
-		for (Observation l : mundo.lasers) {
-			int lx = (int)(l.position.x / mundo.Bloque);
-			int ly = (int)(l.position.y / mundo.Bloque);
-			if (lx == miX || ly == miY) {
-				double d = mundo.MiPosicion.dist(new Vector2d(lx, ly));
-				if (d < dMin) { dMin = d; cercana = l; }
-			}
-		}
-		return cercana;
-	}
+            // PENALIZACIÓN CRÍTICA: Estar en la misma fila o columna que un láser
+            if (lx == x || ly == y) {
+                // Cuanto más cerca esté la bala en nuestro eje, más penaliza
+                puntuacion -= (100.0 / (distManhattan + 1));
+            } else {
+                // Estar en un eje distinto es bueno (Seguro)
+                puntuacion += 10.0;
+            }
+            
+            // Bonus por distancia general (cuanto más lejos de cualquier bala, mejor)
+            puntuacion += distManhattan * 0.5;
+        }
 
-	private boolean esPosicionIntocable(Mundo84 mundo, int x, int y) {
-		for (Observation obj : mundo.objetosIntocables) {
-			int ox = (int)(obj.position.x / mundo.Bloque);
-			int oy = (int)(obj.position.y / mundo.Bloque);
-			if (ox == x && oy == y) return true;
-		}
-		return false;
-	}
+        return puntuacion;
+    }
+
+    private boolean esPosicionBloqueada(Mundo84 mundo, int x, int y) {
+        // No chocar con muros u objetos estáticos
+        for (Observation obj : mundo.objetosIntocables) {
+            if ((int)(obj.position.x / mundo.Bloque) == x && (int)(obj.position.y / mundo.Bloque) == y) return true;
+        }
+        // No chocar con enemigos directamente al esquivar
+        for (Observation en : mundo.enemigos) {
+            if ((int)(en.position.x / mundo.Bloque) == x && (int)(en.position.y / mundo.Bloque) == y) return true;
+        }
+        return false;
+    }
 }

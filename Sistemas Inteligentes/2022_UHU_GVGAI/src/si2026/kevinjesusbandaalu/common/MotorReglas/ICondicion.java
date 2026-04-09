@@ -7,4 +7,7 @@ public interface ICondicion {
 
 	public boolean seCumple(IMundo m);
 	
+	@Override
+	public String toString();
+	
 }

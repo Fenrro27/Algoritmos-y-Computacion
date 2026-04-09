@@ -39,4 +39,9 @@ public class Esquivar_Condicion implements ICondicion {
         
         return false;
     }
+    
+    @Override
+	public String toString() {
+		return "Esquivar";
+	}
 }
