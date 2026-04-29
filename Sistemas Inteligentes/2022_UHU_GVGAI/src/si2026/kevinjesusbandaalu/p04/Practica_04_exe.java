@@ -1,35 +1,36 @@
-package si2026.kevinjesusbandaalu.p02;
+package si2026.kevinjesusbandaalu.p04;
 
 import java.util.Random;
 import tools.Utils;
 import tracks.ArcadeMachine;
 
-public class Practica_02_exe {
+public class Practica_04_exe {
 
     public static void main(String[] args) {
 
-        String p1 = "si2026.kevinjesusbandaalu.p02.Jugador1";
+        String p1 = "si2026.kevinjesusbandaalu.p04.Jugador1";
         String spGamesCollection = "examples/all_games_sp.csv";
         String[][] games = Utils.readGames(spGamesCollection);
 
         boolean visuals = false;
-        int gameIdx = 83;
+        int gameIdx = 49;
         int partidasPorNivel = 100;
         
         // Arrays para guardar los resultados de cada uno de los 5 niveles
         int[] victoriasPorNivel = new int[5];
         double[] puntosPorNivel = new double[5];
-        double[] ticksPorNivel = new double[5]; // <--- NUEVO: Acumulador de timesteps
+        double[] ticksPorNivel = new double[5]; 
 
-        System.out.println("Iniciando simulación masiva: 5 niveles x 100 partidas...");
+        String gameName = games[gameIdx][1];
+        String gamePath = games[gameIdx][0];
+
+        System.out.println("Iniciando simulación masiva de " + gameName + ": 5 niveles x 100 partidas...");
 
         for (int levelIdx = 0; levelIdx < 5; levelIdx++) {
             System.out.println("\nEjecutando Nivel " + levelIdx + "...");
             
             for (int i = 0; i < partidasPorNivel; i++) {
                 int seed = new Random().nextInt();
-                String gameName = games[gameIdx][1];
-                String gamePath = games[gameIdx][0];
                 String levelPath = gamePath.replace(gameName, gameName + "_lvl" + levelIdx);
 
                 // Ejecución
@@ -43,7 +44,8 @@ public class Practica_02_exe {
                 ticksPorNivel[levelIdx] += resultado[2]; // <--- NUEVO: Sumar ticks
                 
                 if ((i + 1) % 25 == 0) System.out.println((i + 1) + "% ");
-            }
+            if(true) System.exit(0);;
+            }   
             System.out.println("-> OK");
         }
 

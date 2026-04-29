@@ -29,7 +29,7 @@ public class Centrar_Accion implements IAccion {
 			objetivo = buscarPuntoAcechoValido(ex, ey);
 		}
 
-		// 3. Si no hay objetivo válido o no hay enemigos, ir al centro [cite: 153]
+		// 3. Si no hay objetivo válido o no hay enemigos, ir al centro del mapa (búnker)
 		if (objetivo == null) {
 			objetivo = new Vector2d(mundo.columnas / 2, mundo.filas / 2);
 		}
@@ -50,13 +50,39 @@ public class Centrar_Accion implements IAccion {
 	}
 
 	/**
-	 * Busca una casilla transitable alrededor del enemigo a una distancia de 2
-	 * bloques. Prioriza el orden antihorario para mejorar el posicionamiento.
+	 * Busca una casilla transitable ALINEADA con el enemigo a una distancia
+	 * prudencial
+	 * (hasta 5 bloques) para que se active rápidamente la regla Disparar.
 	 */
 	private Vector2d buscarPuntoAcechoValido(int ex, int ey) {
-		// Desplazamientos a 2 bloques de distancia en sentido antihorario
-		int[][] patrulla = { { 2, 0 }, { 2, -1 }, { 2, -2 }, { 1, -2 }, { 0, -2 }, { -1, -2 }, { -2, -2 }, { -2, -1 },
-				{ -2, 0 }, { -2, 1 }, { -2, 2 }, { -1, 2 }, { 0, 2 }, { 1, 2 }, { 2, 2 }, { 2, 1 } };
+		int mx = (int) mundo.MiPosicion.x;
+		int my = (int) mundo.MiPosicion.y;
+
+		// 1. Intentar moverse solo en un eje para alinearse (puntos de intersección)
+		Vector2d p1 = new Vector2d(mx, ey); // Moverse verticalmente para alinearse en Y
+		Vector2d p2 = new Vector2d(ex, my); // Moverse horizontalmente para alinearse en X
+
+		boolean p1Valido = mx >= 0 && mx < mundo.columnas && ey >= 0 && ey < mundo.filas && !esPosicionBloqueada(mx, ey);
+		boolean p2Valido = ex >= 0 && ex < mundo.columnas && my >= 0 && my < mundo.filas && !esPosicionBloqueada(ex, my);
+
+		if (p1Valido && p2Valido) {
+			// Ambos son válidos, elegir el que requiere caminar menos
+			return (Math.abs(ey - my) < Math.abs(ex - mx)) ? p1 : p2;
+		} else if (p1Valido) {
+			return p1;
+		} else if (p2Valido) {
+			return p2;
+		}
+
+		// 2. Si las intersecciones directas están bloqueadas, usar desplazamientos cercanos a las intersecciones
+		// ... o si no, usar el respaldo cerca del enemigo
+		int[][] patrulla = {
+				{ 0, -3 }, { 0, 3 }, { -3, 0 }, { 3, 0 },
+				{ 0, -4 }, { 0, 4 }, { -4, 0 }, { 4, 0 },
+				{ 0, -5 }, { 0, 5 }, { -5, 0 }, { 5, 0 },
+				{ 0, -2 }, { 0, 2 }, { -2, 0 }, { 2, 0 },
+				{ 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 }
+		};
 
 		for (int[] p : patrulla) {
 			int tx = ex + p[0];
@@ -114,6 +140,5 @@ public class Centrar_Accion implements IAccion {
 			return ACTIONS.ACTION_UP;
 		return ACTIONS.ACTION_NIL;
 	}
-
 
 }

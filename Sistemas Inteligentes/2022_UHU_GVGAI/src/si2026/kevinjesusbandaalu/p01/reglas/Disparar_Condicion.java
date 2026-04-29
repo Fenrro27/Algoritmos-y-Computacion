@@ -15,10 +15,11 @@ public class Disparar_Condicion implements ICondicion {
         Mundo84 mundo = (Mundo84) m;
         Observation enemigo = mundo.enemigoMasCercano;
 
-        if (enemigo == null) return false;
+        if (enemigo == null)
+            return false;
 
-        double dist = mundo.MiPosicion.dist(new tools.Vector2d(enemigo.position.x / mundo.Bloque, 
-                                                              enemigo.position.y / mundo.Bloque));
+        double dist = mundo.MiPosicion.dist(new tools.Vector2d(enemigo.position.x / mundo.Bloque,
+                enemigo.position.y / mundo.Bloque));
 
         // Condición: Cerca del enemigo Y alineado con mi orientación actual
         return dist <= RANGO_DISPARO && estaAlineado(mundo, enemigo);
@@ -27,18 +28,22 @@ public class Disparar_Condicion implements ICondicion {
     private boolean estaAlineado(Mundo84 mundo, Observation e) {
         double ex = e.position.x / mundo.Bloque;
         double ey = e.position.y / mundo.Bloque;
-        
+
         // Comprobar si está en mi misma fila o columna según hacia dónde miro
-        if (mundo.miOrientacion.x > 0) return Math.abs(ey - mundo.MiPosicion.y) < 1.0 && ex > mundo.MiPosicion.x;
-        if (mundo.miOrientacion.x < 0) return Math.abs(ey - mundo.MiPosicion.y) < 1.0 && ex < mundo.MiPosicion.x;
-        if (mundo.miOrientacion.y > 0) return Math.abs(ex - mundo.MiPosicion.x) < 1.0 && ey > mundo.MiPosicion.y;
-        if (mundo.miOrientacion.y < 0) return Math.abs(ex - mundo.MiPosicion.x) < 1.0 && ey < mundo.MiPosicion.y;
-        
+        if (mundo.miOrientacion.x > 0)
+            return Math.abs(ey - mundo.MiPosicion.y) < 1.0 && ex > mundo.MiPosicion.x;
+        if (mundo.miOrientacion.x < 0)
+            return Math.abs(ey - mundo.MiPosicion.y) < 1.0 && ex < mundo.MiPosicion.x;
+        if (mundo.miOrientacion.y > 0)
+            return Math.abs(ex - mundo.MiPosicion.x) < 1.0 && ey > mundo.MiPosicion.y;
+        if (mundo.miOrientacion.y < 0)
+            return Math.abs(ex - mundo.MiPosicion.x) < 1.0 && ey < mundo.MiPosicion.y;
+
         return false;
     }
-    
+
     @Override
-	public String toString() {
-		return "Disparar";
-	}
+    public String toString() {
+        return "Disparar";
+    }
 }

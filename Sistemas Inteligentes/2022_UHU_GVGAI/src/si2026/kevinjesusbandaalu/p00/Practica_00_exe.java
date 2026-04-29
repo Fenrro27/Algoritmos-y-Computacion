@@ -21,7 +21,7 @@ public class Practica_00_exe {
 		int seed = new Random().nextInt();
 				
 		// Game and level to play
-		int gameIdx  = 50;
+		int gameIdx  = 49;
 		int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
 		
 		String gameName = games[gameIdx][1];
@@ -30,10 +30,10 @@ public class Practica_00_exe {
 
 		
 		// 1. This starts a game, in a level, played by a human.
-		// ArcadeMachine.playOneGame(game, level1, null, seed);
+		 ArcadeMachine.playOneGame(game, level1, null, seed);
 
 		// 2. This plays a game in a level by the controller.
- 		ArcadeMachine.runOneGame(game, level1, visuals, p1, null, seed, 0);
+ 		//ArcadeMachine.runOneGame(game, level1, visuals, p1, null, seed, 0);
 				
 
 		System.exit(0);

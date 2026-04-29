@@ -14,16 +14,54 @@ public class Mundo83 implements IMundo {
 	public Vector2d miOrientacion;
 	public int Bloque, columnas, filas;
 	
-	public List<Observation> lasers;
-	public List<Observation> enemigos;
+	public List<Observation> evitar;       
+	public List<Observation> buzos;         
+	public List<Observation> spawnBuzos;   
+	public List<Observation> zonaSegura;    
+	public int oxigeno;
+	public int maxOxigeno;
+	public int buzosEnBolsa;
+	public boolean bolsaLlena;
+	public Observation objetivo;
 
 	public Mundo83(StateObservation stateObs) {
 		Bloque = stateObs.getBlockSize();
 		columnas = stateObs.getWorldDimension().width / Bloque;
 		filas = stateObs.getWorldDimension().height / Bloque;
+		maxOxigeno= stateObs.getAvatarLimitHealthPoints();
 		
-		lasers = new ArrayList<>();
-		enemigos = new ArrayList<>();
+		 evitar = new ArrayList<>();
+		 buzos = new ArrayList<>();
+		 spawnBuzos = new ArrayList<>();
+		 zonaSegura = new ArrayList<>();
+		 
+		 
+		 List<Observation> distintas = new ArrayList<>();
+			java.util.HashSet<String> tiposVistos = new java.util.HashSet<>();
+			ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
+
+			for (int x = 0; x < grid.length; x++) {
+				for (int y = 0; y < grid[x].length; y++) {
+					for (Observation obs : grid[x][y]) {
+						
+						if (obs.category == 2 && obs.itype == 9) {
+			                    spawnBuzos.add(obs);
+			                }
+			            else if (obs.category == 4 && obs.itype == 2) {
+			                    zonaSegura.add(obs);
+			                    }
+						
+						String clave = obs.category + "-" + obs.itype;
+						if (!tiposVistos.contains(clave)) {
+							distintas.add(obs);
+							tiposVistos.add(clave);
+
+							asignarLetraADiccionario(obs);
+						}
+					}
+				}
+			}
+
 
 	}
 
@@ -33,11 +71,36 @@ public class Mundo83 implements IMundo {
 		Vector2d Pos = stateObs.getAvatarPosition().copy();
 		MiPosicion = new Vector2d(Pos.x / Bloque, Pos.y / Bloque);
 		miOrientacion = stateObs.getAvatarOrientation();
+
+	    this.oxigeno = stateObs.getAvatarHealthPoints();
+	  //System.out.println("Oxigeno cantidad: "+stateObs.getAvatarLimitHealthPoints()+", "+ stateObs.getAvatarMaxHealthPoints());
 		
-		lasers.clear();
-	    enemigos.clear();
-		
+		java.util.HashMap<Integer, Integer> recursos = stateObs.getAvatarResources(); // 0 suele ser Aire
+	//   System.out.println("Recursos: "+recursos+", Cantidad: "+recursos.size());
+		this.buzosEnBolsa = recursos.getOrDefault(18, 0); // 18 es buzos
+	    this.bolsaLlena = (this.buzosEnBolsa >= 4);
+	    	
+	    evitar.clear();
+	    buzos.clear();
+
 		obtenerObservacionesAnalizadas(stateObs);
+		
+		if (objetivo != null) {
+	        boolean sigueExistiendo = false;
+	        for (Observation b : buzos) {
+	            if (b.obsID == objetivo.obsID) { // Usamos el ID único de la observación
+	                objetivo = b; // Actualizamos su posición
+	                sigueExistiendo = true;
+	                break;
+	            }
+	        }
+	        if (!sigueExistiendo) objetivo = null;
+	    }
+
+	    // 2. Si no hay objetivo o el anterior desapareció, buscamos el más cercano
+	    if (objetivo == null && !buzos.isEmpty()) {
+	        objetivo = calcularBuzoMasCercano();
+	    }
 
 	}
 
@@ -54,13 +117,15 @@ public class Mundo83 implements IMundo {
 			for (int y = 0; y < grid[x].length; y++) {
 				for (Observation obs : grid[x][y]) {
 					
-					if (obs.category == 3) {
-	                    enemigos.add(obs);
-	                } 
-	                else if (obs.category == 6) {
-	                    lasers.add(obs);
-	                }
-					
+					 if (obs.category == 3 && obs.itype != 17) { 
+		                    evitar.add(obs);
+		                } else if (obs.category == 6) { 
+		                    evitar.add(obs);
+		                }
+		                else if (obs.category == 3 && obs.itype == 17) {
+		                    buzos.add(obs);
+		                }
+		                
 					String clave = obs.category + "-" + obs.itype;
 					if (!tiposVistos.contains(clave)) {
 						distintas.add(obs);
@@ -74,7 +139,7 @@ public class Mundo83 implements IMundo {
 		}
 
 		// 2. Pintar el terreno una vez analizado
-		pintarTerreno(stateObs);
+	//	pintarTerreno(stateObs);
 	}
 
 	private void asignarLetraADiccionario(Observation o) {
@@ -218,5 +283,19 @@ public class Mundo83 implements IMundo {
 			System.out.println();
 		}
 		System.out.println("========================\n");
+	}
+	
+	
+	private Observation calcularBuzoMasCercano() {
+	    Observation masCercano = null;
+	    double distMin = Double.MAX_VALUE;
+	    for (Observation b : buzos) {
+	        double dist = MiPosicion.dist(new Vector2d(b.position.x / Bloque, b.position.y / Bloque));
+	        if (dist < distMin) {
+	            distMin = dist;
+	            masCercano = b;
+	        }
+	    }
+	    return masCercano;
 	}
 }
