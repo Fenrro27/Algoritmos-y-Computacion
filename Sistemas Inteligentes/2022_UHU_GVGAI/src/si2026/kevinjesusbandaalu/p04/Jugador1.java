@@ -20,6 +20,6 @@ public class Jugador1 extends AbstractPlayer {
         // Actualizamos el conocimiento del mundo en cada paso
         mundo.AnalizarEntorno(stateObs);
          
-        return motor.buscar(mundo);
+        return motor.buscar(mundo, timer);
     }
 }

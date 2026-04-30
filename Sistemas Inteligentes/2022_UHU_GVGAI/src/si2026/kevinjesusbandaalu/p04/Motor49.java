@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 import core.game.StateObservation;
 import ontology.Types.ACTIONS;
+import tools.ElapsedCpuTimer;
 
 public class Motor49 {
 
@@ -14,12 +15,13 @@ public class Motor49 {
         this.mundo = mundo;
     }
 
-    public ACTIONS buscar(Mundo49 mundo) {
+    public ACTIONS buscar(Mundo49 mundo, ElapsedCpuTimer timer) {
         StateObservation stateObs = mundo.stateObsActual;
         if (stateObs == null || stateObs.getGameWinner() == ontology.Types.WINNER.PLAYER_LOSES) return ACTIONS.ACTION_NIL;
 
         // Acciones disponibles para el avatar
         ArrayList<ACTIONS> actions = stateObs.getAvailableActions();
+        System.out.println("Acciones disponibles: " + actions);
         
         // Estructuras de datos para A*
         PriorityQueue<Node> openList = new PriorityQueue<>();
@@ -32,20 +34,18 @@ public class Motor49 {
         Node bestNode = root;
         double minHeuristic = root.h;
 
-        // Límite de procesamiento para evitar bloqueos (aproximadamente 35ms-40ms de búsqueda)
-        // Como no tenemos el timer en la firma, usamos un límite de nodos conservador.
-        int maxNodes = 800; 
+        // Búsqueda guiada por tiempo restante (dejamos 10ms de margen de seguridad)
         int nodesProcessed = 0;
 
-        while (!openList.isEmpty() && nodesProcessed < maxNodes) {
+        while (!openList.isEmpty() && timer.remainingTimeMillis() > 10) {
             Node current = openList.poll();
             nodesProcessed++;
 
-            // Clave de estado única: posición + orientación + tipo (Vampiro/Bala) + recursos
+            // Clave de estado única: posición + orientación + tipo (Vampiro/Bala) + tick
             String stateKey = current.state.getAvatarPosition().toString() + "_" + 
                              current.state.getAvatarOrientation().toString() + "_" +
                              current.state.getAvatarType() + "_" +
-                             current.state.getAvatarResources().toString();
+                             current.state.getGameTick();
 
             if (closedList.containsKey(stateKey) && closedList.get(stateKey) <= current.g) {
                 continue;
@@ -78,7 +78,9 @@ public class Motor49 {
         }
 
         // Si no se encontró la meta, devolvemos la acción que nos acerca más
-        return getFirstAction(bestNode);
+        ACTIONS accionElegida = getFirstAction(bestNode);
+        System.out.println("Acción elegida hacia el siguiente nodo: " + accionElegida + " | Nodos procesados: " + nodesProcessed + " | Heurística: " + minHeuristic);
+        return accionElegida;
     }
 
     /**
