@@ -83,7 +83,7 @@ public class Mundo49 implements IMundo {
                         Integer dirNenufar = direccionesNenufares.get(n);
                         if (dirNenufar != null) {
                             int w = -1;
-                            if (dirNenufar == 8 && n.x <= x) { // Mueve a derecha
+                            if (dirNenufar == 10 && n.x <= x) { // Mueve a derecha (asumido 10)
                                 boolean pathClear = true;
                                 for (int nx = (int)n.x; nx <= x; nx++) {
                                     Vector2d obst = new Vector2d(nx, y);
@@ -92,7 +92,7 @@ public class Mundo49 implements IMundo {
                                     }
                                 }
                                 if (pathClear) w = (int)(x - n.x) * 10 - d;
-                            } else if (dirNenufar == 7 && n.x >= x) { // Mueve a izquierda
+                            } else if (dirNenufar == 11 && n.x >= x) { // Mueve a izquierda (asumido 11)
                                 boolean pathClear = true;
                                 for (int nx = (int)n.x; nx >= x; nx--) {
                                     Vector2d obst = new Vector2d(nx, y);
@@ -165,7 +165,15 @@ public class Mundo49 implements IMundo {
     }
 
     private void calcularRutasNenufares() {
-        dirRutaNenufar = new int[columnas][filas];
+        if (dirRutaNenufar == null) {
+            dirRutaNenufar = new int[columnas][filas];
+        } else {
+            for (int i = 0; i < columnas; i++) {
+                for (int j = 0; j < filas; j++) {
+                    dirRutaNenufar[i][j] = 0;
+                }
+            }
+        }
         for (Vector2d n : nenufar) {
             // Trazar ruta horizontal para el tronco
             for (int step = -1; step <= 1; step += 2) {
@@ -184,7 +192,9 @@ public class Mundo49 implements IMundo {
     }
 
     private void calcularMapaDistancias() {
-        distanciasMeta = new double[columnas][filas];
+        if (distanciasMeta == null) {
+            distanciasMeta = new double[columnas][filas];
+        }
         for (int i = 0; i < columnas; i++) {
             for (int j = 0; j < filas; j++) {
                 distanciasMeta[i][j] = 1000000;
@@ -245,14 +255,14 @@ public class Mundo49 implements IMundo {
             }
         }
         // Debug: Print distance map to identify disconnection
-        System.out.println("Distancias Meta:");
+       /* System.out.println("Distancias Meta:");
         for (int y = 0; y < filas; y++) {
             for (int x = 0; x < columnas; x++) {
                 if (distanciasMeta[x][y] == 1000000) System.out.print(" X ");
                 else System.out.print(String.format("%2d ", (int)distanciasMeta[x][y]));
             }
             System.out.println();
-        }
+        }*/
     }
 
     private class NodeDist implements Comparable<NodeDist> {
@@ -263,41 +273,42 @@ public class Mundo49 implements IMundo {
     }
 
     public void obtenerObservacionesAnalizadas(StateObservation stateObs) {
-        HashSet<String> tiposVistos = new HashSet<>();
         ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
 
         for (int x = 0; x < grid.length; x++) {
             for (int y = 0; y < grid[x].length; y++) {
-                Vector2d celda = new Vector2d(x, y);
                 ArrayList<Observation> obsEnCelda = grid[x][y];
 
                 if (!obsEnCelda.isEmpty()) {
+                    Vector2d celda = new Vector2d(x, y);
                     for (Observation obs : obsEnCelda) {
-                        String clave = obs.category + "-" + obs.itype;
-                        if (!tiposVistos.contains(clave)) {
-                            tiposVistos.add(clave);
-                            asignarLetraADiccionario(obs);
-                        }
+                        asignarLetraADiccionario(obs);
 
                         switch (obs.category) {
                             case 2: // Salida
                                 salida = celda;
                                 break;
                             case 4: // Immovables (Muros, agua, spawners, etc)
-                                if (obs.itype != 3) { // 3 es agua
-                                    arboles.add(celda); // Todo immovable es obstáculo por defecto, a menos que sea zonaMarron o agua
-                                }
-                                if (obs.itype >= 14 && obs.itype <= 17) {
+                                if (obs.itype == 3) {
+                                    agua.add(celda);
+                                } else if (obs.itype >= 14 && obs.itype <= 17) {
                                     catapultas.add(celda);
                                     direccionesCatapultas.put(celda, obs.itype);
+                                } else if (obs.itype == 7 || obs.itype == 8) {
+                                    // Nenúfares que por alguna razón están en categoría 4
+                                    nenufar.add(celda);
+                                    direccionesNenufares.put(celda, obs.itype);
+                                } else {
+                                    arboles.add(celda);
                                 }
                                 break;
-                            case 5: // Moving (Troncos)
-                                nenufar.add(celda);
-                                break;
-                            case 6: // Resources?
+                  
+                            case 6: // Resources / Moving platforms in this version
                                 if (obs.itype == 12) {
                                     zonaMarron.add(celda);
+                                } else if (obs.itype == 10 || obs.itype == 11) {
+                                    nenufar.add(celda);
+                                    direccionesNenufares.put(celda, obs.itype);
                                 }
                                 break;
                         }
@@ -355,10 +366,10 @@ public class Mundo49 implements IMundo {
             case 6:
                 switch (o.itype) {
                     case 10:
-                        letra = " ";
+                        letra = "R";
                         break; // ?, no se q es
                     case 11:
-                        letra = " ";
+                        letra = "L";
                         break; // ?, no se q es
                     case 12:
                         letra = "M";
@@ -471,20 +482,35 @@ public class Mundo49 implements IMundo {
         if (stateObs.getGameWinner() == ontology.Types.WINNER.PLAYER_WINS)
             return 0;
             
-        Vector2d pos = stateObs.getAvatarPosition();
+        tools.Vector2d pos = stateObs.getAvatarPosition();
         int ax = (int)(pos.x / Bloque);
         int ay = (int)(pos.y / Bloque);
+        
+        boolean sobreNenufar = false;
+        if (ax >= 0 && ax < columnas && ay >= 0 && ay < filas) {
+            ArrayList<Observation> obsCelda = stateObs.getObservationGrid()[ax][ay];
+            if (obsCelda != null) {
+                for (Observation o : obsCelda) {
+                    if (o.category == 6 && (o.itype == 10 || o.itype == 11)) {
+                        sobreNenufar = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        double bonus = 0.0; // Eliminado el bono de 20 puntos porque causaba que el A* nunca quisiera bajarse del nenúfar
         
         if (distanciasMeta != null && ax >= 0 && ax < columnas && ay >= 0 && ay < filas) {
             double dist = distanciasMeta[ax][ay];
             if (dist < 1000000) {
-                return dist;
+                return dist * 50.0;
             }
         }
         
         // Si no encuentra la meta, buscar la catapulta más cercana para intentar explorar
         double minDistCatapulta = 1000000;
-        for (Vector2d cat : catapultas) {
+        for (tools.Vector2d cat : catapultas) {
             double d = Math.abs(cat.x - ax) + Math.abs(cat.y - ay);
             if (d < minDistCatapulta) {
                 minDistCatapulta = d;
@@ -492,10 +518,7 @@ public class Mundo49 implements IMundo {
         }
         
         if (minDistCatapulta < 1000000) {
-            // Un valor base de 500,000 para que la prioridad siempre sea la meta (si se descubre).
-            // Multiplicamos por 1.1 para que el costo heurístico decrezca más rápido
-            // de lo que sube el costo real (g) al dar un paso, motivando a A* a moverse.
-            return 500000 + (minDistCatapulta * 1.1);
+            return 500000 + (minDistCatapulta * 50.0);
         }
         
         return 1000000;
