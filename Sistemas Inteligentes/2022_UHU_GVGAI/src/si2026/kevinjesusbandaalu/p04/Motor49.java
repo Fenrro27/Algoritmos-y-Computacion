@@ -85,7 +85,7 @@ public class Motor49 {
                 ArrayList<core.game.Observation> obsActual = current.state.getObservationGrid()[celdaX][celdaY];
                 if (obsActual != null) {
                     for (core.game.Observation o : obsActual) {
-                        if (o.category == 6 && (o.itype == 10 || o.itype == 11)) {
+                        if (o.itype == 10 || o.itype == 11) {
                             enNenufar = true;
                             break;
                         }
@@ -131,7 +131,7 @@ public class Motor49 {
             ArrayList<core.game.Observation> obsRoot = stateObs.getObservationGrid()[rootX][rootY];
             if (obsRoot != null) {
                 for (core.game.Observation o : obsRoot) {
-                    if (o.category == 6 && (o.itype == 10 || o.itype == 11)) {
+                    if (o.itype == 10 || o.itype == 11) {
                         estoyEnNenufar = true;
                         break;
                     }

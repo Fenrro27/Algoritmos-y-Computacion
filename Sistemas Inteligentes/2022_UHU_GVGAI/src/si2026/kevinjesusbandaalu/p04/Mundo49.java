@@ -40,17 +40,21 @@ public class Mundo49 implements IMundo {
 
             Integer dir = direccionesCatapultas.get(loc);
             int dx = 0, dy = 0;
-            if (dir == 14) dy = 1;      // ABAJO
-            else if (dir == 15) dy = -1; // ARRIBA
-            else if (dir == 16) dx = 1;  // DERECHA
-            else if (dir == 17) dx = -1; // IZQUIERDA
+            if (dir == 14)
+                dy = 1; // ABAJO
+            else if (dir == 15)
+                dy = -1; // ARRIBA
+            else if (dir == 16)
+                dx = 1; // DERECHA
+            else if (dir == 17)
+                dx = -1; // IZQUIERDA
 
             int cx = (int) loc.x;
             int cy = (int) loc.y;
             int x = cx + dx;
             int y = cy + dy;
             int d = 1;
-            
+
             boolean aterrizaSeguro = false;
             int mejorEspera = -1;
 
@@ -63,48 +67,56 @@ public class Mundo49 implements IMundo {
                     Vector2d prevPos = new Vector2d(x - dx, y - dy);
                     boolean prevEsVacia = false;
                     if (prevPos.x >= 0 && prevPos.x < columnas && prevPos.y >= 0 && prevPos.y < filas) {
-                        prevEsVacia = stateObsActual.getObservationGrid()[(int)prevPos.x][(int)prevPos.y].isEmpty();
+                        prevEsVacia = stateObsActual.getObservationGrid()[(int) prevPos.x][(int) prevPos.y].isEmpty();
                     }
-                    
-                    // Si el paso anterior es suelo vacío, zonaMarron, ruta de nenúfar o LA SALIDA, aterrizamos seguros
-                    if (prevEsVacia || zonaMarron.contains(prevPos) || dirRutaNenufar[(int)prevPos.x][(int)prevPos.y] > 0 || 
-                        (salida != null && salida.equals(prevPos))) {
+
+                    // Si el paso anterior es suelo vacío, zonaMarron, ruta de nenúfar o LA SALIDA,
+                    // aterrizamos seguros
+                    if (prevEsVacia || zonaMarron.contains(prevPos)
+                            || dirRutaNenufar[(int) prevPos.x][(int) prevPos.y] > 0 ||
+                            (salida != null && salida.equals(prevPos))) {
                         aterrizaSeguro = true;
-                        if (mejorEspera == -1 || 0 < mejorEspera) mejorEspera = 0;
-                        x = (int)prevPos.x;
-                        y = (int)prevPos.y;
+                        if (mejorEspera == -1 || 0 < mejorEspera)
+                            mejorEspera = 0;
+                        x = (int) prevPos.x;
+                        y = (int) prevPos.y;
                     }
                     break; // El vuelo no continúa más allá del muro
                 }
 
                 // Comprobar si un nenúfar móvil nos puede interceptar aquí
                 for (Vector2d n : nenufar) {
-                    if (n.y == y) { 
+                    if (n.y == y) {
                         Integer dirNenufar = direccionesNenufares.get(n);
                         if (dirNenufar != null) {
                             int w = -1;
                             if (dirNenufar == 10 && n.x <= x) { // Mueve a derecha (asumido 10)
                                 boolean pathClear = true;
-                                for (int nx = (int)n.x; nx <= x; nx++) {
+                                for (int nx = (int) n.x; nx <= x; nx++) {
                                     Vector2d obst = new Vector2d(nx, y);
                                     if (arboles.contains(obst) || zonaMarron.contains(obst)) {
-                                        pathClear = false; break;
+                                        pathClear = false;
+                                        break;
                                     }
                                 }
-                                if (pathClear) w = (int)(x - n.x) * 10 - d;
+                                if (pathClear)
+                                    w = (int) (x - n.x) * 10 - d;
                             } else if (dirNenufar == 11 && n.x >= x) { // Mueve a izquierda (asumido 11)
                                 boolean pathClear = true;
-                                for (int nx = (int)n.x; nx >= x; nx--) {
+                                for (int nx = (int) n.x; nx >= x; nx--) {
                                     Vector2d obst = new Vector2d(nx, y);
                                     if (arboles.contains(obst) || zonaMarron.contains(obst)) {
-                                        pathClear = false; break;
+                                        pathClear = false;
+                                        break;
                                     }
                                 }
-                                if (pathClear) w = (int)(n.x - x) * 10 - d;
+                                if (pathClear)
+                                    w = (int) (n.x - x) * 10 - d;
                             }
                             if (w >= 0) {
                                 aterrizaSeguro = true;
-                                if (mejorEspera == -1 || w < mejorEspera) mejorEspera = w;
+                                if (mejorEspera == -1 || w < mejorEspera)
+                                    mejorEspera = w;
                             }
                         }
                     }
@@ -177,13 +189,14 @@ public class Mundo49 implements IMundo {
         for (Vector2d n : nenufar) {
             // Trazar ruta horizontal para el tronco
             for (int step = -1; step <= 1; step += 2) {
-                int nx = (int)n.x;
-                int ny = (int)n.y;
+                int nx = (int) n.x;
+                int ny = (int) n.y;
                 while (nx >= 0 && nx < columnas) {
                     Vector2d pos = new Vector2d(nx, ny);
                     // Si choca con pared o catapulta, termina la ruta
                     boolean esPared = arboles.contains(pos) || zonaMarron.contains(pos) || catapultas.contains(pos);
-                    if (esPared && !pos.equals(n)) break; 
+                    if (esPared && !pos.equals(n))
+                        break;
                     dirRutaNenufar[nx][ny] = 1;
                     nx += step;
                 }
@@ -201,18 +214,20 @@ public class Mundo49 implements IMundo {
             }
         }
 
-        if (salida == null) return;
+        if (salida == null)
+            return;
 
         java.util.PriorityQueue<NodeDist> pq = new java.util.PriorityQueue<>();
-        distanciasMeta[(int)salida.x][(int)salida.y] = 0;
-        pq.add(new NodeDist((int)salida.x, (int)salida.y, 0));
+        distanciasMeta[(int) salida.x][(int) salida.y] = 0;
+        pq.add(new NodeDist((int) salida.x, (int) salida.y, 0));
 
-        int[] dx = {0, 0, 1, -1};
-        int[] dy = {1, -1, 0, 0};
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
 
         while (!pq.isEmpty()) {
             NodeDist actual = pq.poll();
-            if (actual.dist > distanciasMeta[actual.x][actual.y]) continue;
+            if (actual.dist > distanciasMeta[actual.x][actual.y])
+                continue;
 
             Vector2d posActual = new Vector2d(actual.x, actual.y);
 
@@ -223,11 +238,10 @@ public class Mundo49 implements IMundo {
                 if (nx >= 0 && nx < columnas && ny >= 0 && ny < filas) {
                     Vector2d vecina = new Vector2d(nx, ny);
                     boolean esVacia = stateObsActual.getObservationGrid()[nx][ny].isEmpty();
-                    
-                    // Es muro si no es vacía, no es zona marrón, no es ruta de nenúfar, no es catapulta y no es salida
-                    boolean esMuro = !esVacia && !zonaMarron.contains(vecina) && dirRutaNenufar[nx][ny] == 0 && 
-                                     !catapultas.contains(vecina) && !(salida != null && salida.equals(vecina));
-                    
+
+                    // Es muro si está en la lista de árboles o si es agua y no hay ruta de nenúfar
+                    boolean esMuro = arboles.contains(vecina) || (agua.contains(vecina) && dirRutaNenufar[nx][ny] == 0);
+
                     if (!esMuro) {
                         double nuevaDist = actual.dist + 1;
                         if (nuevaDist < distanciasMeta[nx][ny]) {
@@ -238,7 +252,8 @@ public class Mundo49 implements IMundo {
                 }
             }
 
-            // Transiciones inversas por catapulta (si la catapulta cae aquí, podemos "ir" desde la catapulta hacia aquí)
+            // Transiciones inversas por catapulta (si la catapulta cae aquí, podemos "ir"
+            // desde la catapulta hacia aquí)
             for (Vector2d cat : catapultas) {
                 if (destinoCatapultas.containsKey(cat)) {
                     Vector2d destino = destinoCatapultas.get(cat);
@@ -246,30 +261,40 @@ public class Mundo49 implements IMundo {
                         // El coste de la catapulta es la distancia de vuelo
                         double distVuelo = Math.abs(cat.x - destino.x) + Math.abs(cat.y - destino.y);
                         double nuevaDist = actual.dist + distVuelo;
-                        if (nuevaDist < distanciasMeta[(int)cat.x][(int)cat.y]) {
-                            distanciasMeta[(int)cat.x][(int)cat.y] = nuevaDist;
-                            pq.add(new NodeDist((int)cat.x, (int)cat.y, nuevaDist));
+                        if (nuevaDist < distanciasMeta[(int) cat.x][(int) cat.y]) {
+                            distanciasMeta[(int) cat.x][(int) cat.y] = nuevaDist;
+                            pq.add(new NodeDist((int) cat.x, (int) cat.y, nuevaDist));
                         }
                     }
                 }
             }
         }
         // Debug: Print distance map to identify disconnection
-       /* System.out.println("Distancias Meta:");
-        for (int y = 0; y < filas; y++) {
-            for (int x = 0; x < columnas; x++) {
-                if (distanciasMeta[x][y] == 1000000) System.out.print(" X ");
-                else System.out.print(String.format("%2d ", (int)distanciasMeta[x][y]));
-            }
-            System.out.println();
-        }*/
+        /*
+         * System.out.println("Distancias Meta:");
+         * for (int y = 0; y < filas; y++) {
+         * for (int x = 0; x < columnas; x++) {
+         * if (distanciasMeta[x][y] == 1000000) System.out.print(" X ");
+         * else System.out.print(String.format("%2d ", (int)distanciasMeta[x][y]));
+         * }
+         * System.out.println();
+         * }
+         */
     }
 
     private class NodeDist implements Comparable<NodeDist> {
         int x, y;
         double dist;
-        NodeDist(int x, int y, double dist) { this.x = x; this.y = y; this.dist = dist; }
-        public int compareTo(NodeDist o) { return Double.compare(this.dist, o.dist); }
+
+        NodeDist(int x, int y, double dist) {
+            this.x = x;
+            this.y = y;
+            this.dist = dist;
+        }
+
+        public int compareTo(NodeDist o) {
+            return Double.compare(this.dist, o.dist);
+        }
     }
 
     public void obtenerObservacionesAnalizadas(StateObservation stateObs) {
@@ -284,32 +309,37 @@ public class Mundo49 implements IMundo {
                     for (Observation obs : obsEnCelda) {
                         asignarLetraADiccionario(obs);
 
-                        switch (obs.category) {
-                            case 2: // Salida
+                        switch (obs.itype) {
+                            case 3: // Water
+                                agua.add(celda);
+                                break;
+                            case 0: // Wall
+                            case 7: // ForestR
+                            case 8: // ForestL
+                                arboles.add(celda);
+                                break;
+                            case 5: // Goal
                                 salida = celda;
                                 break;
-                            case 4: // Immovables (Muros, agua, spawners, etc)
-                                if (obs.itype == 3) {
-                                    agua.add(celda);
-                                } else if (obs.itype >= 14 && obs.itype <= 17) {
-                                    catapultas.add(celda);
-                                    direccionesCatapultas.put(celda, obs.itype);
-                                } else if (obs.itype == 7 || obs.itype == 8) {
-                                    // Nenúfares que por alguna razón están en categoría 4
-                                    nenufar.add(celda);
-                                    direccionesNenufares.put(celda, obs.itype);
-                                } else {
-                                    arboles.add(celda);
-                                }
+                            case 14:
+                            case 15:
+                            case 16:
+                            case 17: // Catapults
+                                catapultas.add(celda);
+                                direccionesCatapultas.put(celda, obs.itype);
                                 break;
-                  
-                            case 6: // Resources / Moving platforms in this version
-                                if (obs.itype == 12) {
-                                    zonaMarron.add(celda);
-                                } else if (obs.itype == 10 || obs.itype == 11) {
-                                    nenufar.add(celda);
-                                    direccionesNenufares.put(celda, obs.itype);
-                                }
+                            case 12: // Landingpad
+                                zonaMarron.add(celda);
+                                break;
+                            case 10:
+                            case 11: // Logs
+                                nenufar.add(celda);
+                                direccionesNenufares.put(celda, obs.itype);
+                                break;
+                            case 2: // Background
+                            case 4: // Floor
+                            case 19: // Avatar
+                                // Ignore these for mapping, they are traversable or handled elsewhere
                                 break;
                         }
                     }
@@ -319,69 +349,60 @@ public class Mundo49 implements IMundo {
     }
 
     private void asignarLetraADiccionario(Observation o) {
-        String clave = o.category + "-" + o.itype;
+        String clave = String.valueOf(o.itype);
         if (diccionarioLetras.containsKey(clave))
             return;
 
         String letra = "?";
-        switch (o.category) {
+        switch (o.itype) {
             case 0:
-                letra = "A";
-                break; // personaje principal
+                letra = "#";
+                break; // Wall
             case 2:
-                letra = "S";
-                break; // Salida
+                letra = ".";
+                break; // Background
+            case 3:
+                letra = " ";
+                break; // Water
             case 4:
-                switch (o.itype) {
-                    case 0:
-                        letra = "#";
-                        break; // Arboles
-                    case 16:
-                        letra = "1";
-                        break; // Catapulta a la derecha
-                    case 17:
-                        letra = "2";
-                        break; // Catapulta a la izquierda
-                    case 3:
-                        letra = " ";
-                        break; // Agua
-                    case 14:
-                        letra = "3";
-                        break; // catapulta para abajo
-                    case 15:
-                        letra = "4";
-                        break; // catapulta para arriba
-                    case 7:
-                        letra = "5";
-                        break; // Nenufar a la izquierda
-                    case 8:
-                        letra = "6";
-                        break; // nenufar a la derecha
-
-                    default:
-                        System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
-                        break;
-                }
-                break;
-            case 6:
-                switch (o.itype) {
-                    case 10:
-                        letra = "R";
-                        break; // ?, no se q es
-                    case 11:
-                        letra = "L";
-                        break; // ?, no se q es
-                    case 12:
-                        letra = "M";
-                        break; // Marron
-                    default:
-                        System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
-                        break;
-                }
-                break;
-
+                letra = "_";
+                break; // Floor
+            case 5:
+                letra = "S";
+                break; // Goal
+            case 14:
+                letra = "3";
+                break; // Catapult Down
+            case 15:
+                letra = "4";
+                break; // Catapult Up
+            case 16:
+                letra = "1";
+                break; // Catapult Right
+            case 17:
+                letra = "2";
+                break; // Catapult Left
+            case 7:
+                letra = "f";
+                break; // forestR
+            case 8:
+                letra = "l";
+                break; // forestL
+            case 10:
+                letra = "R";
+                break; // logR
+            case 11:
+                letra = "L";
+                break; // logL
+            case 12:
+                letra = "M";
+                break; // Landingpad
+            case 19:
+                letra = "A";
+                break; // Avatar
             default:
-                System.out.println("Categoria: " + o.category + ", itype: " + o.itype);
+                System.out.println("Itype desconocido: " + o.itype);
+                break;
         }
         diccionarioLetras.put(clave, letra);
     }
@@ -391,10 +412,10 @@ public class Mundo49 implements IMundo {
         if (MiPosicion != null) {
             java.util.Queue<Vector2d> q = new java.util.LinkedList<>();
             q.add(MiPosicion);
-            alcanzables[(int)MiPosicion.x][(int)MiPosicion.y] = true;
+            alcanzables[(int) MiPosicion.x][(int) MiPosicion.y] = true;
 
-            int[] dx = {0, 0, 1, -1};
-            int[] dy = {1, -1, 0, 0};
+            int[] dx = { 0, 0, 1, -1 };
+            int[] dy = { 1, -1, 0, 0 };
 
             while (!q.isEmpty()) {
                 Vector2d actual = q.poll();
@@ -408,25 +429,25 @@ public class Mundo49 implements IMundo {
                     if (nx >= 0 && nx < columnas && ny >= 0 && ny < filas && !alcanzables[nx][ny]) {
                         Vector2d vecina = new Vector2d(nx, ny);
                         boolean esVacia = stateObs.getObservationGrid()[nx][ny].isEmpty();
-                        
-                        boolean esMuro = !esVacia && !zonaMarron.contains(vecina) && dirRutaNenufar[nx][ny] == 0 && 
-                                         !catapultas.contains(vecina) && !(salida != null && salida.equals(vecina));
-                        
+
+                        // Es muro si está en la lista de árboles o si es agua y no hay ruta de nenúfar
+                        boolean esMuro = arboles.contains(vecina) || (agua.contains(vecina) && dirRutaNenufar[nx][ny] == 0);
+
                         if (!esMuro) {
                             alcanzables[nx][ny] = true;
                             q.add(vecina);
                         }
                     }
                 }
-                
+
                 // Transición por catapultas
                 for (Vector2d cat : catapultas) {
-                    if ((int)cat.x == cx && (int)cat.y == cy) {
+                    if ((int) cat.x == cx && (int) cat.y == cy) {
                         if (destinoCatapultas.containsKey(cat)) {
                             Vector2d dest = destinoCatapultas.get(cat);
                             if (dest != null && dest.x >= 0 && dest.x < columnas && dest.y >= 0 && dest.y < filas) {
-                                if (!alcanzables[(int)dest.x][(int)dest.y]) {
-                                    alcanzables[(int)dest.x][(int)dest.y] = true;
+                                if (!alcanzables[(int) dest.x][(int) dest.y]) {
+                                    alcanzables[(int) dest.x][(int) dest.y] = true;
                                     q.add(dest);
                                 }
                             }
@@ -461,7 +482,7 @@ public class Mundo49 implements IMundo {
                 } else {
                     String letraElegida = null;
                     for (Observation o : obsEnCelda) {
-                        String clave = o.category + "-" + o.itype;
+                        String clave = String.valueOf(o.itype);
                         if (diccionarioLetras.containsKey(clave)) {
                             letraElegida = diccionarioLetras.get(clave);
                             if (!letraElegida.equals("?"))
@@ -478,49 +499,59 @@ public class Mundo49 implements IMundo {
 
     public double heuristica(StateObservation stateObs) {
         if (stateObs.getGameWinner() == ontology.Types.WINNER.PLAYER_LOSES)
-            return 1000000;
+            return 10000000;
         if (stateObs.getGameWinner() == ontology.Types.WINNER.PLAYER_WINS)
             return 0;
-            
+
         tools.Vector2d pos = stateObs.getAvatarPosition();
-        int ax = (int)(pos.x / Bloque);
-        int ay = (int)(pos.y / Bloque);
-        
-        boolean sobreNenufar = false;
-        if (ax >= 0 && ax < columnas && ay >= 0 && ay < filas) {
-            ArrayList<Observation> obsCelda = stateObs.getObservationGrid()[ax][ay];
-            if (obsCelda != null) {
-                for (Observation o : obsCelda) {
-                    if (o.category == 6 && (o.itype == 10 || o.itype == 11)) {
-                        sobreNenufar = true;
-                        break;
+        int ax = (int) (pos.x / Bloque);
+        int ay = (int) (pos.y / Bloque);
+
+        // 1. SI LA META ES ACCESIBLE (vía tierra o ruta actual de troncos)
+        if (distanciasMeta != null && ax >= 0 && ax < columnas && ay >= 0 && ay < filas) {
+            double dist = distanciasMeta[ax][ay];
+            if (dist < 1000000) {
+                return dist * 10.0; // Multiplicador bajo para prioridad máxima
+            }
+        }
+
+        // 2. SI NO ES ACCESIBLE DIRECTAMENTE, BUSCAR CATAPULTAS
+        double minDistCatapulta = 1000000;
+        if (catapultas != null) {
+            for (tools.Vector2d cat : catapultas) {
+                double d = Math.abs(cat.x - ax) + Math.abs(cat.y - ay);
+                if (d < minDistCatapulta) {
+                    minDistCatapulta = d;
+                }
+            }
+        }
+
+        if (minDistCatapulta < 1000000) {
+            // Base 2 millones para que sea peor que cualquier camino directo a meta
+            return 2000000 + (minDistCatapulta * 10.0);
+        }
+
+        // 3. SI NO HAY CATAPULTAS, BUSCAR RUTAS DE NENÚFARES (donde pasan los troncos)
+        double minDistRutaLog = 1000000;
+        if (dirRutaNenufar != null) {
+            for (int x = 0; x < columnas; x++) {
+                for (int y = 0; y < filas; y++) {
+                    if (dirRutaNenufar[x][y] > 0) {
+                        double d = Math.abs(x - ax) + Math.abs(y - ay);
+                        if (d < minDistRutaLog) {
+                            minDistRutaLog = d;
+                        }
                     }
                 }
             }
         }
-        
-        double bonus = 0.0; // Eliminado el bono de 20 puntos porque causaba que el A* nunca quisiera bajarse del nenúfar
-        
-        if (distanciasMeta != null && ax >= 0 && ax < columnas && ay >= 0 && ay < filas) {
-            double dist = distanciasMeta[ax][ay];
-            if (dist < 1000000) {
-                return dist * 50.0;
-            }
+
+        if (minDistRutaLog < 1000000) {
+            // Base 4 millones para que sea la última opción lógica
+            return 4000000 + (minDistRutaLog * 10.0);
         }
-        
-        // Si no encuentra la meta, buscar la catapulta más cercana para intentar explorar
-        double minDistCatapulta = 1000000;
-        for (tools.Vector2d cat : catapultas) {
-            double d = Math.abs(cat.x - ax) + Math.abs(cat.y - ay);
-            if (d < minDistCatapulta) {
-                minDistCatapulta = d;
-            }
-        }
-        
-        if (minDistCatapulta < 1000000) {
-            return 500000 + (minDistCatapulta * 50.0);
-        }
-        
-        return 1000000;
+
+        // Si no hay absolutamente nada, penalización máxima
+        return 6000000;
     }
 }
