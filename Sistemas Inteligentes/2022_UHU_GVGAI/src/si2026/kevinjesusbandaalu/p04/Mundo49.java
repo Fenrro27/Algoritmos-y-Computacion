@@ -13,13 +13,16 @@ public class Mundo49 implements IMundo {
     // ═══ Clase que representa una trayectoria (catapulta o nenúfar) ═════════════
     public static class Trayectoria {
         public static final int TIPO_CATAPULTA = 1;
-        public static final int TIPO_NENUFAR   = 2;
+        public static final int TIPO_NENUFAR = 2;
 
         /** Tipo de vehículo */
         public int tipo;
         /** Celda de capa 0 desde donde se embarca (catapulta o spawn) */
         public Vector2d origen;
-        /** Primera celda de capa 0 donde aterriza/se puede saltar; null si termina en muro */
+        /**
+         * Primera celda de capa 0 donde aterriza/se puede saltar; null si termina en
+         * muro
+         */
         public Vector2d destino;
         /** Dirección de desplazamiento */
         public int direccion;
@@ -30,11 +33,13 @@ public class Mundo49 implements IMundo {
         public String toString() {
             String tipo_s = (tipo == TIPO_CATAPULTA) ? "CAT" : "NEN";
             String dest_s = (destino != null)
-                    ? (int)destino.x + "," + (int)destino.y : "muro";
-            return tipo_s + " [" + (int)origen.x + "," + (int)origen.y
+                    ? (int) destino.x + "," + (int) destino.y
+                    : "muro";
+            return tipo_s + " [" + (int) origen.x + "," + (int) origen.y
                     + "]→[" + dest_s + "] celdas=" + celdas.size();
         }
     }
+
     // ═══════════════════════════════════════════════════════════════
     public Vector2d MiPosicion;
     public Vector2d miOrientacion;
@@ -56,7 +61,9 @@ public class Mundo49 implements IMundo {
     public HashMap<Vector2d, Vector2d> destinoCatapultas;
 
     public HashMap<String, Vector2d> origenCatapulta = new HashMap<>();
-    /** Capa 2: lista de trayectorias (catapultas + nenúfares) con origen y destino */
+    /**
+     * Capa 2: lista de trayectorias (catapultas + nenúfares) con origen y destino
+     */
     public ArrayList<Trayectoria> trayectorias = new ArrayList<>();
     private HashMap<String, String> diccionarioLetras = new HashMap<>();
 
@@ -71,11 +78,13 @@ public class Mundo49 implements IMundo {
     public static final int DIR_ABAJO = 4; // Forzado solo hacia abajo
 
     // Capa 0: suelo firme (libre de moverse en todas direcciones)
-    // Incluye: suelo, zonaMarron, salida, catapultas y spawns de nenúfares (puntos de embarque)
+    // Incluye: suelo, zonaMarron, salida, catapultas y spawns de nenúfares (puntos
+    // de embarque)
     public boolean[][] mapaTransitable;
 
     // Capa 1: celdas de agua por las que pasan nenúfares/proyectiles de catapulta
-    // NUNCA sobreescribe una celda que ya está en mapaTransitable (capa 0 tiene prioridad)
+    // NUNCA sobreescribe una celda que ya está en mapaTransitable (capa 0 tiene
+    // prioridad)
     public boolean[][] mapaTrayectoria;
 
     // Dirección forzada en cada celda: aplica a ambas capas.
@@ -195,11 +204,13 @@ public class Mundo49 implements IMundo {
         }
 
         // REFUERZO: Si vemos nenúfares (logs) moviéndose, marcar su trayectoria
-        // aunque no hayamos detectado el spawn (útil si el spawn está oculto o es inusual).
+        // aunque no hayamos detectado el spawn (útil si el spawn está oculto o es
+        // inusual).
         for (Vector2d n : nenufar) {
             int ny = (int) n.y;
             Integer itype = direccionesNenufares.get(n);
-            if (itype == null) continue;
+            if (itype == null)
+                continue;
             int dir = (itype == 10) ? DIR_DERECHA : DIR_IZQUIERDA;
             for (int x = 0; x < columnas; x++) {
                 if (esAgua[x][ny] && !mapaTransitable[x][ny]) {
@@ -226,6 +237,15 @@ public class Mundo49 implements IMundo {
      * El suelo normal no detiene al avatar lanzado por catapulta.
      */
     private void construirTrayectorias(boolean[][] esArbol, boolean[][] esZonaMarron) {
+        // Grids auxiliares para detección de aterrizajes
+        boolean[][] esCapGrid = new boolean[columnas][filas];
+        for (Vector2d c : catapultas)
+            esCapGrid[(int) c.x][(int) c.y] = true;
+
+        boolean[][] esSalidaGrid = new boolean[columnas][filas];
+        if (salida != null)
+            esSalidaGrid[(int) salida.x][(int) salida.y] = true;
+
         // ─ Catapultas ───────────────────────────────────────────────────────
         for (Vector2d cap : catapultas) {
             int tipo = direccionesCatapultas.get(cap);
@@ -238,30 +258,34 @@ public class Mundo49 implements IMundo {
             t.direccion = dirForzada;
 
             int curX = (int) cap.x + dxC, curY = (int) cap.y + dyC;
-            Vector2d ultimaCeldaVuelo = cap; 
+            Vector2d ultimaCeldaVuelo = cap;
 
             while (curX >= 0 && curX < columnas && curY >= 0 && curY < filas) {
                 if (esArbol[curX][curY]) {
                     t.destino = ultimaCeldaVuelo;
                     break;
                 }
-                if (esZonaMarron[curX][curY]) {
+                if (esZonaMarron[curX][curY] || esCapGrid[curX][curY] || esSalidaGrid[curX][curY]) {
+                    // Aterriza en zona marrón, sobre OTRA catapulta o en la SALIDA
                     t.destino = new Vector2d(curX, curY);
                     break;
                 }
-                // Sigue volando (no marcamos mapaTrayectoria aquí para evitar confusiones en A*)
+                // Sigue volando (no marcamos mapaTrayectoria aquí para evitar confusiones en
+                // A*)
                 t.celdas.add(new Vector2d(curX, curY));
                 ultimaCeldaVuelo = new Vector2d(curX, curY);
-                curX += dxC; curY += dyC;
+                curX += dxC;
+                curY += dyC;
             }
-            if (t.destino == null) t.destino = ultimaCeldaVuelo;
+            if (t.destino == null)
+                t.destino = ultimaCeldaVuelo;
             trayectorias.add(t);
         }
 
         // ─ Nenúfares ─────────────────────────────────────────────────────────
         for (Vector2d sp : spawnsNenufar) {
             int filaSpawn = (int) sp.y;
-            int colSpawn  = (int) sp.x;
+            int colSpawn = (int) sp.x;
             int dirNenufar = (colSpawn <= columnas / 2) ? DIR_DERECHA : DIR_IZQUIERDA;
             int dxN = (dirNenufar == DIR_DERECHA) ? 1 : -1;
 
@@ -273,7 +297,8 @@ public class Mundo49 implements IMundo {
             // Recorrer en la dirección de movimiento del nenúfar
             int curX = colSpawn + dxN;
             while (curX >= 0 && curX < columnas) {
-                if (esArbol[curX][filaSpawn]) break;
+                if (esArbol[curX][filaSpawn])
+                    break;
                 if (mapaTransitable[curX][filaSpawn]) {
                     t.destino = new Vector2d(curX, filaSpawn); // llegada a tierra firme
                     break;
@@ -283,39 +308,49 @@ public class Mundo49 implements IMundo {
                 }
                 curX += dxN;
             }
-            if (!t.celdas.isEmpty()) trayectorias.add(t);
+            if (!t.celdas.isEmpty())
+                trayectorias.add(t);
         }
 
         // Debug: imprimir trayectorias (sólo la primera vez o en cambios)
-      /*  System.out.println("[TRAYECTORIAS] Total=" + trayectorias.size());
-        for (Trayectoria t : trayectorias)
-            System.out.println("  " + t);
-    */
+        /*
+         * System.out.println("[TRAYECTORIAS] Total=" + trayectorias.size());
+         * for (Trayectoria t : trayectorias)
+         * System.out.println("  " + t);
+         */
     }
 
     /** Convierte el itype de una catapulta a la constante de dirección. */
     private int tipoCatapultaADir(int tipo) {
         switch (tipo) {
-            case 14: return DIR_ABAJO;
-            case 15: return DIR_ARRIBA;
-            case 16: return DIR_DERECHA;
-            case 17: return DIR_IZQUIERDA;
-            default: return DIR_LIBRE;
+            case 14:
+                return DIR_ABAJO;
+            case 15:
+                return DIR_ARRIBA;
+            case 16:
+                return DIR_DERECHA;
+            case 17:
+                return DIR_IZQUIERDA;
+            default:
+                return DIR_LIBRE;
         }
     }
 
     private int dx(int dir) {
-        if (dir == DIR_DERECHA)  return  1;
-        if (dir == DIR_IZQUIERDA) return -1;
+        if (dir == DIR_DERECHA)
+            return 1;
+        if (dir == DIR_IZQUIERDA)
+            return -1;
         return 0;
     }
 
     private int dy(int dir) {
-        if (dir == DIR_ABAJO)  return  1;
-        if (dir == DIR_ARRIBA) return -1;
+        if (dir == DIR_ABAJO)
+            return 1;
+        if (dir == DIR_ARRIBA)
+            return -1;
         return 0;
     }
-
 
     public void obtenerObservacionesAnalizadas(StateObservation stateObs) {
         ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
@@ -424,7 +459,7 @@ public class Mundo49 implements IMundo {
                 letra = "A";
                 break; // Avatar
             default:
-           //     System.out.println("Itype desconocido: " + o.itype);
+                // System.out.println("Itype desconocido: " + o.itype);
                 break;
         }
         diccionarioLetras.put(clave, letra);
