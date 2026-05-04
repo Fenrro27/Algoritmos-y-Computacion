@@ -12,7 +12,7 @@ public class Practica_04_exe {
         String spGamesCollection = "examples/all_games_sp.csv";
         String[][] games = Utils.readGames(spGamesCollection);
 
-        boolean visuals = true;
+        boolean visuals = false;
         int gameIdx = 49;
         int partidasPorNivel = 100;
 
@@ -45,7 +45,6 @@ public class Practica_04_exe {
 
                 if ((i + 1) % 25 == 0)
                     System.out.println((i + 1) + "% ");
-              
             }
             System.out.println("-> OK");
         }

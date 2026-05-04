@@ -17,7 +17,6 @@ public class Jugador1 extends AbstractPlayer {
 
     @Override
     public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer timer) {
-        // Actualizamos el conocimiento del mundo en cada paso
         mundo.AnalizarEntorno(stateObs);
          
         return motor.buscar(mundo, timer);

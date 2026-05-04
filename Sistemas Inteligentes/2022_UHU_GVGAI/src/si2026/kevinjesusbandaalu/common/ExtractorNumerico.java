@@ -33,7 +33,7 @@ public class ExtractorNumerico {
         String spGamesCollection = "examples/all_games_sp.csv";
         String[][] games = Utils.readGames(spGamesCollection);
 
-        int gameIdx = 49; 
+        int gameIdx = 78; 
         String gameName = games[gameIdx][1];
         String gamePath = games[gameIdx][0];
 

@@ -2,13 +2,40 @@ package si2026.kevinjesusbandaalu.p04;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import core.game.Observation;
 import core.game.StateObservation;
 import si2026.kevinjesusbandaalu.common.IMundo;
 import tools.Vector2d;
+import ontology.Types;
 
 public class Mundo49 implements IMundo {
+
+    // ═══ Clase que representa una trayectoria (catapulta o nenúfar) ═════════════
+    public static class Trayectoria {
+        public static final int TIPO_CATAPULTA = 1;
+        public static final int TIPO_NENUFAR   = 2;
+
+        /** Tipo de vehículo */
+        public int tipo;
+        /** Celda de capa 0 desde donde se embarca (catapulta o spawn) */
+        public Vector2d origen;
+        /** Primera celda de capa 0 donde aterriza/se puede saltar; null si termina en muro */
+        public Vector2d destino;
+        /** Dirección de desplazamiento */
+        public int direccion;
+        /** Celdas intermedias de la trayectoria (capa 1) */
+        public java.util.List<Vector2d> celdas = new ArrayList<>();
+
+        @Override
+        public String toString() {
+            String tipo_s = (tipo == TIPO_CATAPULTA) ? "CAT" : "NEN";
+            String dest_s = (destino != null)
+                    ? (int)destino.x + "," + (int)destino.y : "muro";
+            return tipo_s + " [" + (int)origen.x + "," + (int)origen.y
+                    + "]→[" + dest_s + "] celdas=" + celdas.size();
+        }
+    }
+    // ═══════════════════════════════════════════════════════════════
     public Vector2d MiPosicion;
     public Vector2d miOrientacion;
     public int Bloque, columnas, filas;
@@ -16,126 +43,44 @@ public class Mundo49 implements IMundo {
     public ArrayList<Vector2d> catapultas;
     public ArrayList<Vector2d> nenufar; // landingpad
     public ArrayList<Vector2d> agua; // water
+    public ArrayList<Vector2d> suelo; // floor
     public ArrayList<Vector2d> zonaMarron; // floor/walls
     public ArrayList<Vector2d> arboles; // deadly obstacles (trees/walls)
+    public ArrayList<Vector2d> spawnsNenufar;
     public Vector2d salida;
 
     public HashMap<Vector2d, Integer> direccionesCatapultas;
     public HashMap<Vector2d, Integer> direccionesNenufares;
     public StateObservation stateObsActual;
 
-    public int[][] dirRutaNenufar; // 1: hay ruta de nenúfar
-    public double[][] distanciasMeta;
-    public HashMap<Vector2d, Integer> tiempoEsperaCatapultas;
     public HashMap<Vector2d, Vector2d> destinoCatapultas;
 
+    public HashMap<String, Vector2d> origenCatapulta = new HashMap<>();
+    /** Capa 2: lista de trayectorias (catapultas + nenúfares) con origen y destino */
+    public ArrayList<Trayectoria> trayectorias = new ArrayList<>();
     private HashMap<String, String> diccionarioLetras = new HashMap<>();
 
-    public void descartarCatapultas() {
-        tiempoEsperaCatapultas = new HashMap<>();
-        destinoCatapultas = new HashMap<>();
-        ArrayList<Vector2d> catapultasAEliminar = new ArrayList<>();
+    public boolean avatarEnTronco = false;
+    public boolean avatarEnVuelo = false;
 
-        for (Vector2d loc : catapultas) {
+    // Constantes de dirección para mapaDireccion
+    public static final int DIR_LIBRE = 0; // Movimiento libre en todas direcciones
+    public static final int DIR_DERECHA = 1; // Forzado solo hacia la derecha
+    public static final int DIR_IZQUIERDA = 2; // Forzado solo hacia la izquierda
+    public static final int DIR_ARRIBA = 3; // Forzado solo hacia arriba
+    public static final int DIR_ABAJO = 4; // Forzado solo hacia abajo
 
-            Integer dir = direccionesCatapultas.get(loc);
-            int dx = 0, dy = 0;
-            if (dir == 14)
-                dy = 1; // ABAJO
-            else if (dir == 15)
-                dy = -1; // ARRIBA
-            else if (dir == 16)
-                dx = 1; // DERECHA
-            else if (dir == 17)
-                dx = -1; // IZQUIERDA
+    // Capa 0: suelo firme (libre de moverse en todas direcciones)
+    // Incluye: suelo, zonaMarron, salida, catapultas y spawns de nenúfares (puntos de embarque)
+    public boolean[][] mapaTransitable;
 
-            int cx = (int) loc.x;
-            int cy = (int) loc.y;
-            int x = cx + dx;
-            int y = cy + dy;
-            int d = 1;
+    // Capa 1: celdas de agua por las que pasan nenúfares/proyectiles de catapulta
+    // NUNCA sobreescribe una celda que ya está en mapaTransitable (capa 0 tiene prioridad)
+    public boolean[][] mapaTrayectoria;
 
-            boolean aterrizaSeguro = false;
-            int mejorEspera = -1;
-
-            while (x >= 0 && x < columnas && y >= 0 && y < filas) {
-                Vector2d posTraj = new Vector2d(x, y);
-
-                // La bala choca contra muros (arboles o zonaMarron)
-                if (zonaMarron.contains(posTraj) || arboles.contains(posTraj)) {
-                    // Al chocar, el avatar se transforma en onground y retrocede un paso (stepBack)
-                    Vector2d prevPos = new Vector2d(x - dx, y - dy);
-                    boolean prevEsVacia = false;
-                    if (prevPos.x >= 0 && prevPos.x < columnas && prevPos.y >= 0 && prevPos.y < filas) {
-                        prevEsVacia = stateObsActual.getObservationGrid()[(int) prevPos.x][(int) prevPos.y].isEmpty();
-                    }
-
-                    // Si el paso anterior es suelo vacío, zonaMarron, ruta de nenúfar o LA SALIDA,
-                    // aterrizamos seguros
-                    if (prevEsVacia || zonaMarron.contains(prevPos)
-                            || dirRutaNenufar[(int) prevPos.x][(int) prevPos.y] > 0 ||
-                            (salida != null && salida.equals(prevPos))) {
-                        aterrizaSeguro = true;
-                        if (mejorEspera == -1 || 0 < mejorEspera)
-                            mejorEspera = 0;
-                        x = (int) prevPos.x;
-                        y = (int) prevPos.y;
-                    }
-                    break; // El vuelo no continúa más allá del muro
-                }
-
-                // Comprobar si un nenúfar móvil nos puede interceptar aquí
-                for (Vector2d n : nenufar) {
-                    if (n.y == y) {
-                        Integer dirNenufar = direccionesNenufares.get(n);
-                        if (dirNenufar != null) {
-                            int w = -1;
-                            if (dirNenufar == 10 && n.x <= x) { // Mueve a derecha (asumido 10)
-                                boolean pathClear = true;
-                                for (int nx = (int) n.x; nx <= x; nx++) {
-                                    Vector2d obst = new Vector2d(nx, y);
-                                    if (arboles.contains(obst) || zonaMarron.contains(obst)) {
-                                        pathClear = false;
-                                        break;
-                                    }
-                                }
-                                if (pathClear)
-                                    w = (int) (x - n.x) * 10 - d;
-                            } else if (dirNenufar == 11 && n.x >= x) { // Mueve a izquierda (asumido 11)
-                                boolean pathClear = true;
-                                for (int nx = (int) n.x; nx >= x; nx--) {
-                                    Vector2d obst = new Vector2d(nx, y);
-                                    if (arboles.contains(obst) || zonaMarron.contains(obst)) {
-                                        pathClear = false;
-                                        break;
-                                    }
-                                }
-                                if (pathClear)
-                                    w = (int) (n.x - x) * 10 - d;
-                            }
-                            if (w >= 0) {
-                                aterrizaSeguro = true;
-                                if (mejorEspera == -1 || w < mejorEspera)
-                                    mejorEspera = w;
-                            }
-                        }
-                    }
-                }
-
-                x += dx;
-                y += dy;
-                d++;
-            }
-
-            if (!aterrizaSeguro) {
-                catapultasAEliminar.add(loc);
-            } else {
-                tiempoEsperaCatapultas.put(loc, mejorEspera);
-                destinoCatapultas.put(loc, new Vector2d(x, y));
-            }
-        }
-        catapultas.removeAll(catapultasAEliminar);
-    }
+    // Dirección forzada en cada celda: aplica a ambas capas.
+    // Catapultas y spawns (capa 0) también tienen dirección forzada.
+    public int[][] mapaDireccion;
 
     public Mundo49(StateObservation stateObs) {
         Bloque = stateObs.getBlockSize();
@@ -145,8 +90,10 @@ public class Mundo49 implements IMundo {
         catapultas = new ArrayList<>();
         nenufar = new ArrayList<>();
         agua = new ArrayList<>();
+        suelo = new ArrayList<>();
         zonaMarron = new ArrayList<>();
         arboles = new ArrayList<>();
+        spawnsNenufar = new ArrayList<>();
         direccionesCatapultas = new HashMap<>();
         direccionesNenufares = new HashMap<>();
 
@@ -156,192 +103,268 @@ public class Mundo49 implements IMundo {
     @Override
     public void AnalizarEntorno(StateObservation stateObs) {
         this.stateObsActual = stateObs;
-        catapultas.clear();
-        nenufar.clear();
-        agua.clear();
-        zonaMarron.clear();
-        arboles.clear();
-        direccionesCatapultas.clear();
-        direccionesNenufares.clear();
-        salida = null;
+        limpiarListas();
 
         Vector2d pos = stateObs.getAvatarPosition();
         MiPosicion = new Vector2d(pos.x / Bloque, pos.y / Bloque);
         miOrientacion = stateObs.getAvatarOrientation();
 
         obtenerObservacionesAnalizadas(stateObs);
-        calcularRutasNenufares();
-        descartarCatapultas();
-        calcularMapaDistancias();
-        pintarTerreno(stateObs);
+
+        mapaTransitable = new boolean[columnas][filas];
+        mapaTrayectoria = new boolean[columnas][filas];
+        mapaDireccion = new int[columnas][filas]; // 0 = DIR_LIBRE por defecto
+
+        generarMapaAStar();
+
     }
 
-    private void calcularRutasNenufares() {
-        if (dirRutaNenufar == null) {
-            dirRutaNenufar = new int[columnas][filas];
-        } else {
-            for (int i = 0; i < columnas; i++) {
-                for (int j = 0; j < filas; j++) {
-                    dirRutaNenufar[i][j] = 0;
+    private void limpiarListas() {
+        catapultas.clear();
+        nenufar.clear();
+        agua.clear();
+        suelo.clear();
+        zonaMarron.clear();
+        arboles.clear();
+        spawnsNenufar.clear();
+        direccionesCatapultas.clear();
+        direccionesNenufares.clear();
+        origenCatapulta.clear();
+        trayectorias.clear();
+        salida = null;
+
+    }
+
+    private void generarMapaAStar() {
+        // Grids booleanos para búsqueda O(1) por coordenada.
+        // NOTA: Vector2d de GVGAI NO sobreescribe equals/hashCode,
+        // por lo que HashSet<Vector2d> no funciona. Usamos boolean[][].
+        boolean[][] esArbol = new boolean[columnas][filas];
+        boolean[][] esSuelo = new boolean[columnas][filas];
+        boolean[][] esZonaMarron = new boolean[columnas][filas];
+        boolean[][] esAgua = new boolean[columnas][filas];
+
+        for (Vector2d v : arboles)
+            esArbol[(int) v.x][(int) v.y] = true;
+        for (Vector2d v : suelo)
+            esSuelo[(int) v.x][(int) v.y] = true;
+        for (Vector2d v : zonaMarron)
+            esZonaMarron[(int) v.x][(int) v.y] = true;
+        for (Vector2d v : agua)
+            esAgua[(int) v.x][(int) v.y] = true;
+
+        // ── CAPA 0: suelo firme ─────────────────────────────────────────────────
+        // Suelo, zonaMarron y salida → transitables sin restricción de dirección.
+        for (Vector2d v : suelo)
+            mapaTransitable[(int) v.x][(int) v.y] = true;
+        for (Vector2d v : zonaMarron)
+            mapaTransitable[(int) v.x][(int) v.y] = true;
+        if (salida != null)
+            mapaTransitable[(int) salida.x][(int) salida.y] = true;
+
+        // Catapultas → en capa 0 (el avatar puede caminar hasta ellas) +
+        // dirección forzada en mapaDireccion (al pararse encima se lanza).
+        for (Vector2d cap : catapultas) {
+            mapaTransitable[(int) cap.x][(int) cap.y] = true;
+            int tipo = direccionesCatapultas.get(cap);
+            int dirForzada = tipoCatapultaADir(tipo);
+            mapaDireccion[(int) cap.x][(int) cap.y] = dirForzada;
+        }
+
+        // Spawns de nenúfares → en capa 0 (punto de embarque) +
+        // dirección forzada (el nenúfar pasa moviéndose en esa dirección).
+        for (Vector2d sp : spawnsNenufar) {
+            int filaSpawn = (int) sp.y;
+            int colSpawn = (int) sp.x;
+
+            int dirNenufar = (colSpawn == 0 || colSpawn <= columnas / 2)
+                    ? DIR_DERECHA
+                    : DIR_IZQUIERDA;
+
+            // El spawn está en capa 0 (el avatar puede llegar aquí caminando).
+            mapaTransitable[colSpawn][filaSpawn] = true;
+            mapaDireccion[colSpawn][filaSpawn] = dirNenufar;
+
+            // Expandir la trayectoria del nenúfar en CAPA 1 (solo agua).
+            for (int x = 0; x < columnas; x++) {
+                if (esAgua[x][filaSpawn] && !mapaTransitable[x][filaSpawn]) {
+                    mapaTrayectoria[x][filaSpawn] = true;
+                    mapaDireccion[x][filaSpawn] = dirNenufar;
                 }
             }
         }
+
+        // REFUERZO: Si vemos nenúfares (logs) moviéndose, marcar su trayectoria
+        // aunque no hayamos detectado el spawn (útil si el spawn está oculto o es inusual).
         for (Vector2d n : nenufar) {
-            // Trazar ruta horizontal para el tronco
-            for (int step = -1; step <= 1; step += 2) {
-                int nx = (int) n.x;
-                int ny = (int) n.y;
-                while (nx >= 0 && nx < columnas) {
-                    Vector2d pos = new Vector2d(nx, ny);
-                    // Si choca con pared o catapulta, termina la ruta
-                    boolean esPared = arboles.contains(pos) || zonaMarron.contains(pos) || catapultas.contains(pos);
-                    if (esPared && !pos.equals(n))
-                        break;
-                    dirRutaNenufar[nx][ny] = 1;
-                    nx += step;
+            int ny = (int) n.y;
+            Integer itype = direccionesNenufares.get(n);
+            if (itype == null) continue;
+            int dir = (itype == 10) ? DIR_DERECHA : DIR_IZQUIERDA;
+            for (int x = 0; x < columnas; x++) {
+                if (esAgua[x][ny] && !mapaTransitable[x][ny]) {
+                    mapaTrayectoria[x][ny] = true;
+                    mapaDireccion[x][ny] = dir;
                 }
             }
         }
+
+        // ── SIEMPRE: los árboles bloquean ambas capas ───────────────────────────
+        for (Vector2d arb : arboles) {
+            mapaTransitable[(int) arb.x][(int) arb.y] = false;
+            mapaTrayectoria[(int) arb.x][(int) arb.y] = false;
+            mapaDireccion[(int) arb.x][(int) arb.y] = DIR_LIBRE;
+        }
+
+        // ── CAPA 2: construir lista de trayectorias ──────────────────────────────
+        construirTrayectorias(esArbol, esZonaMarron);
     }
 
-    private void calcularMapaDistancias() {
-        if (distanciasMeta == null) {
-            distanciasMeta = new double[columnas][filas];
-        }
-        for (int i = 0; i < columnas; i++) {
-            for (int j = 0; j < filas; j++) {
-                distanciasMeta[i][j] = 1000000;
-            }
-        }
+    /**
+     * Construye la lista de objetos Trayectoria.
+     * Reglas de parada para catapultas: muro (esArbol) o zonaMarron (landingpad).
+     * El suelo normal no detiene al avatar lanzado por catapulta.
+     */
+    private void construirTrayectorias(boolean[][] esArbol, boolean[][] esZonaMarron) {
+        // ─ Catapultas ───────────────────────────────────────────────────────
+        for (Vector2d cap : catapultas) {
+            int tipo = direccionesCatapultas.get(cap);
+            int dirForzada = tipoCatapultaADir(tipo);
+            int dxC = dx(dirForzada), dyC = dy(dirForzada);
 
-        if (salida == null)
-            return;
+            Trayectoria t = new Trayectoria();
+            t.tipo = Trayectoria.TIPO_CATAPULTA;
+            t.origen = cap;
+            t.direccion = dirForzada;
 
-        java.util.PriorityQueue<NodeDist> pq = new java.util.PriorityQueue<>();
-        distanciasMeta[(int) salida.x][(int) salida.y] = 0;
-        pq.add(new NodeDist((int) salida.x, (int) salida.y, 0));
+            int curX = (int) cap.x + dxC, curY = (int) cap.y + dyC;
+            Vector2d ultimaCeldaVuelo = cap; 
 
-        int[] dx = { 0, 0, 1, -1 };
-        int[] dy = { 1, -1, 0, 0 };
-
-        while (!pq.isEmpty()) {
-            NodeDist actual = pq.poll();
-            if (actual.dist > distanciasMeta[actual.x][actual.y])
-                continue;
-
-            Vector2d posActual = new Vector2d(actual.x, actual.y);
-
-            // Transiciones por adyacencia
-            for (int i = 0; i < 4; i++) {
-                int nx = actual.x + dx[i];
-                int ny = actual.y + dy[i];
-                if (nx >= 0 && nx < columnas && ny >= 0 && ny < filas) {
-                    Vector2d vecina = new Vector2d(nx, ny);
-                    boolean esVacia = stateObsActual.getObservationGrid()[nx][ny].isEmpty();
-
-                    // Es muro si está en la lista de árboles o si es agua y no hay ruta de nenúfar
-                    boolean esMuro = arboles.contains(vecina) || (agua.contains(vecina) && dirRutaNenufar[nx][ny] == 0);
-
-                    if (!esMuro) {
-                        double nuevaDist = actual.dist + 1;
-                        if (nuevaDist < distanciasMeta[nx][ny]) {
-                            distanciasMeta[nx][ny] = nuevaDist;
-                            pq.add(new NodeDist(nx, ny, nuevaDist));
-                        }
-                    }
+            while (curX >= 0 && curX < columnas && curY >= 0 && curY < filas) {
+                if (esArbol[curX][curY]) {
+                    t.destino = ultimaCeldaVuelo;
+                    break;
                 }
-            }
-
-            // Transiciones inversas por catapulta (si la catapulta cae aquí, podemos "ir"
-            // desde la catapulta hacia aquí)
-            for (Vector2d cat : catapultas) {
-                if (destinoCatapultas.containsKey(cat)) {
-                    Vector2d destino = destinoCatapultas.get(cat);
-                    if (destino.x == actual.x && destino.y == actual.y) {
-                        // El coste de la catapulta es la distancia de vuelo
-                        double distVuelo = Math.abs(cat.x - destino.x) + Math.abs(cat.y - destino.y);
-                        double nuevaDist = actual.dist + distVuelo;
-                        if (nuevaDist < distanciasMeta[(int) cat.x][(int) cat.y]) {
-                            distanciasMeta[(int) cat.x][(int) cat.y] = nuevaDist;
-                            pq.add(new NodeDist((int) cat.x, (int) cat.y, nuevaDist));
-                        }
-                    }
+                if (esZonaMarron[curX][curY]) {
+                    t.destino = new Vector2d(curX, curY);
+                    break;
                 }
+                // Sigue volando (no marcamos mapaTrayectoria aquí para evitar confusiones en A*)
+                t.celdas.add(new Vector2d(curX, curY));
+                ultimaCeldaVuelo = new Vector2d(curX, curY);
+                curX += dxC; curY += dyC;
             }
+            if (t.destino == null) t.destino = ultimaCeldaVuelo;
+            trayectorias.add(t);
         }
-        // Debug: Print distance map to identify disconnection
-        /*
-         * System.out.println("Distancias Meta:");
-         * for (int y = 0; y < filas; y++) {
-         * for (int x = 0; x < columnas; x++) {
-         * if (distanciasMeta[x][y] == 1000000) System.out.print(" X ");
-         * else System.out.print(String.format("%2d ", (int)distanciasMeta[x][y]));
-         * }
-         * System.out.println();
-         * }
-         */
+
+        // ─ Nenúfares ─────────────────────────────────────────────────────────
+        for (Vector2d sp : spawnsNenufar) {
+            int filaSpawn = (int) sp.y;
+            int colSpawn  = (int) sp.x;
+            int dirNenufar = (colSpawn <= columnas / 2) ? DIR_DERECHA : DIR_IZQUIERDA;
+            int dxN = (dirNenufar == DIR_DERECHA) ? 1 : -1;
+
+            Trayectoria t = new Trayectoria();
+            t.tipo = Trayectoria.TIPO_NENUFAR;
+            t.origen = sp; // el spawn es el punto de embarque principal
+            t.direccion = dirNenufar;
+
+            // Recorrer en la dirección de movimiento del nenúfar
+            int curX = colSpawn + dxN;
+            while (curX >= 0 && curX < columnas) {
+                if (esArbol[curX][filaSpawn]) break;
+                if (mapaTransitable[curX][filaSpawn]) {
+                    t.destino = new Vector2d(curX, filaSpawn); // llegada a tierra firme
+                    break;
+                }
+                if (mapaTrayectoria[curX][filaSpawn]) {
+                    t.celdas.add(new Vector2d(curX, filaSpawn));
+                }
+                curX += dxN;
+            }
+            if (!t.celdas.isEmpty()) trayectorias.add(t);
+        }
+
+        // Debug: imprimir trayectorias (sólo la primera vez o en cambios)
+      /*  System.out.println("[TRAYECTORIAS] Total=" + trayectorias.size());
+        for (Trayectoria t : trayectorias)
+            System.out.println("  " + t);
+    */
     }
 
-    private class NodeDist implements Comparable<NodeDist> {
-        int x, y;
-        double dist;
-
-        NodeDist(int x, int y, double dist) {
-            this.x = x;
-            this.y = y;
-            this.dist = dist;
-        }
-
-        public int compareTo(NodeDist o) {
-            return Double.compare(this.dist, o.dist);
+    /** Convierte el itype de una catapulta a la constante de dirección. */
+    private int tipoCatapultaADir(int tipo) {
+        switch (tipo) {
+            case 14: return DIR_ABAJO;
+            case 15: return DIR_ARRIBA;
+            case 16: return DIR_DERECHA;
+            case 17: return DIR_IZQUIERDA;
+            default: return DIR_LIBRE;
         }
     }
+
+    private int dx(int dir) {
+        if (dir == DIR_DERECHA)  return  1;
+        if (dir == DIR_IZQUIERDA) return -1;
+        return 0;
+    }
+
+    private int dy(int dir) {
+        if (dir == DIR_ABAJO)  return  1;
+        if (dir == DIR_ARRIBA) return -1;
+        return 0;
+    }
+
 
     public void obtenerObservacionesAnalizadas(StateObservation stateObs) {
         ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
-
         for (int x = 0; x < grid.length; x++) {
             for (int y = 0; y < grid[x].length; y++) {
-                ArrayList<Observation> obsEnCelda = grid[x][y];
+                Vector2d celda = new Vector2d(x, y);
 
-                if (!obsEnCelda.isEmpty()) {
-                    Vector2d celda = new Vector2d(x, y);
-                    for (Observation obs : obsEnCelda) {
-                        asignarLetraADiccionario(obs);
+                // Si la celda no tiene ninguna observación, suelo transitable
+                if (grid[x][y].isEmpty()) {
+                    suelo.add(celda);
+                    continue;
+                }
 
-                        switch (obs.itype) {
-                            case 3: // Water
-                                agua.add(celda);
-                                break;
-                            case 0: // Wall
-                            case 7: // ForestR
-                            case 8: // ForestL
-                                arboles.add(celda);
-                                break;
-                            case 5: // Goal
-                                salida = celda;
-                                break;
-                            case 14:
-                            case 15:
-                            case 16:
-                            case 17: // Catapults
-                                catapultas.add(celda);
-                                direccionesCatapultas.put(celda, obs.itype);
-                                break;
-                            case 12: // Landingpad
-                                zonaMarron.add(celda);
-                                break;
-                            case 10:
-                            case 11: // Logs
-                                nenufar.add(celda);
-                                direccionesNenufares.put(celda, obs.itype);
-                                break;
-                            case 2: // Background
-                            case 4: // Floor
-                            case 19: // Avatar
-                                // Ignore these for mapping, they are traversable or handled elsewhere
-                                break;
-                        }
+                for (Observation obs : grid[x][y]) {
+                    asignarLetraADiccionario(obs);
+                    switch (obs.itype) {
+                        case 3:
+                            agua.add(celda);
+                            break;
+                        case 4:
+                            suelo.add(celda);
+                            break;
+                        case 0:
+                            arboles.add(celda);
+                            break; // Wall
+                        case 7:
+                            spawnsNenufar.add(celda);
+                            break; // Spawn nenúfar izquierda
+                        case 8:
+                            spawnsNenufar.add(celda);
+                            break; // Spawn nenúfar derecha
+                        case 5:
+                            salida = celda;
+                            break;
+                        case 14:
+                        case 15:
+                        case 16:
+                        case 17: // Catapultas
+                            catapultas.add(celda);
+                            direccionesCatapultas.put(celda, obs.itype);
+                            break;
+                        case 12:
+                            zonaMarron.add(celda);
+                            break; // Landingpad
+                        case 10:
+                        case 11: // Logs
+                            nenufar.add(celda);
+                            direccionesNenufares.put(celda, obs.itype);
+                            break;
                     }
                 }
             }
@@ -401,157 +424,10 @@ public class Mundo49 implements IMundo {
                 letra = "A";
                 break; // Avatar
             default:
-                System.out.println("Itype desconocido: " + o.itype);
+           //     System.out.println("Itype desconocido: " + o.itype);
                 break;
         }
         diccionarioLetras.put(clave, letra);
     }
 
-    private void pintarTerreno(StateObservation stateObs) {
-        boolean[][] alcanzables = new boolean[columnas][filas];
-        if (MiPosicion != null) {
-            java.util.Queue<Vector2d> q = new java.util.LinkedList<>();
-            q.add(MiPosicion);
-            alcanzables[(int) MiPosicion.x][(int) MiPosicion.y] = true;
-
-            int[] dx = { 0, 0, 1, -1 };
-            int[] dy = { 1, -1, 0, 0 };
-
-            while (!q.isEmpty()) {
-                Vector2d actual = q.poll();
-                int cx = (int) actual.x;
-                int cy = (int) actual.y;
-
-                for (int i = 0; i < 4; i++) {
-                    int nx = cx + dx[i];
-                    int ny = cy + dy[i];
-
-                    if (nx >= 0 && nx < columnas && ny >= 0 && ny < filas && !alcanzables[nx][ny]) {
-                        Vector2d vecina = new Vector2d(nx, ny);
-                        boolean esVacia = stateObs.getObservationGrid()[nx][ny].isEmpty();
-
-                        // Es muro si está en la lista de árboles o si es agua y no hay ruta de nenúfar
-                        boolean esMuro = arboles.contains(vecina) || (agua.contains(vecina) && dirRutaNenufar[nx][ny] == 0);
-
-                        if (!esMuro) {
-                            alcanzables[nx][ny] = true;
-                            q.add(vecina);
-                        }
-                    }
-                }
-
-                // Transición por catapultas
-                for (Vector2d cat : catapultas) {
-                    if ((int) cat.x == cx && (int) cat.y == cy) {
-                        if (destinoCatapultas.containsKey(cat)) {
-                            Vector2d dest = destinoCatapultas.get(cat);
-                            if (dest != null && dest.x >= 0 && dest.x < columnas && dest.y >= 0 && dest.y < filas) {
-                                if (!alcanzables[(int) dest.x][(int) dest.y]) {
-                                    alcanzables[(int) dest.x][(int) dest.y] = true;
-                                    q.add(dest);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
-        System.out.println("\n=== MAPA DEL TERRENO ACCESIBLE ===");
-        System.out.print("    ");
-        for (int x = 0; x < grid.length; x++)
-            System.out.print(String.format("%2d", x));
-        System.out.println();
-        System.out.print("\n    ");
-        for (int i = 0; i < grid.length; i++)
-            System.out.print("--");
-        System.out.println();
-
-        for (int y = 0; y < grid[0].length; y++) {
-            System.out.print(String.format("%2d |", y));
-            for (int x = 0; x < grid.length; x++) {
-                if (!alcanzables[x][y]) {
-                    System.out.print("  "); // No dibujamos nada para ocultar otras islas/muros
-                    continue;
-                }
-
-                ArrayList<Observation> obsEnCelda = grid[x][y];
-                if (obsEnCelda.isEmpty()) {
-                    System.out.print(" ."); // Suelo transitable
-                } else {
-                    String letraElegida = null;
-                    for (Observation o : obsEnCelda) {
-                        String clave = String.valueOf(o.itype);
-                        if (diccionarioLetras.containsKey(clave)) {
-                            letraElegida = diccionarioLetras.get(clave);
-                            if (!letraElegida.equals("?"))
-                                break;
-                        }
-                    }
-                    System.out.print(" " + (letraElegida != null ? letraElegida : " "));
-                }
-            }
-            System.out.println();
-        }
-        System.out.println("========================\n");
-    }
-
-    public double heuristica(StateObservation stateObs) {
-        if (stateObs.getGameWinner() == ontology.Types.WINNER.PLAYER_LOSES)
-            return 10000000;
-        if (stateObs.getGameWinner() == ontology.Types.WINNER.PLAYER_WINS)
-            return 0;
-
-        tools.Vector2d pos = stateObs.getAvatarPosition();
-        int ax = (int) (pos.x / Bloque);
-        int ay = (int) (pos.y / Bloque);
-
-        // 1. SI LA META ES ACCESIBLE (vía tierra o ruta actual de troncos)
-        if (distanciasMeta != null && ax >= 0 && ax < columnas && ay >= 0 && ay < filas) {
-            double dist = distanciasMeta[ax][ay];
-            if (dist < 1000000) {
-                return dist * 10.0; // Multiplicador bajo para prioridad máxima
-            }
-        }
-
-        // 2. SI NO ES ACCESIBLE DIRECTAMENTE, BUSCAR CATAPULTAS
-        double minDistCatapulta = 1000000;
-        if (catapultas != null) {
-            for (tools.Vector2d cat : catapultas) {
-                double d = Math.abs(cat.x - ax) + Math.abs(cat.y - ay);
-                if (d < minDistCatapulta) {
-                    minDistCatapulta = d;
-                }
-            }
-        }
-
-        if (minDistCatapulta < 1000000) {
-            // Base 2 millones para que sea peor que cualquier camino directo a meta
-            return 2000000 + (minDistCatapulta * 10.0);
-        }
-
-        // 3. SI NO HAY CATAPULTAS, BUSCAR RUTAS DE NENÚFARES (donde pasan los troncos)
-        double minDistRutaLog = 1000000;
-        if (dirRutaNenufar != null) {
-            for (int x = 0; x < columnas; x++) {
-                for (int y = 0; y < filas; y++) {
-                    if (dirRutaNenufar[x][y] > 0) {
-                        double d = Math.abs(x - ax) + Math.abs(y - ay);
-                        if (d < minDistRutaLog) {
-                            minDistRutaLog = d;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (minDistRutaLog < 1000000) {
-            // Base 4 millones para que sea la última opción lógica
-            return 4000000 + (minDistRutaLog * 10.0);
-        }
-
-        // Si no hay absolutamente nada, penalización máxima
-        return 6000000;
-    }
 }
