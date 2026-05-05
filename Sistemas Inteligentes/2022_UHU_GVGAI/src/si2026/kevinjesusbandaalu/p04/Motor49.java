@@ -71,7 +71,7 @@ public class Motor49 {
                         int nx = wx + d[0], ny = wy + d[1];
                         if (nx < 0 || nx >= mundo.columnas || ny < 0 || ny >= mundo.filas) continue;
                         if (mundo.mapaTrayectoria[nx][ny] && hayNenufarEn(nx, ny, mundo)) {
-                    //        System.out.println("[NEN] ¡Subiendo al nenúfar!");
+                            System.out.println("[LOG] Saltando al nenúfar detectado en " + nx + "," + ny);
                             objetivoFijo = null;
                             return traducirDireccion(new Vector2d(wx, wy), new Vector2d(nx, ny));
                         }
@@ -163,7 +163,7 @@ public class Motor49 {
             // Si el siguiente paso es agua, esperar a que haya un nenúfar allí
             if (mundo.mapaTrayectoria[sx][sy] && !mundo.mapaTransitable[sx][sy]) {
                 if (hayNenufarEn(sx, sy, mundo)) {
-             //       System.out.println("[ESCAPE] Saltando de nenúfar a nenúfar: " + sx + "," + sy);
+                    System.out.println("[LOG] Saltando de nenúfar a nenúfar en " + sx + "," + sy);
                     return traducirDireccion(mundo.MiPosicion, sig);
                 } else {
                     return ACTIONS.ACTION_NIL; // Esperar en el actual
@@ -193,9 +193,16 @@ public class Motor49 {
                 } else {
                     // Es un nenúfar: el mejor sitio para esperar es la celda de tierra desde la que saltaremos
                     Vector2d espera = camino.get(i-1); 
+                    Vector2d celdaTray = camino.get(i);
                     
-                    // Si ya estamos en la celda de espera, no llamamos a navegarA (evita bucles)
+                    // Si ya estamos en la celda de espera, comprobar si podemos saltar ya
                     if (igualPos(mundo.MiPosicion, espera)) {
+                        if (hayNenufarEn((int)celdaTray.x, (int)celdaTray.y, mundo)) {
+                            System.out.println("[LOG] Nenúfar detectado al llegar al punto de salto " + (int)celdaTray.x + "," + (int)celdaTray.y + ". Saltando.");
+                            objetivoFijo = null;
+                            return traducirDireccion(espera, celdaTray);
+                        }
+                        System.out.println("[LOG] Esperando nenúfar en posición de salto: " + (int)espera.x + "," + (int)espera.y);
                         objetivoFijo = espera;
                         objetivoEsCatapulta = false;
                         return ACTIONS.ACTION_NIL;

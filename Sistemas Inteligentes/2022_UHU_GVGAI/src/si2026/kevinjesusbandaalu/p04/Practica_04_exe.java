@@ -12,7 +12,7 @@ public class Practica_04_exe {
         String spGamesCollection = "examples/all_games_sp.csv";
         String[][] games = Utils.readGames(spGamesCollection);
 
-        boolean visuals = true;
+        boolean visuals = false;
         int gameIdx = 49;
         int partidasPorNivel = 100;
 
@@ -26,7 +26,7 @@ public class Practica_04_exe {
 
         System.out.println("Iniciando simulación masiva de " + gameName + ": 5 niveles x 100 partidas...");
 
-        for (int levelIdx = 3; levelIdx < 5; levelIdx++) {
+        for (int levelIdx = 0; levelIdx < 5; levelIdx++) {
             System.out.println("\nEjecutando Nivel " + levelIdx + "...");
 
             for (int i = 0; i < partidasPorNivel; i++) {

@@ -180,8 +180,8 @@ public class Mundo49 implements IMundo {
             mapaDireccion[(int) cap.x][(int) cap.y] = dirForzada;
         }
 
-        // Spawns de nenúfares → en capa 0 (punto de embarque) +
-        // dirección forzada (el nenúfar pasa moviéndose en esa dirección).
+        // Spawns de nenúfares → NO en capa 0 (el avatar debe esperar el nenúfar).
+        // Se marcan en capa 1 (trayectoria) para que A* pueda planificar el cruce.
         for (Vector2d sp : spawnsNenufar) {
             int filaSpawn = (int) sp.y;
             int colSpawn = (int) sp.x;
@@ -190,8 +190,9 @@ public class Mundo49 implements IMundo {
                     ? DIR_DERECHA
                     : DIR_IZQUIERDA;
 
-            // El spawn está en capa 0 (el avatar puede llegar aquí caminando).
-            mapaTransitable[colSpawn][filaSpawn] = true;
+            // El spawn NO es transitable directamente (es agua).
+            mapaTransitable[colSpawn][filaSpawn] = false;
+            mapaTrayectoria[colSpawn][filaSpawn] = true;
             mapaDireccion[colSpawn][filaSpawn] = dirNenufar;
 
             // Expandir la trayectoria del nenúfar en CAPA 1 (solo agua).
