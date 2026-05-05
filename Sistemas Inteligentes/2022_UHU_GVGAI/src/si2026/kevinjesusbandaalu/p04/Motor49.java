@@ -123,7 +123,17 @@ public class Motor49 {
 
             for (Vector2d v : vecinos(cur.pos, mundo, usarTrayectoria)) {
                 String vk = k(v);
-                double ng = cur.g + 1;
+                
+                // Cálculo de coste: 1 por defecto (caminar), dist+2 para saltos
+                double cost = 1.0;
+                if (esCatapulta((int)cur.pos.x, (int)cur.pos.y, mundo)) {
+                    Mundo49.Trayectoria t = buscarTrayectoriaPorOrigen((int)cur.pos.x, (int)cur.pos.y, mundo);
+                    if (t != null && t.destino != null && igualPos(v, t.destino)) {
+                        cost = dist(cur.pos, v) + 2.0;
+                    }
+                }
+                
+                double ng = cur.g + cost;
                 if (ng < gScore.getOrDefault(vk, Double.MAX_VALUE)) {
                     gScore.put(vk, ng);
                     open.add(new AN(v, cur, ng, dist(v, fin)));
@@ -217,7 +227,7 @@ public class Motor49 {
     //  ESTRATEGIA NENÚFAR
     //  filaT / colT = coordenadas de la primera celda de trayectoria encontrada
     // ═══════════════════════════════════════════════════════════════
-    private ACTIONS estrategiaNenufar(int filaT, int colT, Mundo49 mundo, ElapsedCpuTimer timer) {
+   /*  private ACTIONS estrategiaNenufar(int filaT, int colT, Mundo49 mundo, ElapsedCpuTimer timer) {
         int ax = (int) mundo.MiPosicion.x, ay = (int) mundo.MiPosicion.y;
         int dir = mundo.mapaDireccion[colT][filaT];
         int dxN = dxDir(dir), dyN = dyDir(dir);
@@ -254,7 +264,7 @@ public class Motor49 {
         // Navegar hacia la mejor celda de espera usando capa 0
      //   System.out.println("[NENUFAR] Navegando a celda de espera " + (int)espera.x + "," + (int)espera.y);
         return navegarA(espera, mundo, timer);
-    }
+    }*/
 
     /**
      * Devuelve la celda de capa 0 más cercana al spawn del nenúfar en la fila indicada.
@@ -315,7 +325,20 @@ public class Motor49 {
             for (int[] d : dirs4) {
                 int nx = x + d[0], ny = y + d[1];
                 if (nx < 0 || nx >= mundo.columnas || ny < 0 || ny >= mundo.filas) continue;
-                if (mundo.mapaTransitable[nx][ny] || (usarTray && mundo.mapaTrayectoria[nx][ny])) {
+                
+                if (mundo.mapaTransitable[nx][ny]) {
+                    // SI EL VECINO ES CATAPULTA: aplicar filtros de seguridad y modo
+                    if (esCatapulta(nx, ny, mundo)) {
+                        if (!usarTray) continue; // En navegación pura es muro
+                        
+                        // En planificación, verificar si el aterrizaje es seguro
+                        Mundo49.Trayectoria t = buscarTrayectoriaPorOrigen(nx, ny, mundo);
+                        if (t == null || t.destino == null || !mundo.mapaTransitable[(int)t.destino.x][(int)t.destino.y]) {
+                            continue; // Es muro si nos mata o bloquea
+                        }
+                    }
+                    result.add(new Vector2d(nx, ny));
+                } else if (usarTray && mundo.mapaTrayectoria[nx][ny]) {
                     result.add(new Vector2d(nx, ny));
                 }
             }
@@ -335,7 +358,19 @@ public class Motor49 {
                 // Si es spawn de nenúfar, solo podemos movernos en la dirección del flujo
                 int nx = x + dxDir(dir), ny = y + dyDir(dir);
                 if (nx >= 0 && nx < mundo.columnas && ny >= 0 && ny < mundo.filas) {
-                    if (mundo.mapaTransitable[nx][ny] || (usarTray && mundo.mapaTrayectoria[nx][ny])) {
+                    if (mundo.mapaTransitable[nx][ny]) {
+                        boolean ok = true;
+                        if (esCatapulta(nx, ny, mundo)) {
+                            if (!usarTray) ok = false;
+                            else {
+                                Mundo49.Trayectoria t = buscarTrayectoriaPorOrigen(nx, ny, mundo);
+                                if (t == null || t.destino == null || !mundo.mapaTransitable[(int)t.destino.x][(int)t.destino.y]) {
+                                    ok = false;
+                                }
+                            }
+                        }
+                        if (ok) result.add(new Vector2d(nx, ny));
+                    } else if (usarTray && mundo.mapaTrayectoria[nx][ny]) {
                         result.add(new Vector2d(nx, ny));
                     }
                 }
@@ -346,7 +381,15 @@ public class Motor49 {
             for (int[] d : dirs4) {
                 int nx = x + d[0], ny = y + d[1];
                 if (nx < 0 || nx >= mundo.columnas || ny < 0 || ny >= mundo.filas) continue;
+                
                 if (mundo.mapaTransitable[nx][ny]) {
+                    if (esCatapulta(nx, ny, mundo)) {
+                        if (!usarTray) continue; // Muro en modo navegación
+                        Mundo49.Trayectoria t = buscarTrayectoriaPorOrigen(nx, ny, mundo);
+                        if (t == null || t.destino == null || !mundo.mapaTransitable[(int)t.destino.x][(int)t.destino.y]) {
+                            continue; // Muro si el salto es inseguro
+                        }
+                    }
                     result.add(new Vector2d(nx, ny));
                 } else if (usarTray && mundo.mapaTrayectoria[nx][ny]) {
                     // Solo permitimos entrar en trayectoria si es de tipo NENUFAR
