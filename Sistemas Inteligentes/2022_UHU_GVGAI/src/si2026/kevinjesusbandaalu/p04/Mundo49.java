@@ -309,8 +309,8 @@ public class Mundo49 implements IMundo {
                 }
                 curX += dxN;
             }
-            if (!t.celdas.isEmpty())
-                trayectorias.add(t);
+            // Siempre añadimos la trayectoria si tiene un origen (spawn)
+            trayectorias.add(t);
         }
 
         // Debug: imprimir trayectorias (sólo la primera vez o en cambios)

@@ -66,17 +66,28 @@ public class Motor49 {
                 if (!objetivoEsCatapulta) {
                     // Espera de nenúfar
                     int wx = (int) objetivoFijo.x, wy = (int) objetivoFijo.y;
-                    int[][] dirs4 = {{1,0},{-1,0},{0,1},{0,-1}};
-                    for (int[] d : dirs4) {
-                        int nx = wx + d[0], ny = wy + d[1];
-                        if (nx < 0 || nx >= mundo.columnas || ny < 0 || ny >= mundo.filas) continue;
-                        if (mundo.mapaTrayectoria[nx][ny] && hayNenufarEn(nx, ny, mundo)) {
-                            System.out.println("[LOG] Saltando al nenúfar detectado en " + nx + "," + ny);
-                            objetivoFijo = null;
-                            return traducirDireccion(new Vector2d(wx, wy), new Vector2d(nx, ny));
+                    
+                    // RE-VERIFICAR ALINEACION: Si toda la fila de nenúfares está lista,
+                    // cancelamos la espera estática para que el agente cruce "corriendo".
+                    Mundo49.Trayectoria tray = buscarTrayectoriaAdyacente(wx, wy, mundo);
+                    if (tray != null && trayectoriaEstaAlineada(tray, mundo)) {
+                        System.out.println("[LOG] Trayectoria alineada detectada mientras esperaba. Cruzando sin parar.");
+                        objetivoFijo = null;
+                        // No retornamos NIL, permitimos que baje a estrategiaEscape
+                    } else {
+                        // Lógica de espera normal: saltar si hay uno justo al lado
+                        int[][] dirs4 = {{1,0},{-1,0},{0,1},{0,-1}};
+                        for (int[] d : dirs4) {
+                            int nx = wx + d[0], ny = wy + d[1];
+                            if (nx < 0 || nx >= mundo.columnas || ny < 0 || ny >= mundo.filas) continue;
+                            if (mundo.mapaTrayectoria[nx][ny] && hayNenufarEn(nx, ny, mundo)) {
+                                System.out.println("[LOG] Saltando al nenúfar detectado en " + nx + "," + ny);
+                                objetivoFijo = null;
+                                return traducirDireccion(new Vector2d(wx, wy), new Vector2d(nx, ny));
+                            }
                         }
+                        return ACTIONS.ACTION_NIL;
                     }
-                    return ACTIONS.ACTION_NIL;
                 } else {
                     // Catapulta: debería activarse sola, pero forzamos movimiento por si acaso
                  //   System.out.println("[CAT] En catapulta. Re-evaluando trayectoria.");
@@ -124,12 +135,24 @@ public class Motor49 {
             for (Vector2d v : vecinos(cur.pos, mundo, usarTrayectoria)) {
                 String vk = k(v);
                 
-                // Cálculo de coste: 1 por defecto (caminar), dist+2 para saltos
+                // Cálculo de coste: 
+                // 1.0 estándar (suelo)
+                // 0.5 si es trayectoria alineada (atractivo)
+                // 5.0 si es trayectoria no alineada (penaliza espera)
                 double cost = 1.0;
+                
                 if (esCatapulta((int)cur.pos.x, (int)cur.pos.y, mundo)) {
                     Mundo49.Trayectoria t = buscarTrayectoriaPorOrigen((int)cur.pos.x, (int)cur.pos.y, mundo);
                     if (t != null && t.destino != null && igualPos(v, t.destino)) {
                         cost = dist(cur.pos, v) + 2.0;
+                    }
+                } else if (!mundo.mapaTransitable[(int)v.x][(int)v.y]) {
+                    // Es una celda de agua (trayectoria)
+                    Mundo49.Trayectoria t = buscarTrayectoria((int)v.x, (int)v.y, mundo);
+                    if (t != null && trayectoriaEstaAlineada(t, mundo)) {
+                        cost = 0.5; // Muy atractivo porque podemos correr
+                    } else {
+                        cost = 4.0; // Caro porque implica esperar
                     }
                 }
                 
@@ -162,8 +185,10 @@ public class Motor49 {
             
             // Si el siguiente paso es agua, esperar a que haya un nenúfar allí
             if (mundo.mapaTrayectoria[sx][sy] && !mundo.mapaTransitable[sx][sy]) {
-                if (hayNenufarEn(sx, sy, mundo)) {
-                    System.out.println("[LOG] Saltando de nenúfar a nenúfar en " + sx + "," + sy);
+                Mundo49.Trayectoria t = buscarTrayectoria(sx, sy, mundo);
+                // Si la trayectoria está alineada o hay un nenúfar justo ahí, saltar
+                if (trayectoriaEstaAlineada(t, mundo) || hayNenufarEn(sx, sy, mundo)) {
+                    System.out.println("[LOG] Cruzando de nenúfar a nenúfar en " + sx + "," + sy + (trayectoriaEstaAlineada(t, mundo) ? " (ALINEADO)" : ""));
                     return traducirDireccion(mundo.MiPosicion, sig);
                 } else {
                     return ACTIONS.ACTION_NIL; // Esperar en el actual
@@ -193,8 +218,15 @@ public class Motor49 {
                 } else {
                     // Es un nenúfar: el mejor sitio para esperar es la celda de tierra desde la que saltaremos
                     Vector2d espera = camino.get(i-1); 
-                    Vector2d celdaTray = camino.get(i);
-                    
+                    Vector2d celdaTray = camino.get(i); 
+
+                    // Si la trayectoria está alineada (todos los nenúfares presentes) cruzar inmediatamente
+                    if (trayectoriaEstaAlineada(tray, mundo)) {
+                        System.out.println("[LOG] Trayectoria alineada: cruzando directamente de " + (int)espera.x + "," + (int)espera.y + " a " + (int)celdaTray.x + "," + (int)celdaTray.y);
+                        objetivoFijo = null;
+                        return traducirDireccion(espera, celdaTray);
+                    }
+
                     // Si ya estamos en la celda de espera, comprobar si podemos saltar ya
                     if (igualPos(mundo.MiPosicion, espera)) {
                         if (hayNenufarEn((int)celdaTray.x, (int)celdaTray.y, mundo)) {
@@ -221,6 +253,8 @@ public class Motor49 {
     /** Busca la Trayectoria que contiene la celda (cx, cy) en sus celdas de agua o es su destino. */
     private Mundo49.Trayectoria buscarTrayectoria(int cx, int cy, Mundo49 mundo) {
         for (Mundo49.Trayectoria t : mundo.trayectorias) {
+            // 0. Es el origen (spawn o catapulta)
+            if ((int)t.origen.x == cx && (int)t.origen.y == cy) return t;
             // 1. Es el destino final
             if (t.destino != null && (int)t.destino.x == cx && (int)t.destino.y == cy) return t;
             // 2. Es una de las celdas intermedias (vuelo/agua)
@@ -431,19 +465,51 @@ public class Motor49 {
 
     private boolean hayNenufarEn(int x, int y, Mundo49 mundo) {
         ArrayList<Observation>[][] grid = mundo.stateObsActual.getObservationGrid();
-        if (x < 0 || x >= grid.length || y < 0 || y >= grid[0].length) return false;
+        int dirFlujo = mundo.mapaDireccion[x][y];
         
-        for (Observation obs : grid[x][y]) {
-            if (obs.itype == 10 || obs.itype == 11) {
-                // Calcular posición relativa al centro de la celda en unidades de grid
-                double relX = Math.abs((obs.position.x / mundo.Bloque) - x);
-                double relY = Math.abs((obs.position.y / mundo.Bloque) - y);
-                
-                // Si está suficientemente cerca del centro de la celda (margen 0.35)
-                if (relX < 0.35 && relY < 0.35) return true;
+        // Comprobar la celda objetivo y sus vecinas laterales (x-1, x+1)
+        for (int dx = -1; dx <= 1; dx++) {
+            int nx = x + dx;
+            if (nx < 0 || nx >= grid.length || y < 0 || y >= grid[0].length) continue;
+            
+            for (Observation obs : grid[nx][y]) {
+                if (obs.itype == 10 || obs.itype == 11) {
+                    double realX = obs.position.x / mundo.Bloque;
+                    double realY = obs.position.y / mundo.Bloque;
+                    
+                    double diffX = realX - x;
+                    double diffY = realY - y;
+
+                    // Umbral de seguridad más estricto (0.35 significa que el centro está en el 70% central de la celda)
+                    if (Math.abs(diffX) > 0.4 || Math.abs(diffY) > 0.4) continue;
+                    
+                    // Si el nenúfar se mueve, queremos saltar cuando está ENTRANDO en la celda
+                    // o centrado, pero EVITAR saltar si ya está SALIENDO (para no caer al agua en el siguiente tick)
+                    if (dirFlujo == Mundo49.DIR_DERECHA) {
+                        if (diffX > 0.15) continue;  // Ya ha pasado el centro hacia la derecha, peligroso
+                    } else if (dirFlujo == Mundo49.DIR_IZQUIERDA) {
+                        if (diffX < -0.15) continue; // Ya ha pasado el centro hacia la izquierda, peligroso
+                    }
+
+                    return true; // Hemos encontrado uno válido en esta celda o vecindad
+                }
             }
         }
         return false;
+    }
+
+    /** Busca una trayectoria que tenga una celda de agua adyacente a la posición dada. */
+    private Mundo49.Trayectoria buscarTrayectoriaAdyacente(int x, int y, Mundo49 mundo) {
+        int[][] dirs4 = {{1,0},{-1,0},{0,1},{0,-1}};
+        for (int[] d : dirs4) {
+            int nx = x + d[0], ny = y + d[1];
+            if (nx < 0 || nx >= mundo.columnas || ny < 0 || ny >= mundo.filas) continue;
+            if (mundo.mapaTrayectoria[nx][ny] && !mundo.mapaTransitable[nx][ny]) {
+                Mundo49.Trayectoria t = buscarTrayectoria(nx, ny, mundo);
+                if (t != null) return t;
+            }
+        }
+        return null;
     }
 
     private boolean igualPos(Vector2d a, Vector2d b) {
@@ -529,4 +595,23 @@ public class Motor49 {
         }
         System.out.println("=====================================================================");
     }
+
+
+    /**
+ * Verifica si hay nenúfares en todas las celdas de agua de una trayectoria específica
+ * para permitir un cruce fluido sin esperas intermedias.
+ */
+private boolean trayectoriaEstaAlineada(Mundo49.Trayectoria tray, Mundo49 mundo) {
+    if (tray == null || tray.celdas.isEmpty()) return false;
+    
+    for (Vector2d celda : tray.celdas) {
+        // Solo verificamos celdas que son agua (no transitables en capa 0)
+        if (!mundo.mapaTransitable[(int)celda.x][(int)celda.y]) {
+            if (!hayNenufarEn((int)celda.x, (int)celda.y, mundo)) {
+                return false; // Falta un nenúfar en el convoy
+            }
+        }
+    }
+    return true; // Todos los nenúfares están en su sitio
+}
 }

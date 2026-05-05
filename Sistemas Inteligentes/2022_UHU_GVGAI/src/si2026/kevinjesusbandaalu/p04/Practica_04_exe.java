@@ -14,7 +14,7 @@ public class Practica_04_exe {
 
         boolean visuals = false;
         int gameIdx = 49;
-        int partidasPorNivel = 100;
+        int partidasPorNivel = 10;
 
         // Arrays para guardar los resultados de cada uno de los 5 niveles
         int[] victoriasPorNivel = new int[5];
