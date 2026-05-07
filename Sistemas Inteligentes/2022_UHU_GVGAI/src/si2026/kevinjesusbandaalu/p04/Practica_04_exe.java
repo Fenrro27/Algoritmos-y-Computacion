@@ -14,12 +14,12 @@ public class Practica_04_exe {
 
         boolean visuals = false;
         int gameIdx = 49;
-        int partidasPorNivel = 10;
+        int partidasPorNivel = 100;
 
         // Arrays para guardar los resultados de cada uno de los 5 niveles
         int[] victoriasPorNivel = new int[5];
         double[] puntosPorNivel = new double[5];
-        double[] ticksPorNivel = new double[5];
+        double[] ticksPorNivel = new double[5]; 
 
         String gameName = games[gameIdx][1];
         String gamePath = games[gameIdx][0];
