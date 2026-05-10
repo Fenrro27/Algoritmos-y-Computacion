@@ -1,4 +1,4 @@
-\documentclass[11pt]{report}
+\documentclass[11pt, a4paper]{report}
 \usepackage[spanish]{babel}
 \usepackage{geometry}
 \usepackage{graphicx}
@@ -7,8 +7,38 @@
 \usepackage{tabularx}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{eso-pic}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
 
-\geometry{margin=1in}
+% --- CONFIGURACIÓN DE FUENTE (Igual al TFG) ---
+\usepackage[scaled]{helvet}
+\renewcommand*\familydefault{\sfdefault}
+\usepackage[T1]{fontenc}
+
+\geometry{a4paper, margin=2.5cm, includeheadfoot}
+\setstretch{1.2}
+\setlength{\parskip}{0.6cm}
+\setlength{\parindent}{0pt}
+
+% Configuración de títulos (Máximo 16pt)
+\titleformat{\chapter}[display]
+  {\normalfont\Large\bfseries}{\chaptertitlename\ \thechapter}{10pt}{\Large}
+\titleformat{\section}
+  {\normalfont\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\chapter}{0pt}{0pt}{20pt}
+
+% Configuración de encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Sistemas Inteligentes}
+\fancyhead[R]{Teoría}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
 
 \title{%
     \vspace*{2cm}
@@ -16,6 +46,7 @@
     {\huge \textbf{Sistemas Inteligentes}}\\[0.5cm]
     {\Large Teoría}\\[2cm]
 }
+
 
 \author{%
     \vspace{1cm}
@@ -42,15 +73,16 @@
     captionpos=b
 }
 
-\newpage
-
 % Cambiamos el nombre de los capítulos a "Tema"
 \addto\captionsspanish{\renewcommand{\chaptername}{Tema}}
-
 \begin{document}
-\maketitle
+\input{Portada.tex}
+
+% A partir de aquí, el documento vuelve a la normalidad (sin fondo)
 \tableofcontents
 \newpage
+
+
 % Capitulos del libro
 \input{Temas/Tema_1.tex}
 \input{Temas/Tema_2.tex}
@@ -63,7 +95,6 @@
 
 
 
-
 % Bibliografia
 % \backmatter
 \bibliography{Bibliografia}
@@ -72,7 +103,7 @@
 \newpage
 % Añade la línea al índice manualmente
 \addcontentsline{toc}{chapter}{Bibliografía}
-\chapter*{Bibliografía} % El asterisco quita el número del capítulo
+\chapter*{Bibliografía}
 
 \begin{itemize}
     \item \textbf{Ana Mas}; \textit{Agentes software y sistemas multiagente. Conceptos, arquitecturas y aplicaciones}; Pearson, 2004.
