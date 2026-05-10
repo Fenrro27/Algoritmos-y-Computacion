@@ -1,0 +1,153 @@
+\chapter{Introducción: Búsquedas en IA}
+
+\section{Formulación}
+La Inteligencia Artificial Clásica trata entornos con las siguientes características:
+\begin{itemize}
+    \item Estático: El entorno no varía.
+    \item Observable: Conocemos todas las variables que nos interesan.
+    \item Discreto: Los valores tienen límite de división.
+    \item Determinístico: El estado siguiente es consecuencia del estado actual y de la acción realizada.
+\end{itemize}
+
+\section{Características}
+Se puede construir un grafo con la representación del problema. Las características de este grafo serán:
+\begin{itemize}
+    \item Cada estado se representará mediante un nodo.
+    \item Deberá tener un estado inicial y, al menos, un estado final.
+    \item Las aristas representan las acciones entre los estados.
+    \item Puede ser cíclico.
+\end{itemize}
+
+\section{Espacio De Estados}
+\subsection{Árbol De Búsqueda}
+
+\section{Solución}
+
+\section{Ejemplos}
+
+\section{Búsqueda De Soluciones}
+
+\section{Algoritmo General De Búsqueda}
+
+\section{Estrategias De Búsqueda}
+
+\section{Criterios Para Evaluar Las Estrategias}
+
+\section{Búsquedas Con Adversarios}
+
+
+
+\section{Búsqueda En El Espacio De Estados (Temp)}
+
+
+\subsection{Estructuras de Datos y Definiciones}
+A continuación se define la estructura necesaria para un algoritmo de búsqueda genérico (como A* o Dijkstra).
+
+\begin{lstlisting}[caption=Interfaces y Clase Nodo]
+public interface Estado {
+    public Estado aplicarAccion(Action a);
+    public boolean esMeta();
+    public boolean esValido();
+    public int h(); // Heuristica: coste estimado hasta la meta
+}
+
+public interface Action {
+    public int costeAccion();
+}
+
+public class Nodo implements Comparable<Nodo> {
+    private int g;            // Coste acumulado (inicio -> actual)
+    private Estado estado;
+    private Nodo padre;
+    private Action accion;
+
+    public Nodo(int g, Estado estado, Nodo padre, Action accion) {
+        this.g = g;
+        this.estado = estado;
+        this.padre = padre;
+        this.accion = accion;
+    }
+
+    public int getF() { return this.g + this.estado.h(); }
+    public int getG() { return g; }
+    public Estado getEstado() { return estado; }
+    public Nodo getPadre() { return padre; }
+    public Action getAccion() { return accion; }
+
+    @Override
+    public int compareTo(Nodo otro) {
+        return Integer.compare(this.getF(), otro.getF());
+    }
+}
+\end{lstlisting}
+
+\subsection{Algoritmo de Búsqueda General}
+El siguiente pseudocódigo implementa una búsqueda que evita ciclos mediante un conjunto de estados cerrados y utiliza una cola de prioridad para optimizar la expansión.
+
+\begin{lstlisting}[caption=Algoritmo de Búsqueda corregido]
+public class BusquedaEspacioEstados {
+    public List<Action> buscar(Estado inicial, List<Action> acciones) {
+        PriorityQueue<Nodo> abiertos = new PriorityQueue<>();
+        Set<Estado> cerrados = new HashSet<>();
+
+        abiertos.add(new Nodo(0, inicial, null, null));
+
+        while (!abiertos.isEmpty()) {
+            Nodo actual = abiertos.poll();
+            Estado estadoActual = actual.getEstado();
+
+            if (estadoActual.esMeta()) {
+                return reconstruirCamino(actual);
+            }
+
+            if (!cerrados.contains(estadoActual)) {
+                cerrados.add(estadoActual);
+
+                for (Action a : acciones) {
+                    Estado sigEstado = estadoActual.aplicarAccion(a);
+                    if (sigEstado != null && sigEstado.esValido()) {
+                        int nuevoG = actual.getG() + a.costeAccion();
+                        abiertos.add(new Nodo(nuevoG, sigEstado, actual, a));
+                    }
+                }
+            }
+        }
+        return null; // No hay solucion
+    }
+
+    private List<Action> reconstruirCamino(Nodo nodo) {
+        List<Action> camino = new ArrayList<>();
+        Nodo aux = nodo;
+        while (aux != null && aux.getAccion() != null) {
+            camino.add(0, aux.getAccion());
+            aux = aux.getPadre();
+        }
+        return camino;
+    }
+}
+\end{lstlisting}
+
+\subsection{Notas de Implementación}
+\begin{itemize}
+    \item \textbf{Variantes del algoritmo}:
+    \begin{itemize}
+        \item \textbf{A*}: Se activa cuando \texttt{h()} devuelve una estimación optimista del coste restante.
+        \item \textbf{Dijkstra}: Se obtiene si la función heurística \texttt{h()} devuelve siempre 0.
+        \item \textbf{BFS}: Se obtiene si el coste de toda acción es 1 y \texttt{h()} es 0.
+    \end{itemize}
+    \item \textbf{Control de Ciclos}: El uso de \texttt{Set<Estado> cerrados} es vital para evitar bucles infinitos en grafos.
+    \item \textbf{Requisitos de Java}: Para que la detección de estados repetidos funcione correctamente, la clase que implemente \texttt{Estado} debe sobreescribir obligatoriamente los métodos \texttt{equals()} y \texttt{hashCode()}.
+\end{itemize}
+
+% ---------Bibliografía del Tema------------
+\bigskip
+\noindent\rule{\textwidth}{0.4pt} 
+
+\section*{Bibliografía del Tema}
+\addcontentsline{toc}{section}{Bibliografía del Tema}
+
+\begin{itemize}
+    \item \textbf{Russell, S. \& Norvig, P.} (2003). \textit{Artificial Intelligence: A Modern Approach} (2nd ed.). Prentice Hall. Chapter 3.
+    
+\end{itemize}
+\newpage

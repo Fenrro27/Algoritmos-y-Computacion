@@ -1,0 +1,194 @@
+\chapter{Agentes Inteligentes}
+\section{Conceptos Fundamentales}
+
+Para comprender la materia, el primer paso fundamental es definir qué es un agente. Partiendo de una base lingüística, la \textbf{Real Academia Española (RAE)} propone varias acepciones que resultan relevantes:
+
+\begin{quote}
+\textit{Agente:} 
+\begin{enumerate}
+    \item adj. Que obra o tiene virtud de obrar.
+    \item adj. Gram. Dicho de una palabra o de una expresión: Que designa a la persona, animal o cosa que realiza la acción del verbo.
+    \item m. Persona o cosa que produce un efecto. 
+    \item m. Persona que obra con poder de otra.
+\end{enumerate}
+\end{quote}
+
+
+Sin embargo, al trasladar este concepto al ámbito de la informática, nos encontramos con un problema: \textbf{no existe una definición de agente software universalmente aceptada}. La terminología es diversa y la definición suele depender del dominio de aplicación o del autor consultado.
+
+\medskip
+Nosotros vamos a considerar que un agente es cualquier entidad capaz de percibir su entorno mediante \textbf{sensores} y actuar sobre él a través de \textbf{efectores}. Aunque existen múltiples definiciones en la literatura, se acepta que un agente es un sisema situado que busca cumplir sus objetivos a lo largo del tiempo.
+
+\medskip
+Un agente basicamente hace:
+
+\begin{itemize}
+    \item Percibe el entorno.
+    \item Actúa sobre el entorno.
+    \item Asigna perciones a acciones.
+    \item Mide el rendimiento.
+\end{itemize}
+
+Es decir, es todo aquello que percibe su ambiente mediante sensores y responde o actúa en el ambiente por medio de efectores. No requieren participación de los humanos para operar.
+
+\section{Percepciones y Acciones}
+El comportamiento de un agente depende de su secuencia de percepciones en un momento dado.
+
+\subsection{El ciclo de percepción-acción}
+Un agente ideal se define por un mapeo que especifica qué acción debe emprender ante cualquier secuencia de percepciones. Matemáticamente:
+\begin{equation*}
+    f: \mathcal{P}^* \to \mathcal{A}
+\end{equation*}
+
+Donde:
+\begin{itemize}
+    \item $\mathcal{P}^*$ representa el historial o secuencia de todas las percepciones recibidas hasta el momento.
+    \item $\mathcal{A}$ es la acción resultante elegida por el agente.
+\end{itemize}
+
+\subsection{Sensores y Efectores}
+\begin{itemize}
+    \item \textbf{Sensores:} Adquieren información del medio ambiente. Pueden presentar errores o incertidumbre debido a cambios en el medio. Ejemplos: cámaras, acelerómetros, sonares.
+    \item \textbf{Efectores:} Permiten al agente actuar. En humanos son los músculos y en máquinas son motores, válvulas o brazos mecánicos.
+\end{itemize}
+
+\section{Comportamiento}
+
+
+El comportamiento de un agente depende de la secuencia de percepciones en un momento dado. Se puede caracterizar un agente elaborando una lista de percepciones-acciones. A esto se le conoce como mapeo de secuencias de percepciones para acciones.
+
+\medskip
+El mapeo ideal es especificar qué tipo de acción deberá emprender un agente como respuesta a una determinada secuencia de percepciones.
+
+
+% ---------------------------------------------------------------------------------------
+% ---------------------------------------------------------------------------------------
+% ---------------------------------------------------------------------------------------
+\section{Agentificacion}
+Antes de diseñar un programa de agente tenemos que hacer la descripción de las percepciones, las acciones, las metas y del ambiente.
+La arquitectura de un agente es la siguiente:
+\begin{equation*}
+    \text{Agente} = \text{Arquitectura} + \text{Programa}
+\end{equation*}
+
+Donde:
+\begin{itemize}
+    \item \textbf{Arquitectura:} Pone al alcance del programa las percepciones obtenidas mediante los sensores, lo ejecuta y alimenta el actuador con acciones elegidas por el programa conforme se van generando.
+    \item \textbf{Programa:} Es un algoritmo que recibe las percepciones del agente y genera una secuencia de acciones.
+\end{itemize}
+
+\section{Agentes Inteligentes}
+Los agentes inteligentes tienen las siguientes características:
+\begin{itemize}
+    \item \textbf{Autonomía}: Por la propia naturaleza de los agentes, se espera que sean capaces de operar sin intervención humana directa. Esto implica que deben ser capaces de tomar decisiones y actuar de manera independiente para alcanzar sus objetivos.
+    \item \textbf{Reactividad}: Los agentes inteligentes deben ser capaces de percibir su entorno y responder de manera oportuna a los cambios que ocurren en él. Esto les permite adaptarse a situaciones imprevistas y mantener un comportamiento coherente con sus objetivos.
+    \item \textbf{Proactividad}: Los agentes son capaces de tomar la iniciativa para la consecución de objetivos. Esto significa que no solo reaccionan a los estímulos del entorno, sino que también pueden planificar y ejecutar acciones para alcanzar metas específicas.
+    \item \textbf{Habilidad Social}: Los agentes interactúan con otros agentes (hasta humanos) a través de algún lenguaje. Esto les permite colaborar, negociar y compartir información para lograr objetivos comunes o resolver conflictos.
+\end{itemize}
+
+\subsection{Agentes Inteligentes Racionales}
+Para cada posible secuencia de percepciones, un agente racional seleccionaría un acción que
+maximice su medida de rendimiento, a partir de esa secuencia de acciones y el conocimiento 
+que tenga en su interior. Esto es lo que se conoce como Agente Racional, y dependen de:
+
+\begin{itemize}
+    \item Medida Del Grado De Éxito.
+    \item Secuencia De Percepciones.
+    \item Conocimiento Acerca Del Medio.
+    \item Acciones Que Puede Emprender.
+\end{itemize}
+
+\subsection{Medida de Rendimiento y Racionalidad}
+
+Para determinar la eficacia de un agente, es imprescindible establecer un criterio de evaluación denominado \textbf{medida de rendimiento} o medida del desempeño. Este concepto se fundamenta en los siguientes pilares:
+
+\begin{itemize}
+    \item \textbf{Evaluación cualitativa:} Analiza el ``cómo'' el agente interactúa con su entorno.
+    \item \textbf{Grado de éxito:} Determina qué tan exitoso ha sido un agente en el cumplimiento de su tarea.
+    \item \textbf{Objetividad:} La medida debe ser objetiva, basándose en criterios externos y no en el estado interno del agente.
+\end{itemize}
+
+\bigskip
+
+Es fundamental distinguir la racionalidad de otros conceptos cognitivos superiores. 
+Según la literatura de la asignatura, la racionalidad \textbf{NO ES} omnisciencia 
+(saberlo todo), clarividencia (predecir el futuro) ni implica ser exitosa necesariamente 
+en todos los casos físicos.
+
+\bigskip
+
+En cambio, la racionalidad se puede definir como un \textbf{éxito esperado}, tomando como 
+base estrictamente lo que el agente ha percibido hasta el momento a través de sus sensores. 
+Por tanto, un agente es racional si elige la mejor acción posible dada la información 
+limitada de la que dispone y su conocimiento previo.
+
+
+\section{Entorno}
+Antes de proceder al diseño de un programa de agente, es imperativo realizar una descripción exhaustiva del ambiente en el que este operará. El éxito de un agente racional depende de cómo sus sensores captan la información del entorno y cómo sus acciones lo modifican. 
+
+\medskip
+\noindent
+Para categorizar estos escenarios, utilizamos una taxonomía basada en cinco dimensiones fundamentales que determinan la complejidad del problema a resolver:
+
+\bigskip
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{|l|X|} 
+\hline
+\textbf{Propiedad} & \textbf{Descripción} \\ \hline
+\textbf{Accesibilidad} & Es \textbf{accesible} si los sensores detectan todos los aspectos que el agente requiere para elegir una acción. De lo contrario, es no accesible. \\ \hline
+\textbf{Determinismo} & Es \textbf{determinista} si el estado siguiente del entorno se puede determinar completamente por el estado actual y las acciones del agente. \\ \hline
+\textbf{Episodicidad} & Es \textbf{episódico} cuando la experiencia del agente se divide en episodios independientes; cada acción corresponde solo a las percepciones de su episodio. \\ \hline
+\textbf{Dinamismo} & Es \textbf{estático} si el ambiente no cambia mientras el agente se encuentra decidiendo la acción. Si cambia, se considera dinámico \\ \hline
+\textbf{Continuidad} & Es \textbf{discreto} si existe una cantidad limitada y distinguible de percepciones y acciones distintas. \\ \hline
+\end{tabularx}
+\caption{Dimensiones y características de los entornos para agentes inteligentes.}
+\end{table}
+
+\section{Tipos De Agentes}
+Antes de profundizar en los sistemas computacionales, es necesario situar al agente dentro de una taxonomía general basada en su naturaleza y el entorno en el que opera. En este sentido, podemos distinguir tres categorías fundamentales:
+\begin{itemize}
+    \item \textbf{Agentes Naturales:} Aquellos constituidos por cuerpos biológicos que operan en entornos naturales, donde su medida de rendimiento suele estar ligada a la supervivencia o la reproducción.
+    
+    \item \textbf{Agentes de Hardware (Robots):} Sistemas artificiales que actúan directamente en el entorno físico mediante el uso de sensores como cámaras u odómetros, y efectores como ruedas o brazos mecánicos.
+    
+    \item \textbf{Agentes Software (Softbots):} Son programas que habitan en entornos virtuales, como sistemas operativos o Internet. A diferencia de los robots físicos, sus sensores y efectores son componentes lógicos dependientes del dominio, como protocolos de red o consultas a bases de datos.
+\end{itemize}
+
+\bigskip
+
+De aqui en adelante, nos centraremos específicamente en el estudio de los \textbf{Agentes Software}. Estos sistemas son fundamentales en áreas como el comercio electrónico, la recuperación de información y la gestión del conocimiento, donde su capacidad para automatizar tareas complejas de forma autónoma resulta indispensable.
+
+\subsection{Reactivos} Selecciona una acción únicamente en función de la percepción actual. Se implementa con reglas condición-acción.
+
+\subsection{Reactivos Basados En Modelos} Se utilizan para abordar entornos parcialmente observables. Mantiene un estado interno que se actualiza
+a lo largo del tiempo usando el conocimiento adquirido. Usa un modelo del mundo y un conjunto de reglas.
+
+\subsection{Basados En Objetivos} Buscan lograr ciertos objetivos. El comportamiento se complica cuando las secuencias de acciones son
+largas. Para ello se utilizan estrategias de búsqueda y planificación. Se tiene en cuenta el futuro.
+
+\subsection{Basados En Utilidad} Ciertas metas pueden ser alcanzadas de diferentes formas. La función de utilidad mapea una secuencia
+de estados en un número real, la utilidad. La utilidad es una función que correlaciona un estado y un número
+real mediante el que se caracteriza el grado de satisfacción.
+
+\subsection{Agentes Aprendices} El agente tiene un elemento de aprendizaje que mejora el rendimiento de este. Nos provee feedback sobre
+el rendimiento del agente. La elección de la acción se realiza en función de las percepciones y del elemento
+de aprendizaje.
+
+
+\bigskip
+\noindent\rule{\textwidth}{0.4pt} % Línea divisoria para separar del contenido
+
+\section*{Bibliografía del Tema}
+\addcontentsline{toc}{section}{Bibliografía del Tema}
+
+\begin{itemize}
+    \item \textbf{Russell, S. \& Norvig, P.} (2003). \textit{Artificial Intelligence: A Modern Approach} (2nd ed.). Prentice Hall. Chapter 2.
+    
+    \item \textbf{Wooldridge, M.} (2002). \textit{An Introduction to Multiagent Systems}. Wiley. Chapters 1 and 2.
+\end{itemize}
+
+\newpage
+

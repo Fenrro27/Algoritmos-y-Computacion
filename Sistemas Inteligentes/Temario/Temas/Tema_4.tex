@@ -1,0 +1,144 @@
+\chapter{Planificación Clásica}
+
+\section{Definición De Planifiación}
+La planificación es el proceso de búsqueda y articulación de una secuencia de acciones (denominada \textbf{plan}) que permite alcanzar uno o varios objetivos partiendo de un estado inicial. 
+
+Los elementos fundamentales que intervienen en un problema de planificación son:
+\begin{itemize}
+    \item \textbf{Estados:} Representaciones del mundo en un momento dado mediante predicados lógicos.
+    \item \textbf{Acciones/Operadores:} Generan descripciones de estados nuevos al ser aplicados.
+    \item \textbf{Metas (Objetivos):} El estado final o condiciones que se desean conseguir.
+    \item \textbf{Plan:} Secuencia ordenada de acciones que transforman el estado inicial en el estado meta.
+\end{itemize}
+
+\section{Planificación Lineal: STRIPS}
+\textbf{STRIPS} (\textit{Stanford Research Institute Problem Solver}) es tanto un lenguaje como un algoritmo de planificación que utiliza una pila de objetivos. Realiza una exploración en profundidad del espacio de estados.
+
+
+\subsection{Lenguaje y Operadores}
+
+El vocabulario que vamos a usar para definir un problema es el siguiente:
+\begin{itemize}
+    \item P: significa insertar P.
+    \item ¬P: Significa eliminar P.
+    \item Los estados se representan con un conjunto de predicados.
+\end{itemize}
+
+\bigskip
+STRIPS utiliza la \textbf{Hipótesis del Mundo Cerrado}: cualquier condición no mencionada explícitamente en el estado se considera falsa. Los operadores constan de:
+\begin{enumerate}
+    \item \textbf{Precondiciones (P):} Literales que deben ser ciertos para ejecutar la acción.
+    \item \textbf{Lista de Adición (A):} Literales que pasan a ser verdaderos tras la acción.
+    \item \textbf{Lista de Supresión (S):} Literales que dejan de ser ciertos tras la acción.
+\end{enumerate}
+
+\subsection{Algoritmo de Implementación}
+El proceso se basa en el manejo de una pila:
+\begin{itemize}
+    \item Si la cima es un \textbf{operador}: se ejecuta si sus precondiciones se cumplen; si no, se apilan sus precondiciones.
+    \item Si la cima es una \textbf{meta}: si ya es cierta en el estado actual, se elimina; si no, se busca un operador que la añada y se apila dicho operador.
+    \item Si la cima es una \textbf{conjunción de metas}: se elimina si todas son ciertas; de lo contrario, se apilan las metas individuales en distintas combinaciones.
+\end{itemize}
+
+\subsection{Anomalía de Sussman}
+Es un problema intrínseco a la planificación lineal que ocurre cuando la consecución de un objetivo implica necesariamente destruir un objetivo alcanzado previamente. Esto sucede porque el planificador lineal asume erróneamente que los objetivos son independientes y pueden resolverse secuencialmente sin interferencias.
+
+---
+<PDDL es el lenguaje con el que vamos a escribir la planificacion
+Esta escrito el logica de primer orden, los estados y los objetivos se escriben como un conjunto de formulas logicas, acciones tienen ( nombre, precondiciones, conjunto de supresin )>
+<Se hizo ejemplo de strips> 
+
+Anomalía de Sussman 
+Cuando los objetivos no son independientes hay veces que el problema no tiene solucion
+(No siempre aparece, podemos incluso poner los operadores en un orden concreto y no se produce)
+
+
+\section{Planificación de Orden Parcial (POP)}
+A diferencia de la planificación lineal, la \textbf{Planificación de Orden Parcial} (o no lineal) permite que los objetivos no tengan que seguir una secuencia única estricta desde el inicio. Se basa en el **Espacio de Planes**, donde cada nodo es un plan parcial.
+
+\subsection{Características Principales}
+\begin{itemize}
+    \item \textbf{Principio de Mínimo Compromiso (Least Commitment):} No se determina el orden de las acciones a menos que sea estrictamente necesario para evitar conflictos (\textit{amenazas}). "No ordenar lo que no necesita ser ordenado".
+    \item \textbf{Flexibilidad:} Permite la ejecución en paralelo de acciones independientes.
+    \item \textbf{Búsqueda:} A diferencia de STRIPS, POP busca en el espacio de planes parciales, no en el espacio de estados.
+\end{itemize}
+
+\subsection{Componentes Formales de un Plan}
+Un plan parcial se define como una tupla $\pi = (A, <, \mathcal{CL}, \text{Agenda})$, donde:
+\begin{itemize}
+    \item \textbf{Acciones (A):} Conjunto de pasos del plan. Incluye dos acciones ficticias:
+    \begin{itemize}
+        \item \textbf{Start:} No tiene precondiciones; sus efectos son el estado inicial.
+        \item \textbf{Finish:} Sus precondiciones son los objetivos finales; no tiene efectos.
+    \end{itemize}
+    \item \textbf{Restricciones de Orden ($<$):} Un conjunto de pares $(A_i < A_j)$ que indican que $A_i$ debe ejecutarse antes que $A_j$.
+    \item \textbf{Enlaces Causales ($\mathcal{CL}$):} Se representan como $A_i \xrightarrow{p} A_j$, significando que el efecto $p$ de la acción $A_i$ satisface la precondición $p$ de la acción $A_j$.
+    \item \textbf{Agenda:} Conjunto de precondiciones abiertas (objetivos que aún no tienen un enlace causal que los satisfaga).
+\end{itemize}
+
+\subsection{Amenazas y Resolución de Conflictos}
+Existe una \textbf{amenaza} cuando una acción $A_k$ tiene un efecto que niega la precondición $p$ de un enlace causal $A_i \xrightarrow{p} A_j$. Formalmente, $A_k$ es una amenaza si:
+\begin{enumerate}
+    \item $A_k$ tiene como efecto $\neg p$.
+    \item El orden $(A_i < A_k < A_j)$ es consistente (es decir, no crea ciclos).
+\end{enumerate}
+
+Para resolverla, se añaden restricciones de orden:
+\begin{itemize}
+    \item \textbf{Promoción:} Se fuerza $A_j < A_k$ (la acción conflictiva va después).
+    \item \textbf{Degradación:} Se fuerza $A_k < A_i$ (la acción conflictiva va antes).
+\end{itemize}
+
+\subsection{Algoritmo POP (Pseudocódigo)}
+El algoritmo funciona de manera recursiva tratando de cerrar precondiciones abiertas y resolver amenazas:
+
+\begin{enumerate}
+    \item \textbf{Inicialización:} Plan con $\{\text{Start, Finish}\}$, orden $\text{Start} < \text{Finish}$, y agenda con las precondiciones de \text{Finish}.
+    \item \textbf{Selección:} Elegir una precondición abierta $(p, A_{next})$ de la agenda.
+    \item \textbf{Selección de Operador:} Elegir una acción $A_{prev}$ (nueva o existente) que tenga a $p$ como efecto.
+    \item \textbf{Actualización:}
+    \begin{itemize}
+        \item Añadir el enlace causal $A_{prev} \xrightarrow{p} A_{next}$.
+        \item Añadir la restricción de orden $A_{prev} < A_{next}$.
+        \item Si $A_{prev}$ es nueva, añadirla al plan y poner sus precondiciones en la agenda.
+    \end{itemize}
+    \item \textbf{Resolución de Amenazas:} Por cada acción $A_k$ que amenace un enlace, intentar promoción o degradación. Si ambas causan un ciclo, hacer \textit{backtracking}.
+    \item \textbf{Bucle:} Repetir hasta que la agenda esté vacía.
+\end{enumerate}
+
+---
+..-Se dice plan parcial abierto si existe alguna precondicion que no este satisfecha
+Por otro lado, se dice que el plan parcial esta cerrado si todas las precondiciones estan satisfechas o vacias.
+El objetivo es pasar de un plan parcial abierto a uno cerrado.
+
+Hay dos formas de añadir reglas, por promocion y por degradación. (Solucion de amenazas)
+
+Hace falta una serie de comprimisos para hacer pop:
+\begin{itemize}
+    \item Principio de minimo Compromiso
+    \item El planificador es libre de añadir todas las acciones cuando y como quiera. Puede haber acciones repetidas (Mismo nombre).
+    \item 
+\end{itemize}
+<>Hay que usar PDDL, añadir al resumen
+
+
+
+\section{Otras Técnicas de Planificación}
+\begin{itemize}
+    \item \textbf{Descomposición Jerárquica (HTN):} Divide tareas complejas en subtareas más simples. Utiliza macrooperadores o niveles de abstracción para manejar planes extensos.
+    \item \textbf{Planificación Clásica:} Se aplica en entornos observables, deterministas, finitos, estáticos y discretos.
+\end{itemize}
+
+
+
+% ---------Bibliografía del Tema------------
+\bigskip
+\noindent\rule{\textwidth}{0.4pt} 
+
+\section*{Bibliografía del Tema}
+\addcontentsline{toc}{section}{Bibliografía del Tema}
+
+\begin{itemize}
+    \item
+\end{itemize}
+\newpage

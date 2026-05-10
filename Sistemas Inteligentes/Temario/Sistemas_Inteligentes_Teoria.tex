@@ -1,0 +1,89 @@
+\documentclass[11pt]{report}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{apacite}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{margin=1in}
+
+\title{%
+    \vspace*{2cm}
+    {\Large UNIVERSIDAD DE HUELVA}\\[0.5cm] % 
+    {\huge \textbf{Sistemas Inteligentes}}\\[0.5cm]
+    {\Large Teoría}\\[2cm]
+}
+
+\author{%
+    \vspace{1cm}
+    Escuela Tecnica Superior De Ingeniería\\[0.5cm]
+    Departamento De Tecnologias De La Información \\[0.5cm]
+}
+
+\date{%
+    \vspace{2cm}
+    \large \today
+}
+
+\lstset{
+    language=Java,
+    basicstyle=\small\ttfamily,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{orange},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    breaklines=true,
+    frame=single,
+    tabsize=2,
+    captionpos=b
+}
+
+\newpage
+
+% Cambiamos el nombre de los capítulos a "Tema"
+\addto\captionsspanish{\renewcommand{\chaptername}{Tema}}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+% Capitulos del libro
+\input{Temas/Tema_1.tex}
+\input{Temas/Tema_2.tex}
+\input{Temas/Tema_3.tex}
+\input{Temas/Tema_4.tex}
+\input{Temas/Tema_5.tex}
+\input{Temas/Tema_6.tex}
+\input{Temas/Tema_7.tex}
+
+
+
+
+
+% Bibliografia
+% \backmatter
+\bibliography{Bibliografia}
+\bibliographystyle{apacite}
+\nocite{*}
+\newpage
+% Añade la línea al índice manualmente
+\addcontentsline{toc}{chapter}{Bibliografía}
+\chapter*{Bibliografía} % El asterisco quita el número del capítulo
+
+\begin{itemize}
+    \item \textbf{Ana Mas}; \textit{Agentes software y sistemas multiagente. Conceptos, arquitecturas y aplicaciones}; Pearson, 2004.
+        
+    \item \textbf{Gerhard Weiss (ed.)}; \textit{Multiagent systems}; The MIT Press, 1999.
+
+    \item \textbf{M. Klusch (Ed.)}; \textit{Intelligent Information Agents. Agent-Based Information Discovery and Management}; Springer Verlag, 1999.
+
+    \item \textbf{Russell, S., Norvig, P.}, \textit{Inteligencia Artificial: Un Enfoque Moderno}, Pearson (2004) (4ª Ed).
+
+    \item \textbf{Russell, S. J., \& Norvig, P.} (2020). \textit{Artificial Intelligence: A Modern Approach} (Global Edition).
+\end{itemize}
+
+\end{document}
