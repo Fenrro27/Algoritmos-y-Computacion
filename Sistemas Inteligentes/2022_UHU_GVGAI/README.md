@@ -1,46 +1,49 @@
-gvgai
-=====
+# GVGAI - General Video Game AI Framework
 
-Note: The Learning track code is not in this repository, but here: https://github.com/rubenrtorrado/GVGAI_GYM
+Este proyecto forma parte de la asignatura de **Sistemas Inteligentes** (Universidad de Huelva, 2026) y utiliza el framework **GVGAI (General Video Game Artificial Intelligence)** para el desarrollo de agentes inteligentes capaces de jugar a diversos videojuegos de forma autónoma.
 
+## 🎮 ¿Qué es GVGAI?
 
-This is the framework for the General Video Game Competition, used for the Planning and PCG Tracks - http://www.gvgai.net/
+**GVGAI** (http://www.gvgai.net/) es un entorno de investigación diseñado para el desarrollo de algoritmos de Inteligencia Artificial que puedan generalizar su comportamiento a través de múltiples juegos.
 
-Google group - https://groups.google.com/forum/#!forum/the-general-video-game-competition
+El framework se divide en varias pistas (tracks), siendo la **Single Player Planning Track** la utilizada en estas prácticas, donde el agente dispone de un tiempo limitado por paso para planificar sus movimientos.
 
-## FAQs / Troubleshooting
+---
 
-**3. Where are the Test methods? Due to the explosion of GVGAI competition tracks, we have distributed the main methods in different classes across the code hierarchy:
+## 🛠️ Prácticas Desarrolladas
 
- - Single Player Planning track: tracks.singlePlayer.Test.java
- - 2-Player Planning track: tracks.multiPlayer.TestMultiPlayer.java
- - Level Generation track: tracks.levelGeneration.TestLevelGeneration.java
- - Rule Generation track: tracks.ruleGeneration.TestRuleGeneration.java
+En este repositorio se implementan diversos agentes localizados en el paquete `si2026.kevinjesusbandaalu`.
 
+### 🏁 Práctica 04: Gymkhana (Agente Avanzado)
+Esta es la práctica principal centrada en la resolución del entorno **Gymkhana**, un juego complejo que requiere navegación precisa, gestión de estados y superación de obstáculos dinámicos.
 
-**2. How do I upload my controller? What files or folder structure do I need? 
-First of all, your controller ```Agent.java``` and any auxiliary files you create should be in a single package folder with your username. For example, if your username is "abc", you should have a package folder named "abc" in the project. Your entire project layout should look something like this:
+*   **Mundo49**: Analizador de entorno encargado de la detección de entidades, mapeo de peligros (agua) y gestión de elementos especiales como nenúfares móviles y catapultas.
+*   **Motor49**: Motor de búsqueda basado en el algoritmo **A***. Implementa:
+    *   **Heurísticas Jerárquicas**: Priorización de objetivos y seguridad.
+    *   **Simulación de Trayectorias**: Cálculo de saltos en catapultas y sincronización con plataformas móviles.
+    *   **Gestión de Transformaciones**: Adaptación del comportamiento según el estado del avatar (vuelo, orientación, etc.).
 
-```groovy
-- abc
-	|- Agent.java
-	|- MyAdditionalFile1.java
-	|- MyAdditionalFile2.java
-- tracks
-- core
-- ontology
-- tools
+### 📂 Otras Prácticas
+*   **P01 / P02**: Implementaciones iniciales de agentes reactivos y de búsqueda básica para familiarización con la API de GVGAI.
+
+---
+
+## 🚀 Estructura del Código del Agente
+
+Para cumplir con los requisitos de entrega, cada agente se organiza en su propio subpaquete:
+```text
+src/si2026/kevinjesusbandaalu/
+├── p04/
+│   ├── Practica_04_exe.java  (Clase principal/Agente)
+│   ├── Motor49.java          (Lógica de búsqueda A*)
+│   ├── Mundo49.java          (Análisis del estado del juego)
+│   └── Node.java             (Estructura para el árbol de búsqueda)
+└── common/                   (Utilidades compartidas)
 ```
 
-Then, all you need to do is to zip and upload the "abc" folder. No other folders/files are necessary.
+## 📖 Instrucciones de Ejecución
 
+Para ejecutar un determinado agente para un juego concreto, se debe compilar y ejecutar desde la clase: `si2026.kevinjesusbandaalu.p0x.Practica_0x_exe`, dentro de esta tendra una ruta al agente concreto donde implementamos la tecnica de resolución del videojuego en cuestion.
 
-**3. I am getting the error `javac1.8 class not found` when running Eclipse and ANT on build.xml**
-This is likely because the ANT version that is installed with your version of Eclipse is old. You can easily fix this problem by doing the following:
-
-- Download the archive of the [latest version of ANT](http://ant.apache.org/bindownload.cgi) (Tested with  Ant 1.9.4)
-- Extract the archive onto a local folder on your computer (e.g., /Users/gvgai/ant/apache-ant-1.9.4/)
-- In Eclipse, go to Eclipse -> Preferences -> Ant -> Runtime
-- Click on "Ant Home'' button on the right.
-- Select the folder, which you extracted ANT into (e.g., /Users/gvgai/ant/apache-ant-1.9.4/)
-
+---
+*Desarrollado para la asignatura de Sistemas Inteligentes - Universidad de Huelva.*
