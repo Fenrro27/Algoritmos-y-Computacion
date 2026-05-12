@@ -80,8 +80,12 @@ public class Strips {
 
 			ForwardNode current = search.queue.poll();
 			
+			// if (search.totalExpansions % 1000 == 0) {
+			// 	System.err.println("STRIPS: Buscando... Total Exp: " + search.totalExpansions + " Queue: " + search.queue.size() + " H: " + current.heuristic);
+			// }
+			
 			if (current.state.containsAll(search.plan.finalStates)) {
-				System.err.println("STRIPS: ¡Victoria! Pasos: " + current.planSoFar.size() + " Expansiones totales: " + search.totalExpansions);
+				// System.err.println("STRIPS: ¡Victoria! Pasos: " + current.planSoFar.size() + " Expansiones totales: " + search.totalExpansions);
 				search.finalSolution = current.planSoFar;
 				return current.planSoFar;
 			}
@@ -165,7 +169,7 @@ public class Strips {
 			}
 		}
 		
-		return (totalBoxDist * 10) + (distAvatarBox) + penalty;
+		return totalBoxDist + distAvatarBox + penalty;
 	}
 
 	private static int countSatisfiedGoals(Set<String> state, List<String> goals) {

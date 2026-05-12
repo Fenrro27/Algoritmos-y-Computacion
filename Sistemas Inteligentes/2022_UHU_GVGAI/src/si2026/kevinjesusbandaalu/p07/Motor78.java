@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import core.game.StateObservation;
 import tools.Vector2d;
-import java.util.HashSet;
-import java.util.Set;
 import ontology.Types.ACTIONS;
 
 public class Motor78 {
@@ -133,7 +131,7 @@ public class Motor78 {
                 }
             }
         }
-        System.err.println("STRIPS: Acciones generadas: " + plan.actions.size());
+        // System.err.println("STRIPS: Acciones generadas: " + plan.actions.size());
     }
 
     private int[][] calcularDistanciasYDeadEnds() {
