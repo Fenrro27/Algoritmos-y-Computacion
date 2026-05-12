@@ -1,0 +1,5 @@
+# Lista de acciones. 1 por linea
+dormir
+limpiar_pileta
+banarse
+comprar_ropa

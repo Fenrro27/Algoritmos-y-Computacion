@@ -1,0 +1,12 @@
+# Esto serían comentarios
+
+
+# Definiciones de los estados (lista de Proposiciones)
+Ei: relajado, toalla_seca
+Ef: ropa, pileta_limpia
+
+# Acciones: (Nombre, Prerequisitos, Adicion,Eliminacion)
+Accion: dormir          ; relajado             ; descansado      ;
+Accion: banarse         ; toalla_seca          ; limpio          ; toalla_seca
+Accion: comprar_ropa    ; descansado, limpio   ; ropa            ; 
+Accion: limpiar_pileta  ; descansado           ; pileta_limpia   ; limpio
