@@ -128,6 +128,12 @@ public class Main {
         System.out.println("  - Tiempo medio: " + String.format("%.4f", avgTime) + " ms");
     }
 
+
+    /**
+     * MÉTODO DE CONTROL: Verifica que una solución propuesta sea correcta.
+     * Si cambia el problema, se reescribe este método por completo
+     * para adaptarlo a las nuevas reglas (ej. comprobar que no haya números repetidos si fuera Sudoku).
+     */
     private static boolean isValidSolution(String originalLine, String solutionLine) {
         try {
             // Comparar estructura básica (número de ';' y sumas)
@@ -176,9 +182,14 @@ public class Main {
         }
     }
 
+    /**
+     * EL CONSTRUCTOR DEL PROBLEMA (Aquí se concentra el 90% de los cambios si cambia de problema)
+     */
     private static String solveBoard(String line) {
         try {
-            // Parseo de la línea del tablero
+            // Parseo de la línea del fichero
+            // Cambia según el formato de entrada que defina el problema.
+            // Actualmente asume una matriz N x N con sumas separadas por puntos y comas.
             String[] parts = line.split(";");
             int n = parts.length - 1;
             int[][] grid = new int[n][n];
@@ -198,11 +209,14 @@ public class Main {
                 colSums[j] = Integer.parseInt(colVals[j]);
             }
 
-            // Configuración del problema CSP
+            // Listas que recogen los componentes básicos del motor genérico
             List<Node> allNodes = new ArrayList<>();
             Node[][] nodesGrid = new Node[n][n];
-            List<SumConstraint> constraints = new ArrayList<>();
+            List<iConstraint> constraints = new ArrayList<>();
 
+            //INSTANCIACIÓN DE LAS NUEVAS RESTRICCIONES
+            // Si el problema cambia, se Crearan objetos de 
+            // las nuevas clases (ej. AllDifferentConstraint, MenorQueConstraint...)
             SumConstraint[] rowConstraints = new SumConstraint[n];
             for (int i = 0; i < n; i++) {
                 rowConstraints[i] = new SumConstraint(rowSums[i], "row", i);
@@ -215,17 +229,27 @@ public class Main {
                 constraints.add(colConstraints[j]);
             }
 
+            // Bucle de creación de Nodos y Vinculación
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     Node node = new Node(i, j, grid[i][j]);
                     nodesGrid[i][j] = node;
                     allNodes.add(node);
-                    node.rowConstraint = rowConstraints[i];
-                    node.colConstraint = colConstraints[j];
-                    rowConstraints[i].nodes.add(node);
-                    colConstraints[j].nodes.add(node);
+                    // VINCULACIÓN BIDIRECCIONAL DINÁMICA
+                    // Conecta el nodo con las restricciones que le afectan y viceversa.
+                    // Si el juego cambia (ej: Sudoku), aquí se enlazarían también la caja 3x3.
+                    // REGLA DE ORO: Si metes la restricción en el nodo, mete el nodo en la restricción.                    
+                    node.relatedConstraints.add(rowConstraints[i]);
+                    node.relatedConstraints.add(colConstraints[j]);
+                    rowConstraints[i].getNodes().add(node);
+                    colConstraints[j].getNodes().add(node);
                 }
             }
+
+            // A PARTIR DE AQUÍ: Si añades nuevas restricciones en el futuro, solo harías:
+            // Constraint nuevaRegla = new MiNuevaRestriccion(nodosSeleccionados);
+            // constraints.add(nuevaRegla);
+            // por cada nodo: nodo.relatedConstraints.add(nuevaRegla);
 
             // Propagación AC3 inicial
             AC3 propagator = new AC3(constraints);
@@ -234,7 +258,9 @@ public class Main {
             // Backtracking con AC3
             Backtracking solver = new Backtracking(allNodes, constraints);
             if (solver.solve()) {
-                // Construcción de la cadena de resultado
+                
+                // Define cómo se debe formatear el string de texto que se guardará en el fichero.
+                // Depende estrictamente de cómo se deba guardar la solución.
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {

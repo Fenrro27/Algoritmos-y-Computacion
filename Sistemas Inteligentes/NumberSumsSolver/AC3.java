@@ -1,29 +1,30 @@
 import java.util.*;
 
 public class AC3 {
-    private List<SumConstraint> constraints;
+    private List<iConstraint> constraints;
 
-    public AC3(List<SumConstraint> constraints) {
+    public AC3(List<iConstraint> constraints) {
         this.constraints = constraints;
     }
 
     public boolean solve() {
-        Queue<SumConstraint> queue = new LinkedList<>(constraints);
+        Queue<iConstraint> queue = new LinkedList<>(constraints);
+        // Usamos un Set para que las búsquedas queue.contains() pasen de O(N) a O(1)
+        Set<iConstraint> inQueue = new HashSet<>(constraints);
         
         while (!queue.isEmpty()) {
-            SumConstraint sc = queue.poll();
+            iConstraint sc = queue.poll();
+            inQueue.remove(sc);//--
             
             // pruneDomains devuelve true si algún dominio de nodo en esta restricción fue modificado
             if (sc.pruneDomains()) {
-                // Si se modificó un dominio, necesitamos volver a verificar todas las restricciones
-                // que contienen los nodos modificados (excepto la actual).
-                // Para simplificar, añadimos todas las restricciones que comparten nodos con sc.
-                for (Node n : sc.nodes) {
-                    if (n.rowConstraint != null && n.rowConstraint != sc) {
-                        if (!queue.contains(n.rowConstraint)) queue.add(n.rowConstraint);
-                    }
-                    if (n.colConstraint != null && n.colConstraint != sc) {
-                        if (!queue.contains(n.colConstraint)) queue.add(n.colConstraint);
+               // Si el dominio cambió, alertamos a TODAS las restricciones que comparten este nodo
+                for (Node n : sc.getNodes()) {
+                    for (iConstraint related : n.relatedConstraints) {
+                        if (related != sc && !inQueue.contains(related)) {
+                            queue.add(related);
+                            inQueue.add(related);
+                        }
                     }
                 }
             }

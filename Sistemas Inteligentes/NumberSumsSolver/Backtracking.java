@@ -2,9 +2,9 @@ import java.util.*;
 
 public class Backtracking {
     private List<Node> allNodes;
-    private List<SumConstraint> constraints;
+    private List<iConstraint> constraints;
 
-    public Backtracking(List<Node> allNodes, List<SumConstraint> constraints) {
+    public Backtracking(List<Node> allNodes, List<iConstraint> constraints) {
         this.allNodes = allNodes;
         this.constraints = constraints;
     }
@@ -14,18 +14,19 @@ public class Backtracking {
     }
 
     private boolean search() {
+        // HEURÍSTICA MRV: Buscar el nodo con restricciones más críticas (dominio más pequeño > 1)
         // Buscar un nodo cuyo dominio tenga más de 1 valor (no decidido)
         Node bestNode = null;
         for (Node n : allNodes) {
             if (n.domain.size() > 1) {
                 bestNode = n;
-                break;
+                break; // En binario [0,1], cualquier tamaño > 1 es de tamaño 2. El primero sirve.
             }
         }
 
         if (bestNode == null) {
             // Comprobar si todas las restricciones están satisfechas
-            for (SumConstraint sc : constraints) {
+            for (iConstraint sc : constraints) {
                 if (!sc.isSatisfied()) return false;
             }
             return true;
