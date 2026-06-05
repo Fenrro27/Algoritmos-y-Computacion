@@ -1,0 +1,22 @@
+Ei = relajado, toalla_seca
+Ef = ropa, pileta_limpia
+
+Accion = dormir
+P =relajado
+S =
+A = descansado
+
+Accion = bañarse
+P = toalla_seca
+S = toalla_seca
+A = limpio
+
+Accion = comprar_ropa
+P = descansado, limpio
+S = 
+A = ropa
+
+Accion = limpiar_pileta 
+P = descansado
+S = limpio
+A = pileta_limpia

@@ -1,0 +1,17 @@
+Ei = p1, p2
+Ef = p5, p6
+
+Accion = A
+P = p1
+S = 
+A = p3,p4
+
+Accion = B
+P = p2, p4
+S = p3, p5
+A = p6
+
+Accion = C
+P = p3
+S = p3
+A = p5
