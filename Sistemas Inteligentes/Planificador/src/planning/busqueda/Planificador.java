@@ -22,45 +22,73 @@ public final class Planificador {
 
     private Planificador() {}
 
+    public static final class BfsStep {
+        public final int step;
+        public final String state;
+        public final String action;
+        public final String parentState;
+
+        public BfsStep(int step, String state, String action, String parentState) {
+            this.step = step;
+            this.state = state;
+            this.action = action;
+            this.parentState = parentState;
+        }
+    }
+
     /**
      * Resultado de la planificación: plan encontrado, trayectoria de estados
      * y estadísticas básicas. Si {@link #exito} es false, {@link #plan}
      * y {@link #trayectoria} están vacíos.
      */
     public static final class Resultado {
-        public final boolean      exito;
-        public final List<Action> plan;
-        public final List<State>  trayectoria;
-        public final int          nodosExplorados;
-        public final int          nodosGenerados;
+        public final boolean            exito;
+        public final List<List<Action>> planes;
+        public final List<List<State>>  trayectorias;
+        public final List<Action>       plan;
+        public final List<State>        trayectoria;
+        public final int                nodosExplorados;
+        public final int                nodosGenerados;
+        public final List<BfsStep>      trace;
 
-        private Resultado(boolean exito,
-                          List<Action> plan,
-                          List<State> trayectoria,
+        public Resultado(boolean exito,
+                          List<List<Action>> planes,
+                          List<List<State>> trayectorias,
                           int nodosExplorados,
-                          int nodosGenerados) {
+                          int nodosGenerados,
+                          List<BfsStep> trace) {
             this.exito           = exito;
-            this.plan            = Collections.unmodifiableList(plan);
-            this.trayectoria     = Collections.unmodifiableList(trayectoria);
+            this.planes          = Collections.unmodifiableList(planes);
+            this.trayectorias    = Collections.unmodifiableList(trayectorias);
+            this.plan            = planes.isEmpty() ? Collections.<Action>emptyList() : Collections.unmodifiableList(planes.get(0));
+            this.trayectoria     = trayectorias.isEmpty() ? Collections.<State>emptyList() : Collections.unmodifiableList(trayectorias.get(0));
             this.nodosExplorados = nodosExplorados;
             this.nodosGenerados  = nodosGenerados;
+            this.trace           = Collections.unmodifiableList(trace);
         }
     }
 
     /**
-     * Resuelve el problema mediante BFS hacia adelante.
+     * Resuelve el problema mediante BFS hacia adelante, encontrando todos los planes óptimos.
      *
      * @param problema problema de planificación
-     * @return resultado con el plan (puede estar vacío si Ei ya cumple Ef)
+     * @return resultado con todos los planes óptimos
      */
     public static Resultado planificar(Problema_Plan problema) {
         State inicial = problema.getEstadoInicial();
+        List<BfsStep> trace = new ArrayList<BfsStep>();
+
+        List<List<Action>> planes = new ArrayList<List<Action>>();
+        List<List<State>> trayectorias = new ArrayList<List<State>>();
 
         // Caso trivial: el estado inicial ya cumple el objetivo
         if (problema.esObjetivo(inicial)) {
             List<State> tray = new ArrayList<State>();
             tray.add(inicial);
-            return new Resultado(true, new ArrayList<Action>(), tray, 0, 1);
+            trace.add(new BfsStep(1, inicial.toString(), "None", "None"));
+            planes.add(new ArrayList<Action>());
+            trayectorias.add(tray);
+            return new Resultado(true, planes, trayectorias, 0, 1, trace);
         }
 
         Deque<Nodo>  frontera  = new ArrayDeque<Nodo>();
@@ -70,10 +98,17 @@ public final class Planificador {
 
         int explorados = 0;
         int generados  = 1;
+        int solutionDepth = -1;
 
         while (!frontera.isEmpty()) {
             Nodo n = frontera.pollFirst();
+            int currentDepth = obtenerProfundidad(n);
+            if (solutionDepth != -1 && currentDepth >= solutionDepth) {
+                break; // Ya encontramos todas las soluciones óptimas al nivel más corto
+            }
+
             explorados++;
+            trace.add(new BfsStep(explorados, n.estado.toString(), n.accion != null ? n.accion.getName() : "None", n.padre != null ? n.padre.estado.toString() : "None"));
 
             for (Action a : problema.accionesAplicables(n.estado)) {
                 State sucesor = n.estado.apply(a);
@@ -82,22 +117,51 @@ public final class Planificador {
                 Nodo hijo = new Nodo(sucesor, n, a);
                 generados++;
 
+                int depthOfHijo = currentDepth + 1;
                 if (problema.esObjetivo(sucesor)) {
-                    return new Resultado(true,
-                                         reconstruirPlan(hijo),
-                                         reconstruirTrayectoria(hijo),
-                                         explorados,
-                                         generados);
+                    planes.add(reconstruirPlan(hijo));
+                    trayectorias.add(reconstruirTrayectoria(hijo));
+                    solutionDepth = depthOfHijo;
+                    trace.add(new BfsStep(explorados + 1, sucesor.toString(), a.getName(), n.estado.toString()));
                 }
-                frontera.addLast(hijo);
+
+                if (solutionDepth == -1) {
+                    frontera.addLast(hijo);
+                }
             }
         }
 
-        return new Resultado(false,
-                             new ArrayList<Action>(),
-                             new ArrayList<State>(),
+        boolean exito = !planes.isEmpty();
+        List<List<Action>> filteredPlanes = new ArrayList<List<Action>>();
+        List<List<State>> filteredTrayectorias = new ArrayList<List<State>>();
+        if (exito) {
+            int minLen = Integer.MAX_VALUE;
+            for (List<Action> p : planes) {
+                if (p.size() < minLen) {
+                    minLen = p.size();
+                }
+            }
+            for (int i = 0; i < planes.size(); i++) {
+                if (planes.get(i).size() == minLen) {
+                    filteredPlanes.add(planes.get(i));
+                    filteredTrayectorias.add(trayectorias.get(i));
+                }
+            }
+        }
+        return new Resultado(exito,
+                             filteredPlanes,
+                             filteredTrayectorias,
                              explorados,
-                             generados);
+                             generados,
+                             trace);
+    }
+
+    private static int obtenerProfundidad(Nodo n) {
+        int d = 0;
+        for (Nodo temp = n; temp.padre != null; temp = temp.padre) {
+            d++;
+        }
+        return d;
     }
 
     // -------------------------------------------------------------------------

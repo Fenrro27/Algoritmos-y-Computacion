@@ -1,0 +1,281 @@
+Evolucion de la Pila de STRIPS para ejercicio_2_sep22
+============================================================
+
+Paso 0:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 1:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 2:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - descansado
+    - limpio
+    - State[descansado, limpio]
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 3:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - relajado
+    - State[relajado]
+    - dormir
+    - limpio
+    - State[descansado, limpio]
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 4:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - State[relajado]
+    - dormir
+    - limpio
+    - State[descansado, limpio]
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 5:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - dormir
+    - limpio
+    - State[descansado, limpio]
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 6:
+  Estado actual: { relajado, toalla_seca, descansado }
+  Pila (cima -> fondo):
+    - limpio
+    - State[descansado, limpio]
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 7:
+  Estado actual: { relajado, toalla_seca, descansado }
+  Pila (cima -> fondo):
+    - toalla_seca
+    - State[toalla_seca]
+    - bañarse
+    - State[descansado, limpio]
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 8:
+  Estado actual: { relajado, toalla_seca, descansado }
+  Pila (cima -> fondo):
+    - State[toalla_seca]
+    - bañarse
+    - State[descansado, limpio]
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 9:
+  Estado actual: { relajado, toalla_seca, descansado }
+  Pila (cima -> fondo):
+    - bañarse
+    - State[descansado, limpio]
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 10:
+  Estado actual: { relajado, descansado, limpio }
+  Pila (cima -> fondo):
+    - State[descansado, limpio]
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 11:
+  Estado actual: { relajado, descansado, limpio }
+  Pila (cima -> fondo):
+    - comprar_ropa
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 12:
+  Estado actual: { relajado, descansado, limpio, ropa }
+  Pila (cima -> fondo):
+    - pileta_limpia
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 13:
+  Estado actual: { relajado, descansado, limpio, ropa }
+  Pila (cima -> fondo):
+    - descansado
+    - State[descansado]
+    - limpiar_pileta
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 14:
+  Estado actual: { relajado, descansado, limpio, ropa }
+  Pila (cima -> fondo):
+    - State[descansado]
+    - limpiar_pileta
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 15:
+  Estado actual: { relajado, descansado, limpio, ropa }
+  Pila (cima -> fondo):
+    - limpiar_pileta
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 16:
+  Estado actual: { relajado, descansado, ropa, pileta_limpia }
+  Pila (cima -> fondo):
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 17:
+  Estado actual: { relajado, descansado, ropa, pileta_limpia }
+  Pila (cima -> fondo):
+----------------------------------------
+Paso 18:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - pileta_limpia
+    - ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 19:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - descansado
+    - State[descansado]
+    - limpiar_pileta
+    - ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 20:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - relajado
+    - State[relajado]
+    - dormir
+    - State[descansado]
+    - limpiar_pileta
+    - ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 21:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - State[relajado]
+    - dormir
+    - State[descansado]
+    - limpiar_pileta
+    - ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 22:
+  Estado actual: { relajado, toalla_seca }
+  Pila (cima -> fondo):
+    - dormir
+    - State[descansado]
+    - limpiar_pileta
+    - ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 23:
+  Estado actual: { relajado, toalla_seca, descansado }
+  Pila (cima -> fondo):
+    - State[descansado]
+    - limpiar_pileta
+    - ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 24:
+  Estado actual: { relajado, toalla_seca, descansado }
+  Pila (cima -> fondo):
+    - limpiar_pileta
+    - ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 25:
+  Estado actual: { relajado, toalla_seca, descansado, pileta_limpia }
+  Pila (cima -> fondo):
+    - ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 26:
+  Estado actual: { relajado, toalla_seca, descansado, pileta_limpia }
+  Pila (cima -> fondo):
+    - descansado
+    - limpio
+    - State[descansado, limpio]
+    - comprar_ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 27:
+  Estado actual: { relajado, toalla_seca, descansado, pileta_limpia }
+  Pila (cima -> fondo):
+    - limpio
+    - State[descansado, limpio]
+    - comprar_ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 28:
+  Estado actual: { relajado, toalla_seca, descansado, pileta_limpia }
+  Pila (cima -> fondo):
+    - toalla_seca
+    - State[toalla_seca]
+    - bañarse
+    - State[descansado, limpio]
+    - comprar_ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 29:
+  Estado actual: { relajado, toalla_seca, descansado, pileta_limpia }
+  Pila (cima -> fondo):
+    - State[toalla_seca]
+    - bañarse
+    - State[descansado, limpio]
+    - comprar_ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 30:
+  Estado actual: { relajado, toalla_seca, descansado, pileta_limpia }
+  Pila (cima -> fondo):
+    - bañarse
+    - State[descansado, limpio]
+    - comprar_ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 31:
+  Estado actual: { relajado, descansado, pileta_limpia, limpio }
+  Pila (cima -> fondo):
+    - State[descansado, limpio]
+    - comprar_ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 32:
+  Estado actual: { relajado, descansado, pileta_limpia, limpio }
+  Pila (cima -> fondo):
+    - comprar_ropa
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 33:
+  Estado actual: { relajado, descansado, pileta_limpia, limpio, ropa }
+  Pila (cima -> fondo):
+    - State[ropa, pileta_limpia]
+----------------------------------------
+Paso 34:
+  Estado actual: { relajado, descansado, pileta_limpia, limpio, ropa }
+  Pila (cima -> fondo):
+----------------------------------------

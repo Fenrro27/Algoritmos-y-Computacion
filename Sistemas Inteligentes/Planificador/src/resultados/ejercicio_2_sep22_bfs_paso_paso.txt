@@ -1,0 +1,53 @@
+Evolucion paso a paso de la Busqueda hacia adelante (BFS) para ejercicio_2_sep22
+===========================================================================
+
+Paso 1:
+  Estado actual: { relajado, toalla_seca }
+  Accion aplicada: None
+  Estado de procedencia (padre): None
+--------------------------------------------------
+Paso 2:
+  Estado actual: { relajado, toalla_seca, descansado }
+  Accion aplicada: dormir
+  Estado de procedencia (padre): { relajado, toalla_seca }
+--------------------------------------------------
+Paso 3:
+  Estado actual: { relajado, limpio }
+  Accion aplicada: bañarse
+  Estado de procedencia (padre): { relajado, toalla_seca }
+--------------------------------------------------
+Paso 4:
+  Estado actual: { relajado, descansado, limpio }
+  Accion aplicada: bañarse
+  Estado de procedencia (padre): { relajado, toalla_seca, descansado }
+--------------------------------------------------
+Paso 5:
+  Estado actual: { relajado, toalla_seca, descansado, pileta_limpia }
+  Accion aplicada: limpiar_pileta
+  Estado de procedencia (padre): { relajado, toalla_seca, descansado }
+--------------------------------------------------
+Paso 6:
+  Estado actual: { relajado, descansado, limpio, ropa }
+  Accion aplicada: comprar_ropa
+  Estado de procedencia (padre): { relajado, descansado, limpio }
+--------------------------------------------------
+Paso 7:
+  Estado actual: { relajado, descansado, ropa, pileta_limpia }
+  Accion aplicada: limpiar_pileta
+  Estado de procedencia (padre): { relajado, descansado, limpio, ropa }
+--------------------------------------------------
+Paso 7:
+  Estado actual: { relajado, descansado, pileta_limpia }
+  Accion aplicada: limpiar_pileta
+  Estado de procedencia (padre): { relajado, descansado, limpio }
+--------------------------------------------------
+Paso 8:
+  Estado actual: { relajado, descansado, pileta_limpia, limpio }
+  Accion aplicada: bañarse
+  Estado de procedencia (padre): { relajado, toalla_seca, descansado, pileta_limpia }
+--------------------------------------------------
+Paso 9:
+  Estado actual: { relajado, descansado, pileta_limpia, limpio, ropa }
+  Accion aplicada: comprar_ropa
+  Estado de procedencia (padre): { relajado, descansado, pileta_limpia, limpio }
+--------------------------------------------------

@@ -1,0 +1,38 @@
+Evolucion paso a paso de la Busqueda hacia adelante (BFS) para ejercicio1_junio22
+===========================================================================
+
+Paso 1:
+  Estado actual: { p1, p2 }
+  Accion aplicada: None
+  Estado de procedencia (padre): None
+--------------------------------------------------
+Paso 2:
+  Estado actual: { p1, p2, p3, p4 }
+  Accion aplicada: A
+  Estado de procedencia (padre): { p1, p2 }
+--------------------------------------------------
+Paso 3:
+  Estado actual: { p1, p2, p4, p6 }
+  Accion aplicada: B
+  Estado de procedencia (padre): { p1, p2, p3, p4 }
+--------------------------------------------------
+Paso 4:
+  Estado actual: { p1, p2, p4, p5 }
+  Accion aplicada: C
+  Estado de procedencia (padre): { p1, p2, p3, p4 }
+--------------------------------------------------
+Paso 5:
+  Estado actual: { p1, p2, p4, p6, p3 }
+  Accion aplicada: A
+  Estado de procedencia (padre): { p1, p2, p4, p6 }
+--------------------------------------------------
+Paso 6:
+  Estado actual: { p1, p2, p4, p6, p5 }
+  Accion aplicada: C
+  Estado de procedencia (padre): { p1, p2, p4, p6, p3 }
+--------------------------------------------------
+Paso 6:
+  Estado actual: { p1, p2, p4, p5, p3 }
+  Accion aplicada: A
+  Estado de procedencia (padre): { p1, p2, p4, p5 }
+--------------------------------------------------

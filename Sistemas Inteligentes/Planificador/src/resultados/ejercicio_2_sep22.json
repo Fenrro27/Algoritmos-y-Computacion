@@ -1,0 +1,438 @@
+{
+  "problem": "ejercicio_2_sep22.txt",
+  "bfs": {
+    "exito": true,
+    "nodosExplorados": 8,
+    "nodosGenerados": 10,
+    "plan": ["dormir", "bañarse", "comprar_ropa", "limpiar_pileta"],
+    "planes": [["dormir", "bañarse", "comprar_ropa", "limpiar_pileta"], ["dormir", "limpiar_pileta", "bañarse", "comprar_ropa"]],
+    "trace": [
+      {
+        "step": 1,
+        "state": "{ relajado, toalla_seca }",
+        "action": "None",
+        "parentState": "None"
+      },
+      {
+        "step": 2,
+        "state": "{ relajado, toalla_seca, descansado }",
+        "action": "dormir",
+        "parentState": "{ relajado, toalla_seca }"
+      },
+      {
+        "step": 3,
+        "state": "{ relajado, limpio }",
+        "action": "bañarse",
+        "parentState": "{ relajado, toalla_seca }"
+      },
+      {
+        "step": 4,
+        "state": "{ relajado, descansado, limpio }",
+        "action": "bañarse",
+        "parentState": "{ relajado, toalla_seca, descansado }"
+      },
+      {
+        "step": 5,
+        "state": "{ relajado, toalla_seca, descansado, pileta_limpia }",
+        "action": "limpiar_pileta",
+        "parentState": "{ relajado, toalla_seca, descansado }"
+      },
+      {
+        "step": 6,
+        "state": "{ relajado, descansado, limpio, ropa }",
+        "action": "comprar_ropa",
+        "parentState": "{ relajado, descansado, limpio }"
+      },
+      {
+        "step": 7,
+        "state": "{ relajado, descansado, ropa, pileta_limpia }",
+        "action": "limpiar_pileta",
+        "parentState": "{ relajado, descansado, limpio, ropa }"
+      },
+      {
+        "step": 7,
+        "state": "{ relajado, descansado, pileta_limpia }",
+        "action": "limpiar_pileta",
+        "parentState": "{ relajado, descansado, limpio }"
+      },
+      {
+        "step": 8,
+        "state": "{ relajado, descansado, pileta_limpia, limpio }",
+        "action": "bañarse",
+        "parentState": "{ relajado, toalla_seca, descansado, pileta_limpia }"
+      },
+      {
+        "step": 9,
+        "state": "{ relajado, descansado, pileta_limpia, limpio, ropa }",
+        "action": "comprar_ropa",
+        "parentState": "{ relajado, descansado, pileta_limpia, limpio }"
+      }
+    ]
+  },
+  "strips": {
+    "exito": true,
+    "nodosExplorados": 35,
+    "nodosGenerados": 11,
+    "plan": ["dormir", "bañarse", "comprar_ropa", "limpiar_pileta"],
+    "planes": [["dormir", "bañarse", "comprar_ropa", "limpiar_pileta"], ["dormir", "limpiar_pileta", "bañarse", "comprar_ropa"]],
+    "trace": [
+      {
+        "step": 0,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 1,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 2,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["descansado", "limpio", "State[descansado, limpio]", "comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 3,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["relajado", "State[relajado]", "dormir", "limpio", "State[descansado, limpio]", "comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 4,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["State[relajado]", "dormir", "limpio", "State[descansado, limpio]", "comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 5,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["dormir", "limpio", "State[descansado, limpio]", "comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 6,
+        "state": "{ relajado, toalla_seca, descansado }",
+        "stack": ["limpio", "State[descansado, limpio]", "comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 7,
+        "state": "{ relajado, toalla_seca, descansado }",
+        "stack": ["toalla_seca", "State[toalla_seca]", "bañarse", "State[descansado, limpio]", "comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 8,
+        "state": "{ relajado, toalla_seca, descansado }",
+        "stack": ["State[toalla_seca]", "bañarse", "State[descansado, limpio]", "comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 9,
+        "state": "{ relajado, toalla_seca, descansado }",
+        "stack": ["bañarse", "State[descansado, limpio]", "comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 10,
+        "state": "{ relajado, descansado, limpio }",
+        "stack": ["State[descansado, limpio]", "comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 11,
+        "state": "{ relajado, descansado, limpio }",
+        "stack": ["comprar_ropa", "pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 12,
+        "state": "{ relajado, descansado, limpio, ropa }",
+        "stack": ["pileta_limpia", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 13,
+        "state": "{ relajado, descansado, limpio, ropa }",
+        "stack": ["descansado", "State[descansado]", "limpiar_pileta", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 14,
+        "state": "{ relajado, descansado, limpio, ropa }",
+        "stack": ["State[descansado]", "limpiar_pileta", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 15,
+        "state": "{ relajado, descansado, limpio, ropa }",
+        "stack": ["limpiar_pileta", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 16,
+        "state": "{ relajado, descansado, ropa, pileta_limpia }",
+        "stack": ["State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 17,
+        "state": "{ relajado, descansado, ropa, pileta_limpia }",
+        "stack": []
+      },
+      {
+        "step": 18,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["pileta_limpia", "ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 19,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["descansado", "State[descansado]", "limpiar_pileta", "ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 20,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["relajado", "State[relajado]", "dormir", "State[descansado]", "limpiar_pileta", "ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 21,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["State[relajado]", "dormir", "State[descansado]", "limpiar_pileta", "ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 22,
+        "state": "{ relajado, toalla_seca }",
+        "stack": ["dormir", "State[descansado]", "limpiar_pileta", "ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 23,
+        "state": "{ relajado, toalla_seca, descansado }",
+        "stack": ["State[descansado]", "limpiar_pileta", "ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 24,
+        "state": "{ relajado, toalla_seca, descansado }",
+        "stack": ["limpiar_pileta", "ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 25,
+        "state": "{ relajado, toalla_seca, descansado, pileta_limpia }",
+        "stack": ["ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 26,
+        "state": "{ relajado, toalla_seca, descansado, pileta_limpia }",
+        "stack": ["descansado", "limpio", "State[descansado, limpio]", "comprar_ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 27,
+        "state": "{ relajado, toalla_seca, descansado, pileta_limpia }",
+        "stack": ["limpio", "State[descansado, limpio]", "comprar_ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 28,
+        "state": "{ relajado, toalla_seca, descansado, pileta_limpia }",
+        "stack": ["toalla_seca", "State[toalla_seca]", "bañarse", "State[descansado, limpio]", "comprar_ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 29,
+        "state": "{ relajado, toalla_seca, descansado, pileta_limpia }",
+        "stack": ["State[toalla_seca]", "bañarse", "State[descansado, limpio]", "comprar_ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 30,
+        "state": "{ relajado, toalla_seca, descansado, pileta_limpia }",
+        "stack": ["bañarse", "State[descansado, limpio]", "comprar_ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 31,
+        "state": "{ relajado, descansado, pileta_limpia, limpio }",
+        "stack": ["State[descansado, limpio]", "comprar_ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 32,
+        "state": "{ relajado, descansado, pileta_limpia, limpio }",
+        "stack": ["comprar_ropa", "State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 33,
+        "state": "{ relajado, descansado, pileta_limpia, limpio, ropa }",
+        "stack": ["State[ropa, pileta_limpia]"]
+      },
+      {
+        "step": 34,
+        "state": "{ relajado, descansado, pileta_limpia, limpio, ropa }",
+        "stack": []
+      }
+    ]
+  },
+  "pop": {
+    "exito": true,
+    "nodosExplorados": 20,
+    "nodosGenerados": 21,
+    "plan": ["dormir", "bañarse", "comprar_ropa", "limpiar_pileta"],
+    "planes": [["dormir", "bañarse", "comprar_ropa", "limpiar_pileta"], ["bañarse", "dormir", "comprar_ropa", "limpiar_pileta"], ["dormir", "limpiar_pileta", "bañarse", "comprar_ropa"]],
+    "steps": [
+      {"id": 0, "name": "Start"},
+      {"id": 1, "name": "Finish"},
+      {"id": 2, "name": "comprar_ropa"},
+      {"id": 3, "name": "limpiar_pileta"},
+      {"id": 4, "name": "dormir"},
+      {"id": 5, "name": "bañarse"}
+    ],
+    "constraints": [
+      {"before": 0, "after": 1},
+      {"before": 2, "after": 1},
+      {"before": 0, "after": 2},
+      {"before": 3, "after": 1},
+      {"before": 0, "after": 3},
+      {"before": 4, "after": 2},
+      {"before": 0, "after": 4},
+      {"before": 4, "after": 1},
+      {"before": 5, "after": 2},
+      {"before": 0, "after": 5},
+      {"before": 5, "after": 1},
+      {"before": 2, "after": 3},
+      {"before": 4, "after": 3}
+    ],
+    "links": [
+      {"source": 2, "target": 1, "literal": "ropa"},
+      {"source": 3, "target": 1, "literal": "pileta_limpia"},
+      {"source": 4, "target": 2, "literal": "descansado"},
+      {"source": 5, "target": 2, "literal": "limpio"},
+      {"source": 4, "target": 3, "literal": "descansado"},
+      {"source": 0, "target": 4, "literal": "relajado"},
+      {"source": 0, "target": 5, "literal": "toalla_seca"}
+    ],
+    "trace": [
+      {
+        "step": 0,
+        "steps": ["0:Start", "1:Finish"],
+        "constraints": ["0<1"],
+        "links": [],
+        "open": ["1:ropa", "1:pileta_limpia"]
+      },
+      {
+        "step": 1,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa"],
+        "constraints": ["0<1", "2<1", "0<2"],
+        "links": ["2-ropa->1"],
+        "open": ["1:pileta_limpia", "2:descansado", "2:limpio"]
+      },
+      {
+        "step": 2,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1"],
+        "open": ["2:descansado", "2:limpio", "3:descansado"]
+      },
+      {
+        "step": 3,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2"],
+        "open": ["2:limpio", "3:descansado", "4:relajado"]
+      },
+      {
+        "step": 4,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "2<3"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2"],
+        "open": ["3:descansado", "4:relajado", "5:toalla_seca"]
+      },
+      {
+        "step": 5,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "2<3", "4<3"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "4-descansado->3"],
+        "open": ["4:relajado", "5:toalla_seca"]
+      },
+      {
+        "step": 6,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "2<3", "4<3"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "4-descansado->3", "0-relajado->4"],
+        "open": ["5:toalla_seca"]
+      },
+      {
+        "step": 7,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "2<3", "4<3"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "4-descansado->3", "0-relajado->4", "0-toalla_seca->5"],
+        "open": []
+      },
+      {
+        "step": 8,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse", "6:dormir"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "2<3", "6<3", "0<6", "6<1"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "6-descansado->3"],
+        "open": ["4:relajado", "5:toalla_seca", "6:relajado"]
+      },
+      {
+        "step": 9,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse", "6:dormir"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "2<3", "6<3", "0<6", "6<1"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "6-descansado->3", "0-relajado->4"],
+        "open": ["5:toalla_seca", "6:relajado"]
+      },
+      {
+        "step": 10,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse", "6:dormir"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "2<3", "6<3", "0<6", "6<1"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "6-descansado->3", "0-relajado->4", "0-toalla_seca->5"],
+        "open": ["6:relajado"]
+      },
+      {
+        "step": 11,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse", "6:dormir"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "2<3", "6<3", "0<6", "6<1"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "6-descansado->3", "0-relajado->4", "0-toalla_seca->5", "0-relajado->6"],
+        "open": []
+      },
+      {
+        "step": 12,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "3<5"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2"],
+        "open": ["3:descansado", "4:relajado", "5:toalla_seca"]
+      },
+      {
+        "step": 13,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "3<5", "4<3"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "4-descansado->3"],
+        "open": ["4:relajado", "5:toalla_seca"]
+      },
+      {
+        "step": 14,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "3<5", "4<3"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "4-descansado->3", "0-relajado->4"],
+        "open": ["5:toalla_seca"]
+      },
+      {
+        "step": 15,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "3<5", "4<3"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "4-descansado->3", "0-relajado->4", "0-toalla_seca->5"],
+        "open": []
+      },
+      {
+        "step": 16,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse", "6:dormir"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "3<5", "6<3", "0<6", "6<1"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "6-descansado->3"],
+        "open": ["4:relajado", "5:toalla_seca", "6:relajado"]
+      },
+      {
+        "step": 17,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse", "6:dormir"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "3<5", "6<3", "0<6", "6<1"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "6-descansado->3", "0-relajado->4"],
+        "open": ["5:toalla_seca", "6:relajado"]
+      },
+      {
+        "step": 18,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse", "6:dormir"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "3<5", "6<3", "0<6", "6<1"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "6-descansado->3", "0-relajado->4", "0-toalla_seca->5"],
+        "open": ["6:relajado"]
+      },
+      {
+        "step": 19,
+        "steps": ["0:Start", "1:Finish", "2:comprar_ropa", "3:limpiar_pileta", "4:dormir", "5:bañarse", "6:dormir"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "4<2", "0<4", "4<1", "5<2", "0<5", "5<1", "3<5", "6<3", "0<6", "6<1"],
+        "links": ["2-ropa->1", "3-pileta_limpia->1", "4-descansado->2", "5-limpio->2", "6-descansado->3", "0-relajado->4", "0-toalla_seca->5", "0-relajado->6"],
+        "open": []
+      }
+    ],
+    "conflictResolution": ["[POP] Conflicto (Amenaza) detectado: El paso S3 (limpiar_pileta) amenaza el enlace causal: S5 --[limpio]--> S2", "    -> Intentando PROMOCION: forzar orden S2 (comprar_ropa) < S3 (limpiar_pileta)", "    -> Intentando DEGRADACION (Democion): forzar orden S3 (limpiar_pileta) < S5 (bañarse)", "    -> Ambos metodos de resolucion fallaron en este punto. Haciendo BACKTRACK..."]
+  }
+}
