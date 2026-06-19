@@ -24,12 +24,18 @@ public class Acciones {
     }
     
     public boolean esAccion(String s) {
-    	return s == this.name;
+    	if (s == null && this.name == null) return true;
+    	if (s == null || this.name == null) return false;
+    	return this.name.equals(s);
     }
     
     @Override
     public boolean equals(Object obj) {
-    	return this.name==((Acciones)obj).name;
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Acciones other = (Acciones) obj;
+        if (this.name == null) return other.name == null;
+        return this.name.equals(other.name);
     }
 
 }
