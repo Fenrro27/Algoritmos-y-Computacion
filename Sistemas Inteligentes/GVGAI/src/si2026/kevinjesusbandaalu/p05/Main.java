@@ -1,3 +1,5 @@
+package si2026.kevinjesusbandaalu.p05;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
