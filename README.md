@@ -7,7 +7,7 @@ Repositorio con el contenido de las practicas de las asignaturas del Grado en In
 
 - [x] **Modelos bioinspirados y heurísticas de búsqueda** 
 - [ ] **Aprendizaje Automático** 
-- [ ] **Sistemas Inteligentes** 
+- [X] **Sistemas Inteligentes** 
 - [ ] **Fundamentos de Análisis de Algoritmos** 
 - [ ] **Algoritmia y Modelos de Computación** 
 - [x] **Modelos Avanzados de Computación**
