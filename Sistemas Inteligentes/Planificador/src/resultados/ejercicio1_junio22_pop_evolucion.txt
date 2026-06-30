@@ -1,0 +1,92 @@
+Evolucion de la Red de Planificacion POP para ejercicio1_junio22
+================================================================================
+
+Paso 0:
+  Pasos activos: ['0:Start', '1:Finish']
+  Restricciones de orden: ['0<1']
+  Enlaces causales:
+  Precondiciones abiertas: ['1:p5', '1:p6']
+------------------------------------------------------------
+Paso 1:
+  Pasos activos: ['0:Start', '1:Finish', '2:C']
+  Restricciones de orden: ['0<1', '2<1', '0<2']
+  Enlaces causales:
+    - 2-p5->1
+  Precondiciones abiertas: ['1:p6', '2:p3']
+------------------------------------------------------------
+Paso 2:
+  Pasos activos: ['0:Start', '1:Finish', '2:C', '3:B']
+  Restricciones de orden: ['0<1', '2<1', '0<2', '3<1', '0<3', '3<2']
+  Enlaces causales:
+    - 2-p5->1
+    - 3-p6->1
+  Precondiciones abiertas: ['2:p3', '3:p2', '3:p4']
+------------------------------------------------------------
+Paso 3:
+  Pasos activos: ['0:Start', '1:Finish', '2:C', '3:B', '4:A']
+  Restricciones de orden: ['0<1', '2<1', '0<2', '3<1', '0<3', '3<2', '4<2', '0<4', '4<1', '3<4']
+  Enlaces causales:
+    - 2-p5->1
+    - 3-p6->1
+    - 4-p3->2
+  Precondiciones abiertas: ['3:p2', '3:p4', '4:p1']
+------------------------------------------------------------
+Paso 4:
+  Pasos activos: ['0:Start', '1:Finish', '2:C', '3:B', '4:A']
+  Restricciones de orden: ['0<1', '2<1', '0<2', '3<1', '0<3', '3<2', '4<2', '0<4', '4<1', '3<4']
+  Enlaces causales:
+    - 2-p5->1
+    - 3-p6->1
+    - 4-p3->2
+    - 0-p2->3
+  Precondiciones abiertas: ['3:p4', '4:p1']
+------------------------------------------------------------
+Paso 5:
+  Pasos activos: ['0:Start', '1:Finish', '2:C', '3:B', '4:A', '5:A']
+  Restricciones de orden: ['0<1', '2<1', '0<2', '3<1', '0<3', '3<2', '4<2', '0<4', '4<1', '3<4', '5<3', '0<5', '5<1']
+  Enlaces causales:
+    - 2-p5->1
+    - 3-p6->1
+    - 4-p3->2
+    - 0-p2->3
+    - 5-p4->3
+  Precondiciones abiertas: ['4:p1', '5:p1']
+------------------------------------------------------------
+Paso 6:
+  Pasos activos: ['0:Start', '1:Finish', '2:C', '3:B', '4:A', '5:A']
+  Restricciones de orden: ['0<1', '2<1', '0<2', '3<1', '0<3', '3<2', '4<2', '0<4', '4<1', '3<4', '5<3', '0<5', '5<1']
+  Enlaces causales:
+    - 2-p5->1
+    - 3-p6->1
+    - 4-p3->2
+    - 0-p2->3
+    - 5-p4->3
+    - 0-p1->4
+  Precondiciones abiertas: ['5:p1']
+------------------------------------------------------------
+Paso 7:
+  Pasos activos: ['0:Start', '1:Finish', '2:C', '3:B', '4:A', '5:A']
+  Restricciones de orden: ['0<1', '2<1', '0<2', '3<1', '0<3', '3<2', '4<2', '0<4', '4<1', '3<4', '5<3', '0<5', '5<1']
+  Enlaces causales:
+    - 2-p5->1
+    - 3-p6->1
+    - 4-p3->2
+    - 0-p2->3
+    - 5-p4->3
+    - 0-p1->4
+    - 0-p1->5
+  Precondiciones abiertas: []
+------------------------------------------------------------
+
+Resolucion de Conflictos (Amenazas) durante la busqueda:
+========================================================
+  [POP] Conflicto (Amenaza) detectado: El paso S3 (B) amenaza el enlace causal: S2 --[p5]--> S1
+      -> Intentando PROMOCION: forzar orden S1 (Finish) < S3 (B)
+      -> PROMOCION no viable: crea un ciclo inconsistente.
+      -> Intentando DEGRADACION (Democion): forzar orden S3 (B) < S2 (C)
+  [POP] Conflicto (Amenaza) detectado: El paso S3 (B) amenaza el enlace causal: S4 --[p3]--> S2
+      -> Intentando PROMOCION: forzar orden S2 (C) < S3 (B)
+      -> PROMOCION no viable: crea un ciclo inconsistente.
+      -> Intentando DEGRADACION (Democion): forzar orden S3 (B) < S4 (A)
+      -> Ambos metodos de resolucion fallaron en este punto. Haciendo BACKTRACK...
+      -> Ambos metodos de resolucion fallaron en este punto. Haciendo BACKTRACK...

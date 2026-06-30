@@ -1,0 +1,307 @@
+Evolucion de la Pila de STRIPS para ejercicio1_junio22
+============================================================
+
+Paso 0:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - State[p5, p6]
+----------------------------------------
+Paso 1:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - p5
+    - p6
+    - State[p5, p6]
+----------------------------------------
+Paso 2:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - p3
+    - State[p3]
+    - C
+    - p6
+    - State[p5, p6]
+----------------------------------------
+Paso 3:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - p1
+    - State[p1]
+    - A
+    - State[p3]
+    - C
+    - p6
+    - State[p5, p6]
+----------------------------------------
+Paso 4:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - State[p1]
+    - A
+    - State[p3]
+    - C
+    - p6
+    - State[p5, p6]
+----------------------------------------
+Paso 5:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - A
+    - State[p3]
+    - C
+    - p6
+    - State[p5, p6]
+----------------------------------------
+Paso 6:
+  Estado actual: { p1, p2, p3, p4 }
+  Pila (cima -> fondo):
+    - State[p3]
+    - C
+    - p6
+    - State[p5, p6]
+----------------------------------------
+Paso 7:
+  Estado actual: { p1, p2, p3, p4 }
+  Pila (cima -> fondo):
+    - C
+    - p6
+    - State[p5, p6]
+----------------------------------------
+Paso 8:
+  Estado actual: { p1, p2, p4, p5 }
+  Pila (cima -> fondo):
+    - p6
+    - State[p5, p6]
+----------------------------------------
+Paso 9:
+  Estado actual: { p1, p2, p4, p5 }
+  Pila (cima -> fondo):
+    - p2
+    - p4
+    - State[p2, p4]
+    - B
+    - State[p5, p6]
+----------------------------------------
+Paso 10:
+  Estado actual: { p1, p2, p4, p5 }
+  Pila (cima -> fondo):
+    - p4
+    - State[p2, p4]
+    - B
+    - State[p5, p6]
+----------------------------------------
+Paso 11:
+  Estado actual: { p1, p2, p4, p5 }
+  Pila (cima -> fondo):
+    - State[p2, p4]
+    - B
+    - State[p5, p6]
+----------------------------------------
+Paso 12:
+  Estado actual: { p1, p2, p4, p5 }
+  Pila (cima -> fondo):
+    - B
+    - State[p5, p6]
+----------------------------------------
+Paso 13:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - State[p5, p6]
+----------------------------------------
+Paso 14:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 15:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - p3
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 16:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - p1
+    - State[p1]
+    - A
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 17:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - State[p1]
+    - A
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 18:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - A
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 19:
+  Estado actual: { p1, p2, p4, p6, p3 }
+  Pila (cima -> fondo):
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 20:
+  Estado actual: { p1, p2, p4, p6, p3 }
+  Pila (cima -> fondo):
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 21:
+  Estado actual: { p1, p2, p4, p6, p5 }
+  Pila (cima -> fondo):
+    - State[p5, p6]
+----------------------------------------
+Paso 22:
+  Estado actual: { p1, p2, p4, p6, p5 }
+  Pila (cima -> fondo):
+----------------------------------------
+Paso 23:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - p6
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 24:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - p2
+    - p4
+    - State[p2, p4]
+    - B
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 25:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - p4
+    - State[p2, p4]
+    - B
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 26:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - p1
+    - State[p1]
+    - A
+    - State[p2, p4]
+    - B
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 27:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - State[p1]
+    - A
+    - State[p2, p4]
+    - B
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 28:
+  Estado actual: { p1, p2 }
+  Pila (cima -> fondo):
+    - A
+    - State[p2, p4]
+    - B
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 29:
+  Estado actual: { p1, p2, p3, p4 }
+  Pila (cima -> fondo):
+    - State[p2, p4]
+    - B
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 30:
+  Estado actual: { p1, p2, p3, p4 }
+  Pila (cima -> fondo):
+    - B
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 31:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - p5
+    - State[p5, p6]
+----------------------------------------
+Paso 32:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - p3
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 33:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - p1
+    - State[p1]
+    - A
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 34:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - State[p1]
+    - A
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 35:
+  Estado actual: { p1, p2, p4, p6 }
+  Pila (cima -> fondo):
+    - A
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 36:
+  Estado actual: { p1, p2, p4, p6, p3 }
+  Pila (cima -> fondo):
+    - State[p3]
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 37:
+  Estado actual: { p1, p2, p4, p6, p3 }
+  Pila (cima -> fondo):
+    - C
+    - State[p5, p6]
+----------------------------------------
+Paso 38:
+  Estado actual: { p1, p2, p4, p6, p5 }
+  Pila (cima -> fondo):
+    - State[p5, p6]
+----------------------------------------
+Paso 39:
+  Estado actual: { p1, p2, p4, p6, p5 }
+  Pila (cima -> fondo):
+----------------------------------------

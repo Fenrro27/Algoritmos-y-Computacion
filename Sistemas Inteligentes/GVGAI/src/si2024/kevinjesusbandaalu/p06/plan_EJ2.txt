@@ -1,0 +1,11 @@
+# Esto serían comentarios
+
+
+# Definiciones de los estados (lista de Proposiciones)
+Ei: P1, P2
+Ef: P5, P6
+
+# Acciones: (Nombre, Prerequisitos, Adicion,Eliminacion)
+Accion: A    ; P1             ; P3, P4      ;
+Accion: B    ; P2, P4         ; P6          ; P3, P5
+Accion: C    ; P3   	      ; P5    	    ; P3 

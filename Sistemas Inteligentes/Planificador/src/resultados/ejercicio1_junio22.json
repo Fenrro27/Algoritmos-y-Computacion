@@ -1,0 +1,361 @@
+{
+  "problem": "ejercicio1_junio22.txt",
+  "bfs": {
+    "exito": true,
+    "nodosExplorados": 6,
+    "nodosGenerados": 7,
+    "plan": ["A", "B", "A", "C"],
+    "planes": [["A", "B", "A", "C"]],
+    "trace": [
+      {
+        "step": 1,
+        "state": "{ p1, p2 }",
+        "action": "None",
+        "parentState": "None"
+      },
+      {
+        "step": 2,
+        "state": "{ p1, p2, p3, p4 }",
+        "action": "A",
+        "parentState": "{ p1, p2 }"
+      },
+      {
+        "step": 3,
+        "state": "{ p1, p2, p4, p6 }",
+        "action": "B",
+        "parentState": "{ p1, p2, p3, p4 }"
+      },
+      {
+        "step": 4,
+        "state": "{ p1, p2, p4, p5 }",
+        "action": "C",
+        "parentState": "{ p1, p2, p3, p4 }"
+      },
+      {
+        "step": 5,
+        "state": "{ p1, p2, p4, p6, p3 }",
+        "action": "A",
+        "parentState": "{ p1, p2, p4, p6 }"
+      },
+      {
+        "step": 6,
+        "state": "{ p1, p2, p4, p6, p5 }",
+        "action": "C",
+        "parentState": "{ p1, p2, p4, p6, p3 }"
+      },
+      {
+        "step": 6,
+        "state": "{ p1, p2, p4, p5, p3 }",
+        "action": "A",
+        "parentState": "{ p1, p2, p4, p5 }"
+      }
+    ]
+  },
+  "strips": {
+    "exito": true,
+    "nodosExplorados": 40,
+    "nodosGenerados": 13,
+    "plan": ["A", "B", "A", "C"],
+    "planes": [["A", "B", "A", "C"]],
+    "trace": [
+      {
+        "step": 0,
+        "state": "{ p1, p2 }",
+        "stack": ["State[p5, p6]"]
+      },
+      {
+        "step": 1,
+        "state": "{ p1, p2 }",
+        "stack": ["p5", "p6", "State[p5, p6]"]
+      },
+      {
+        "step": 2,
+        "state": "{ p1, p2 }",
+        "stack": ["p3", "State[p3]", "C", "p6", "State[p5, p6]"]
+      },
+      {
+        "step": 3,
+        "state": "{ p1, p2 }",
+        "stack": ["p1", "State[p1]", "A", "State[p3]", "C", "p6", "State[p5, p6]"]
+      },
+      {
+        "step": 4,
+        "state": "{ p1, p2 }",
+        "stack": ["State[p1]", "A", "State[p3]", "C", "p6", "State[p5, p6]"]
+      },
+      {
+        "step": 5,
+        "state": "{ p1, p2 }",
+        "stack": ["A", "State[p3]", "C", "p6", "State[p5, p6]"]
+      },
+      {
+        "step": 6,
+        "state": "{ p1, p2, p3, p4 }",
+        "stack": ["State[p3]", "C", "p6", "State[p5, p6]"]
+      },
+      {
+        "step": 7,
+        "state": "{ p1, p2, p3, p4 }",
+        "stack": ["C", "p6", "State[p5, p6]"]
+      },
+      {
+        "step": 8,
+        "state": "{ p1, p2, p4, p5 }",
+        "stack": ["p6", "State[p5, p6]"]
+      },
+      {
+        "step": 9,
+        "state": "{ p1, p2, p4, p5 }",
+        "stack": ["p2", "p4", "State[p2, p4]", "B", "State[p5, p6]"]
+      },
+      {
+        "step": 10,
+        "state": "{ p1, p2, p4, p5 }",
+        "stack": ["p4", "State[p2, p4]", "B", "State[p5, p6]"]
+      },
+      {
+        "step": 11,
+        "state": "{ p1, p2, p4, p5 }",
+        "stack": ["State[p2, p4]", "B", "State[p5, p6]"]
+      },
+      {
+        "step": 12,
+        "state": "{ p1, p2, p4, p5 }",
+        "stack": ["B", "State[p5, p6]"]
+      },
+      {
+        "step": 13,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["State[p5, p6]"]
+      },
+      {
+        "step": 14,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["p5", "State[p5, p6]"]
+      },
+      {
+        "step": 15,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["p3", "State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 16,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["p1", "State[p1]", "A", "State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 17,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["State[p1]", "A", "State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 18,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["A", "State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 19,
+        "state": "{ p1, p2, p4, p6, p3 }",
+        "stack": ["State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 20,
+        "state": "{ p1, p2, p4, p6, p3 }",
+        "stack": ["C", "State[p5, p6]"]
+      },
+      {
+        "step": 21,
+        "state": "{ p1, p2, p4, p6, p5 }",
+        "stack": ["State[p5, p6]"]
+      },
+      {
+        "step": 22,
+        "state": "{ p1, p2, p4, p6, p5 }",
+        "stack": []
+      },
+      {
+        "step": 23,
+        "state": "{ p1, p2 }",
+        "stack": ["p6", "p5", "State[p5, p6]"]
+      },
+      {
+        "step": 24,
+        "state": "{ p1, p2 }",
+        "stack": ["p2", "p4", "State[p2, p4]", "B", "p5", "State[p5, p6]"]
+      },
+      {
+        "step": 25,
+        "state": "{ p1, p2 }",
+        "stack": ["p4", "State[p2, p4]", "B", "p5", "State[p5, p6]"]
+      },
+      {
+        "step": 26,
+        "state": "{ p1, p2 }",
+        "stack": ["p1", "State[p1]", "A", "State[p2, p4]", "B", "p5", "State[p5, p6]"]
+      },
+      {
+        "step": 27,
+        "state": "{ p1, p2 }",
+        "stack": ["State[p1]", "A", "State[p2, p4]", "B", "p5", "State[p5, p6]"]
+      },
+      {
+        "step": 28,
+        "state": "{ p1, p2 }",
+        "stack": ["A", "State[p2, p4]", "B", "p5", "State[p5, p6]"]
+      },
+      {
+        "step": 29,
+        "state": "{ p1, p2, p3, p4 }",
+        "stack": ["State[p2, p4]", "B", "p5", "State[p5, p6]"]
+      },
+      {
+        "step": 30,
+        "state": "{ p1, p2, p3, p4 }",
+        "stack": ["B", "p5", "State[p5, p6]"]
+      },
+      {
+        "step": 31,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["p5", "State[p5, p6]"]
+      },
+      {
+        "step": 32,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["p3", "State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 33,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["p1", "State[p1]", "A", "State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 34,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["State[p1]", "A", "State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 35,
+        "state": "{ p1, p2, p4, p6 }",
+        "stack": ["A", "State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 36,
+        "state": "{ p1, p2, p4, p6, p3 }",
+        "stack": ["State[p3]", "C", "State[p5, p6]"]
+      },
+      {
+        "step": 37,
+        "state": "{ p1, p2, p4, p6, p3 }",
+        "stack": ["C", "State[p5, p6]"]
+      },
+      {
+        "step": 38,
+        "state": "{ p1, p2, p4, p6, p5 }",
+        "stack": ["State[p5, p6]"]
+      },
+      {
+        "step": 39,
+        "state": "{ p1, p2, p4, p6, p5 }",
+        "stack": []
+      }
+    ]
+  },
+  "pop": {
+    "exito": true,
+    "nodosExplorados": 8,
+    "nodosGenerados": 10,
+    "plan": ["A", "B", "A", "C"],
+    "planes": [["A", "B", "A", "C"]],
+    "steps": [
+      {"id": 0, "name": "Start"},
+      {"id": 1, "name": "Finish"},
+      {"id": 2, "name": "C"},
+      {"id": 3, "name": "B"},
+      {"id": 4, "name": "A"},
+      {"id": 5, "name": "A"}
+    ],
+    "constraints": [
+      {"before": 0, "after": 1},
+      {"before": 2, "after": 1},
+      {"before": 0, "after": 2},
+      {"before": 3, "after": 1},
+      {"before": 0, "after": 3},
+      {"before": 3, "after": 2},
+      {"before": 4, "after": 2},
+      {"before": 0, "after": 4},
+      {"before": 4, "after": 1},
+      {"before": 3, "after": 4},
+      {"before": 5, "after": 3},
+      {"before": 0, "after": 5},
+      {"before": 5, "after": 1}
+    ],
+    "links": [
+      {"source": 2, "target": 1, "literal": "p5"},
+      {"source": 3, "target": 1, "literal": "p6"},
+      {"source": 4, "target": 2, "literal": "p3"},
+      {"source": 0, "target": 3, "literal": "p2"},
+      {"source": 5, "target": 3, "literal": "p4"},
+      {"source": 0, "target": 4, "literal": "p1"},
+      {"source": 0, "target": 5, "literal": "p1"}
+    ],
+    "trace": [
+      {
+        "step": 0,
+        "steps": ["0:Start", "1:Finish"],
+        "constraints": ["0<1"],
+        "links": [],
+        "open": ["1:p5", "1:p6"]
+      },
+      {
+        "step": 1,
+        "steps": ["0:Start", "1:Finish", "2:C"],
+        "constraints": ["0<1", "2<1", "0<2"],
+        "links": ["2-p5->1"],
+        "open": ["1:p6", "2:p3"]
+      },
+      {
+        "step": 2,
+        "steps": ["0:Start", "1:Finish", "2:C", "3:B"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "3<2"],
+        "links": ["2-p5->1", "3-p6->1"],
+        "open": ["2:p3", "3:p2", "3:p4"]
+      },
+      {
+        "step": 3,
+        "steps": ["0:Start", "1:Finish", "2:C", "3:B", "4:A"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "3<2", "4<2", "0<4", "4<1", "3<4"],
+        "links": ["2-p5->1", "3-p6->1", "4-p3->2"],
+        "open": ["3:p2", "3:p4", "4:p1"]
+      },
+      {
+        "step": 4,
+        "steps": ["0:Start", "1:Finish", "2:C", "3:B", "4:A"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "3<2", "4<2", "0<4", "4<1", "3<4"],
+        "links": ["2-p5->1", "3-p6->1", "4-p3->2", "0-p2->3"],
+        "open": ["3:p4", "4:p1"]
+      },
+      {
+        "step": 5,
+        "steps": ["0:Start", "1:Finish", "2:C", "3:B", "4:A", "5:A"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "3<2", "4<2", "0<4", "4<1", "3<4", "5<3", "0<5", "5<1"],
+        "links": ["2-p5->1", "3-p6->1", "4-p3->2", "0-p2->3", "5-p4->3"],
+        "open": ["4:p1", "5:p1"]
+      },
+      {
+        "step": 6,
+        "steps": ["0:Start", "1:Finish", "2:C", "3:B", "4:A", "5:A"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "3<2", "4<2", "0<4", "4<1", "3<4", "5<3", "0<5", "5<1"],
+        "links": ["2-p5->1", "3-p6->1", "4-p3->2", "0-p2->3", "5-p4->3", "0-p1->4"],
+        "open": ["5:p1"]
+      },
+      {
+        "step": 7,
+        "steps": ["0:Start", "1:Finish", "2:C", "3:B", "4:A", "5:A"],
+        "constraints": ["0<1", "2<1", "0<2", "3<1", "0<3", "3<2", "4<2", "0<4", "4<1", "3<4", "5<3", "0<5", "5<1"],
+        "links": ["2-p5->1", "3-p6->1", "4-p3->2", "0-p2->3", "5-p4->3", "0-p1->4", "0-p1->5"],
+        "open": []
+      }
+    ],
+    "conflictResolution": ["[POP] Conflicto (Amenaza) detectado: El paso S3 (B) amenaza el enlace causal: S2 --[p5]--> S1", "    -> Intentando PROMOCION: forzar orden S1 (Finish) < S3 (B)", "    -> PROMOCION no viable: crea un ciclo inconsistente.", "    -> Intentando DEGRADACION (Democion): forzar orden S3 (B) < S2 (C)", "[POP] Conflicto (Amenaza) detectado: El paso S3 (B) amenaza el enlace causal: S4 --[p3]--> S2", "    -> Intentando PROMOCION: forzar orden S2 (C) < S3 (B)", "    -> PROMOCION no viable: crea un ciclo inconsistente.", "    -> Intentando DEGRADACION (Democion): forzar orden S3 (B) < S4 (A)", "    -> Ambos metodos de resolucion fallaron en este punto. Haciendo BACKTRACK...", "    -> Ambos metodos de resolucion fallaron en este punto. Haciendo BACKTRACK..."]
+  }
+}

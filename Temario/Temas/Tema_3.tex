@@ -1,0 +1,128 @@
+\chapter{Comportamientos}
+
+\section{Introducción A Los Comportamientos Inteligentes}
+\subsection{Niveles De IA En Agentes}
+Se distinguen tres niveles principales en el desarrollo de agentes inteligentes:
+\begin{itemize}
+    \item \textbf{Básico}: Basado en técnicas de toma de decisiones principalmente reactivas.
+    \item \textbf{Avanzado}: Incluye técnicas de razonamiento y planificación.
+    \item \textbf{Futuro}: Temas de investigación actualmente en desarrollo.
+\end{itemize}
+
+\subsection{Tipos De Algoritmos}
+\subsubsection{Sin Búsqueda}
+En estos algoritmos, el coste computacional es predecible. El conocimiento reside en la lógica del código o en tablas externas. Ejemplos comunes son los sistemas de reglas y los árboles de decisión.
+
+\subsubsection{Con Búsqueda}
+El coste computacional depende del tamaño del espacio de búsqueda, el cual suele ser grande. El conocimiento se encuentra en la evaluación de los estados. Incluye algoritmos como Minimax, Planificación y Pathfinding.
+
+
+\section{Sistemas Basados En Reglas}
+También conocidos como sistemas de producción o sistemas expertos. Los sistemas basados en reglas son uno de los paradigmas de IA más
+exitosos. Se originaron en los años 70 y 80.
+
+\subsection{Arquitectura Y Componentes}
+Los datos son alamcenados como hechos y reglas. Sus componenetes son:
+\begin{itemize}
+    \item \textbf{Memoria de trabajo}: Almacena los hechos ciertos o el modelo del mundo.
+    \item \textbf{Reglas de producción}: Definidas habitualmente como estructuras IF...THEN.
+    \item \textbf{Motor de inferencia}: Programa encargado de calcular las consecuencias y aplicar las reglas.
+    \item \textbf{Resolución de conflictos}: Decide qué regla aplicar si más de una es válida.
+\end{itemize}
+
+\subsection{Mecanismos De Razonamiento}
+Una regla se ``dispara'' cuando sus antecedentes coinciden con los hechos de la base de datos.  El
+disparo de la regla añade a la base de hechos el consecuente de esta. 
+\medskip
+Existen dos enfoques de inferencia en los sistemas basados en reglas:
+
+\subsubsection{Encadenamiento Hacia Delante}
+Tambien llamado ``Forward Chaining'', es un razonamiento deductivo basado en datos. Parte de antecedentes para llegar a una conclusión o acción.
+
+\subsubsection{Encadenamiento Hacia Atrás}
+Tambien llamado ``Backward Chaining'', es un razonamiento inductivo impulsado por objetivos. Parte de una conclusión e intenta demostrarla buscando los antecedentes necesarios en la base de hechos.
+
+\subsection{Estrategis De Resolución De Conflictos}
+Existen varias formas de solucionar los conflictos:
+\begin{itemize}
+    \item \textbf{Orden físico}: Las reglas se evalúan según su orden en el código.  Es difícil añadir reglas a estos sistemas.
+    \item \textbf{Prioridad de datos}: Se utiliza una cola de prioridad para los elementos del problema. Se usa la regla que ocupa los elementos más prioritarios.
+    \item \textbf{Especificidad O Máxima Especialidad}: Se elige la regla con mayor número de antecedentes coincidentes.
+    \item \textbf{Selección aleatoria}: Disparo aleatorio o de todas las reglas aplicables.
+    \item \textbf{Lanzar Todo}: Se Disparan todas las reglas aplicables.
+    \item \textbf{Mejor regla}: Se busca la regla más adecuada para lanzarla.
+\end{itemize}
+
+\subsection{Ventajas Y Desvantajas}
+\begin{itemize}
+    \item \textbf{Ventajas}: Son universales, muy expresivos, modulares y fáciles de leer.
+    \item \textbf{Desventajas}: No todo el conocimiento encaja en reglas, requieren consenso de expertos, pueden ser intensivos en memoria/computación, pueden ser dificiles de depurar, requiere un conocimiento detallado y es dificil olvidad hechos.
+\end{itemize}
+
+\section{Árboles De Decisión}
+\subsection{Carasterísticas}
+Se consideran la técnica de IA más básica. Destacan por ser fáciles de implementar, rápidos de ejecutar y sencillos de entender.
+
+\subsection{Implementación}
+Se utiliza Programación Orientada a Objetos (POO) para evitar estructuras de código frágiles. Los nodos interiores representan decisiones y las hojas representan acciones.
+
+\subsection{Funcionamiento}
+El test de cada nodo suele ser de tiempo constante. El tiempo total de ejecución depende de la profundidad del árbol. Se recomienda construir árboles balanceados y colocar las decisiones más costosas al final.
+
+\subsection{Ventajas Y Desvantajas}
+\begin{itemize}
+    \item \textbf{Ventajas}: Son extremadamente rápidos de ejecutar ($O(depth)$), fáciles de implementar y depurar, y muy visuales para diseñadores no programadores.
+    \item \textbf{Desventajas}: Pueden volverse inmanejables si el árbol es muy profundo, presentan dificultades para gestionar estados que dependen del tiempo (no tienen memoria) y suelen conllevar duplicidad de comprobaciones en distintas ramas.
+\end{itemize}
+
+\section{Máquinas De Estado Finitas (FMS)}
+\subsection{Carasterísticas}
+Permiten una correspondencia natural entre estados y comportamientos. Formalmente constan de un conjunto de estados, un estado inicial, un alfabeto de entrada y transiciones.
+
+\subsection{Implementación}
+\begin{itemize}
+    \item \textbf{Inicial}: Basada en enumerados y sentencias condicionales; eficiente pero difícil de mantener.
+    \item \textbf{Orientada a Objetos}: Clases para \texttt{State} y \texttt{Transition}; más limpia y flexible.
+\end{itemize}
+
+\subsection{Combinar Árboles De Decisión Con Máquinas De Estados}
+Se utilizan para evitar comprobaciones duplicadas o costosas en las transiciones de la FSM. Por ejemplo, si una condición como "jugador a la vista" es computacionalmente cara, el árbol de decisión optimiza la evaluación.
+
+\subsection{Ventajas Y Desvantajas}
+\begin{itemize}
+    \item \textbf{Ventajas}: Son computacionalmente económicas, fáciles de diseñar para comportamientos simples y permiten una transición clara y predecible entre estados lógicos.
+    \item \textbf{Desventajas}: Sufren de la "explosión de estados" (el número de transiciones crece exponencialmente al añadir nuevos estados), son difíciles de reutilizar y no gestionan bien las interrupciones o tareas paralelas.
+\end{itemize}
+
+\section{Máquinas De Estado Jerárquicas  (HFSM)}
+Surgieron para gestionar interrupciones (como recargar batería) sin perder el progreso del comportamiento actual.
+
+\subsection{Ventajas Y Desvantajas}
+\begin{itemize}
+    \item \textbf{Ventajas}:
+        \begin{itemize}
+            \item \textbf{Memoria de estado}: Permiten recordar el estado interno y continuar tras una interrupción.
+            \item \textbf{Reducción de la complejidad}: Evitan la explosión de estados. En un ejemplo con interrupciones de batería y enemigos, una HFSM requiere 7 estados frente a los 12 de una FSM plana.
+        \end{itemize}
+    \item \textbf{Desventajas}: Su implementación es significativamente más compleja que una FSM plana, requieren un mayor diseño previo para definir las jerarquías y tienen una ligera sobrecarga (overhead) adicional en el motor de inferencia.
+\end{itemize}
+
+% ---------Bibliografía del Tema------------
+\bigskip
+\noindent\rule{\textwidth}{0.4pt} 
+
+\section*{Bibliografía del Tema}
+\addcontentsline{toc}{section}{Bibliografía del Tema}
+
+\begin{itemize}
+    \item Buckland, M. (2005). \textit{Programming Game AI by Example}. Wordware Publishing, Inc.
+    
+    \item Millington, I., \& Funge, J. (2018). \textit{Artificial Intelligence for Games} (3rd ed.). CRC Press.
+    
+    \item Rabin, S. (Ed.). (2017). \textit{Game AI Pro 3: Collected Wisdom of Game AI Professionals}. CRC Press.
+    
+    \item Russell, S. J., \& Norvig, P. (2020). \textit{Artificial Intelligence: A Modern Approach} (4th ed.). Pearson.
+    
+    \item Schwab, B. (2008). \textit{AI Game Development: Digital Media Academy Series}. Charles River Media.
+\end{itemize}
+\newpage

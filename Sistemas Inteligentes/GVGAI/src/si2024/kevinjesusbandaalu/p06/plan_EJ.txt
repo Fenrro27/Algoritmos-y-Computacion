@@ -1,0 +1,12 @@
+# Definiciones de los estados (lista de Proposiciones)
+Ei: P6, P7
+Ef: P2, P3, P4
+
+# Acciones: (Nombre, Prerequisitos, Adicion,Eliminacion)
+Accion: A ;    ; P2 ; P5, P4
+Accion: B ; P1 ; P5 ; P1
+Accion: C ; P7 ; P5 ; P7
+Accion: D ; P5 ; P4 ; P2, P7
+Accion: E ; P6 ; P3 ; P2
+Accion: F ; P6 ; P2 ; P6
+

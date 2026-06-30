@@ -1,0 +1,167 @@
+\chapter{Programación de Restricciones}
+
+% Satisfaccion de restricciones
+Los problemas se componen por tres elementos:
+\begin{itemize}
+    \item Variables
+    \item Dominio de las Variables
+    \item Restricciones
+\end{itemize}
+
+Buscamos en profundidad porque buscamos una solucion, todas las soluciones van a tener la misma longitud. 
+La anchura va creciendo en cada nivel por lo que tardaria mas a pesar de que daria todas las soluciones incluyendo la optima si existe, en principio no hay una optima.
+
+% Euristicas
+Primero lo que mas va a fallar:
+- Una forma de optimizar los algoritmos es ir buscando las opciones que antes van a fallar para agilizar el arbol de busqueda un monton, por ejemplo buscar las que menos dominio tienen primero.
+- Tambien podemos mirar la que tiene mayor dominio.
+- La que participe en mas restricciones.
+- A la hora de chequear las restricciones no lo mismo chequear la que este en restricciones mas pesadas que en lass que estan en mas livianas.
+- ordenar las restricciones  de tal forma que se ordenen de forma que se comprueben primero las restricciones gordas, esto es al generar sucesores.
+
+Tecnica fordward chaining: (o fordward cheking, ha dicho ambos nombres no se cual es) quito todos los valores de las otras variables incompatibles con el padre, pero solo a los hijos de un cierto paso.
+
+
+
+\section{Algoritmos}
+
+Algoritmo de Satisfaccion de restricciones: 
+\begin{itemize}
+    \item AC3:
+    \item 
+\end{itemize}
+
+Para el AC3 de la practica voy a ir reduciendo los dominios de las variables y voy a ir expandiendo  los dominios mas pequeños para buscar la solucion
+
+\section{Ejecrcicios}
+\subsection{Ejericio 1} Dada la red inicial de la figura, donde en cada nodo se representa el dominio de la
+variable, obténgase la red arco consistente equivalente.
+<Falta imagen>
+
+Solucion: <Buscar una bien escrita>
+
+Variables: X1,X2,X3
+Restricciones: X1>X2>X3
+Paso 1:
+Dom(X1)={6,10}
+Dom(X2)={5,9}
+Dom(X3)={8,15}
+Paso 2:
+Dom(X1)={6,10}
+Dom(X2)={9,9}
+Dom(X3)={8,15}
+Paso 3:
+Dom(X1)={10,10}
+Dom(X2)={9,9}
+Dom(X3)={8,15}
+Paso 4:
+Dom(X1)={10,10}
+Dom(X2)={9,9}
+Dom(X3)={8,8}
+
+\subsection{Ejercicio 2} El sudoku es un claro ejemplo de representaciópn del puzzle como un problema de
+satisfacci´on de restricciones. Este problema se publicó en Nueva York en el año 1979
+bajo el nombre de “Number Place” y se hizo popular en Japón con el nombre de sudoku
+(“Sudji wa dokushin ni kagiru”: “los números deben ser sencillos” o “los números deben
+aparecer una vez”).
+\medskip
+En el problema del sudoku (ver un ejemplo en la figura), hay que rellenar las casillas de
+un tablero de 9 x 9 con números del 1 al 9, de forma que no se repita ningún número
+en la misma fila, columna, o subcuadro de 3 x 3 que componen el sudoku. Modelar
+este problema como un CSP.
+<Falta imagen>
+
+\subsection{Ejercicio 3} Cinco casas consecutivas tienen colores diferentes y son habitadas por hombres de
+diferentes nacionalidades. Cada uno tiene un animal diferente, una bebida preferida y
+fuma una marca determinada. Además, se sabe que:
+\begin{itemize}
+    \item El noruego vive en la primera casa
+    \item La casa de al lado del noruego es azul
+    \item El habitante de la tercera casa bebe leche
+    \item El inglés vive en la casa roja
+    \item El habitante de la casa verde bebe café
+    \item El habitante de la casa amarilla fuma Kools
+    \item La casa blanca se encuentra justo después de la verde 8. El español tiene un perro
+    \item  El ucraniano bebe té
+    \item El japonés fuma Cravens
+    \item El fumador de Old Golds tiene un caracol
+    \item El fumador de Gitanes bebe vino
+    \item El vecino del fumador de Chesterfields tiene un reno
+    \item El vecino del fumador de Kools tiene un caballo
+\end{itemize}
+
+\subsection{Ejercicio 4} Obtener la ordenaci´on de variables seg´un los diferentes m´etodos de ordenaci´on est´aticos
+para cada uno de los CSP binarios siguientes:
+<Falta imagen>
+
+\subsection{Ejercicio 5} Seis amigos y sus respectivas esposas, se hospedan en el mismo hotel; y todos ellos
+salen todos los d´ıas, asistiendo a reuniones de distinto volumen y composici´on. Para
+asegurar la variedad en estas salidas, han acordado establecer las siguientes reglas: “Si
+Antonio est´a con su mujer, es decir en la misma reuni´on que su mujer, y David con
+la suya, y Luis con la se˜nora de Pedro, Enrique debe estar con la se˜nora de Ram´on.
+Si Antonio est´a con su mujer y Pedro con la suya, y David con la se˜nora de Enrique,
+Ram´on no debe estar con la se˜nora de Luis. Si Enrique y Ram´on y sus mujeres est´an
+todos en la misma reuni´on, y Antonio no est´a con la se˜nora de David, Luis no debe
+estar con la se˜nora de Pedro. Si Antonio est´a con su mujer y Ram´on con la suya, y
+David no est´a con la se˜nora de Enrique, Luis debe estar con la se˜nora de Pedro. Si Luis
+est´a con su mujer y Pedro con la suya y Enrique con la se˜nora de Ram´on, Antonio no
+debe estar con la se˜nora de David. Si David y Enrique y sus mujeres est´an todos en la
+misma reuni´on, y Luis no est´a con la se˜nora de Pedro, Ram´on debe estar con la se˜nora
+de Luis”.
+\medskip
+Modelar dicho problema como un CSP y obtener las posibles combinaciones de reuniones para cada amigo. ¿Es posible que todos los d´ıas haya al menos un matrimonio
+cuyos miembros no est´en juntos en la misma reuni´on? Este problema y el siguiente son
+originales de Lewis Carroll, en su obra L´ogica Simb´olica.
+
+
+\subsection{Ejercicio 6} Cinco amigos, Bernardo, Casimir, Luis, Carlos y Marcial, se encuentran cada d´ıa en el
+restaurante. Tienen estas reglas, que observan cada vez que comen: “Bernardo toma
+sal si y solamente si Casimir toma solo sal o solo mostaza. Bernardo toma mostaza si y
+solamente si, o bien Luis no toma sal ni mostaza, o bien Marcial toma ambas. Casimir
+toma sal si y solamente si, o Bernardo toma solamente uno de los dos condimentos, o
+bien Marcial no toma ninguno de ellos. Toma mostaza si y solamente si Luis o Carlos
+toman dos condimentos. Luis toma sal si y solamente si o bien Bernardo no toma
+ning´un condimento, o bien Casimir toma ambos. Luis toma mostaza si y solamente
+si Carlos o Marcial no toman ni sal ni mostaza. Carlos toma sal si y solamente si
+Bernardo o Luis no toman ni sal ni mostaza. Toma mostaza si y solamente si Casimir
+o Marcial no toman ni sal, ni mostaza. Marcial toma sal si y solamente si Bernardo o
+Carlos toman los dos condimentos. Marcial toma mostaza si y solamente si Casimir o
+Luis toman solo un condimento”.
+\medskip
+Modelar el CSP correspondiente. El problema consiste en descubrir si estas reglas son
+compatibles y, en caso de que lo sean, cuales son las combinaciones posibles.
+
+\subsection{Ejercicio 7} Representar mediante un CSP la siguiente informaci´on: Juana, Pepa y Paloma nacieron
+y viven en ciudades diferentes (M´alaga, Madrid y Valencia). Adem´as, ninguna vive en
+la ciudad donde naci´o. Juana es m´as alta que la que vive en Madrid. Paloma es cu˜nada
+de la que vive en Valencia. La que vive en Madrid y la que naci´o en M´alaga tienen
+nombres que comienzan por distinta letra. La que naci´o en M´alaga y la que vive ahora
+en Valencia tienen nombres que comienzan por la misma letra.
+\medskip
+¿ D´onde naci´o y vive cada una?
+
+\subsection{Ejercicio 8} Henry Dudeney (1847-1930) era un ingenioso inventor de problemas matem´aticos. Entre sus aportaciones se encuentra un puzzle con cierta complejidad de resoluci´on. Se
+trata de un hept´agono donde en cada arista hay que colocar tres n´umeros: uno en cada
+v´ertice y otro en el centro de la arista. Hay que colocar los n´umeros del 1 al 14 alrededor
+de las aristas del hept´agono de manera que el n´umero de la arista y los dos v´ertices
+extremos sumen lo mismo, para todas las aristas. Modelar el CSP correspondiente.
+<Falta imagen>
+
+\subsection{Ejercicio 9} Obtener, seg´un las heur´ısticas de ordenaci´on de variables, la mejor ordenaci´on para el
+coloreado de los siguientes mapas:
+
+
+<Falta imagen>
+
+
+% ---------Bibliografía del Tema------------
+\bigskip
+\noindent\rule{\textwidth}{0.4pt} 
+
+\section*{Bibliografía del Tema}
+\addcontentsline{toc}{section}{Bibliografía del Tema}
+
+\begin{itemize}
+    \item
+\end{itemize}
+\newpage

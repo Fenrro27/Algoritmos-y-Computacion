@@ -1,0 +1,5 @@
+# Lista de acciones. 1 por linea
+C
+D
+E
+F
