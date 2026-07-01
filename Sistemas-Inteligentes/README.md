@@ -1,4 +1,4 @@
-# Sistemas Inteligentes (SI)
+﻿# Sistemas Inteligentes (SI)
 
 Este directorio contiene las prácticas, proyectos de desarrollo y material de estudio de la asignatura **Sistemas Inteligentes** del Grado en Ingeniería Informática de la **Universidad de Huelva (UHU)**. Las actividades están centradas en la resolución de problemas complejos mediante búsquedas heurísticas, planificación automática y problemas de satisfacción de restricciones (CSP).
 
@@ -7,8 +7,8 @@ Este directorio contiene las prácticas, proyectos de desarrollo y material de e
 ## 📂 Contenido del Directorio
 
 ### 👾 1. Agentes de Videojuegos (GVGAI)
-* **Proyecto**: [GVGAI/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/GVGAI/)
-* **Código de los Agentes**: [si2026/kevinjesusbandaalu/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/GVGAI/src/si2026/kevinjesusbandaalu/)
+* **Proyecto**: [GVGAI/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas-Inteligentes/GVGAI/)
+* **Código de los Agentes**: [si2026/kevinjesusbandaalu/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas-Inteligentes/GVGAI/src/si2026/kevinjesusbandaalu/)
 
 Desarrollo e implementación de agentes inteligentes capaces de jugar de forma autónoma a diferentes videojuegos haciendo uso del framework **GVGAI** (General Video Game AI):
 * **P01 / P02**: Implementación de agentes reactivos básicos y búsqueda simple.
@@ -19,11 +19,11 @@ Desarrollo e implementación de agentes inteligentes capaces de jugar de forma a
 
 ### 🧩 2. Resolución de Problemas CSP (Constraint Satisfaction Problems)
 Implementación en Java de resolutores eficientes de problemas de satisfacción de restricciones sin usar librerías externas:
-* **[SudokuSolver/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/SudokuSolver/)**: Resolutor de sudokus de alto rendimiento basado en:
+* **[SudokuSolver/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas-Inteligentes/SudokuSolver/)**: Resolutor de sudokus de alto rendimiento basado en:
   * El algoritmo de consistencia de arcos **AC3**.
   * Algoritmo de exploración **Backtracking** óptimo.
   * Optimización mediante máscaras de bits (*Bitmasks*) y concurrencia paralela (`java.util.concurrent`) con una arquitectura libre de asignaciones de memoria adicionales (*zero-allocation*).
-* **[NumberSumsSolver/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/NumberSumsSolver/)**: Resolutor del puzzle matemático *NumberSums* (basado en restricciones N-arias de suma):
+* **[NumberSumsSolver/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas-Inteligentes/NumberSumsSolver/)**: Resolutor del puzzle matemático *NumberSums* (basado en restricciones N-arias de suma):
   * Emplea modelado CSP estricto.
   * Consistencia de arcos **AC3** combinada con propagación de rangos (suma mínima/máxima).
   * Algoritmo **Backtracking** optimizado con mantenimiento de consistencia de arcos (**MAC**).
@@ -31,14 +31,14 @@ Implementación en Java de resolutores eficientes de problemas de satisfacción 
 ---
 
 ### 📅 3. Planificador Automático (Planificación en Inteligencia Artificial)
-* **Proyecto**: [Planificador/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/Planificador/)
-* **Algoritmos**: [strips/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/Planificador/src/planning/strips/), [pop/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/Planificador/src/planning/pop/), y [busqueda/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/Planificador/src/planning/busqueda/)
+* **Proyecto**: [Planificador/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas-Inteligentes/Planificador/)
+* **Algoritmos**: [strips/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas-Inteligentes/Planificador/src/planning/strips/), [pop/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas-Inteligentes/Planificador/src/planning/pop/), y [busqueda/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas-Inteligentes/Planificador/src/planning/busqueda/)
 
 Implementación en Java de motores de planificación automática para alcanzar metas a partir de un estado inicial:
 * **STRIPS (Stanford Research Institute Planning System)**: Planificador de orden total lineal clásico basado en pilas de objetivos.
 * **POP (Partial Order Planner)**: Algoritmo de planificación de orden parcial no lineal, que gestiona enlaces causales y detecta amenazas en paralelo.
 * **Planificación por Búsqueda**: Planificador heurístico en espacio de estados utilizando búsquedas informadas.
-* **Visualizador**: Incluye un script en Python ([visualize.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/Planificador/visualize.py)) para trazar y analizar gráficamente los resultados y la eficiencia de los planes generados.
+* **Visualizador**: Incluye un script en Python ([visualize.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas-Inteligentes/Planificador/visualize.py)) para trazar y analizar gráficamente los resultados y la eficiencia de los planes generados.
 
 ---
 
