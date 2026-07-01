@@ -1,0 +1,6 @@
+NAME: dataset0
+TYPE: TSP
+COMMENT: Archivo dataset0
+DIMENSION: 0
+NODE_COORD_SECTION
+EOF

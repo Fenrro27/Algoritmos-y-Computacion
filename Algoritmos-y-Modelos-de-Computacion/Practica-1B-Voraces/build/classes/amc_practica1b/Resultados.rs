@@ -1,0 +1,2 @@
+amc_practica1b.costeArista
+amc_practica1b.Resultados
