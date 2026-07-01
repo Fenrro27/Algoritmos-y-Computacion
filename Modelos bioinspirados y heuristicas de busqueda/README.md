@@ -1,67 +1,53 @@
-# 🧠 Modelos Bioinspirados y Heurística de Búsqueda  
+# Modelos Bioinspirados y Heurísticas de Búsqueda (MBHB)
 
-Este repositorio contiene las prácticas de la asignatura **Modelos Bioinspirados y Heurística de Búsqueda**, enfocadas en la resolución del **Problema de Asignación Cuadrática (QAP)**.  
-El objetivo principal es implementar, analizar y comparar diferentes algoritmos heurísticos y metaheurísticos, evaluando su desempeño frente a soluciones óptimas conocidas en datasets estándar.  
+Este directorio contiene los desarrollos y prácticas correspondientes a la asignatura **Modelos Bioinspirados y Heurísticas de Búsqueda** del Grado en Ingeniería Informática de la **Universidad de Huelva (UHU)**. 
 
----
-
-## 📘 Introducción al problema QAP  
-
-El **Quadratic Assignment Problem (QAP)** es un problema clásico de optimización combinatoria: dado un conjunto de **n instalaciones** y **n localizaciones**, se debe asignar cada instalación a una localización de manera que se minimice el **costo total**, calculado a partir de:  
-- la **distancia** entre localizaciones,  
-- y el **flujo** de interacción entre instalaciones.  
-
-Es un problema **NP-difícil**, por lo que resulta ideal para evaluar algoritmos heurísticos y bioinspirados.  
-
-Los datasets empleados en todas las prácticas son:  
-
-- **tai25b**  
-- **sko90**  
-- **tai150b**  
-
-Cada algoritmo se compara con el **costo óptimo** de referencia publicado para estos problemas.  
+El foco principal de las prácticas es el diseño, implementación e instrumentación de algoritmos heurísticos y metaheurísticos para resolver el **Problema de Asignación Cuadrática (QAP - Quadratic Assignment Problem)**, evaluando su rendimiento frente a soluciones óptimas conocidas sobre datasets del estado del arte.
 
 ---
 
-## 📂 Contenido de las prácticas  
+## 📘 El Problema QAP (Quadratic Assignment Problem)
+El **QAP** es un problema clásico de optimización combinatoria clasificado como **NP-difícil**. Consiste en asignar un conjunto de $n$ instalaciones a $n$ localizaciones con el fin de minimizar el coste total de flujo-distancia:
+$$\text{Minimizar } \sum_{i=1}^{n} \sum_{j=1}^{n} f_{ij} d_{\pi(i)\pi(j)}$$
+donde $f_{ij}$ representa la matriz de flujos entre instalaciones y $d_{xy}$ representa la matriz de distancias entre localizaciones.
 
-### 🔹 Práctica 1: Heurísticas clásicas y metaheurísticas iniciales  
-Se comparan los siguientes algoritmos:  
+### 📊 Conjuntos de Datos Evaluados (Ubicados en [DataSets/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/DataSets/)):
+* `tai25b`: Problema de dimensión mediana ($n=25$) con flujo de datos estructurado.
+* `sko90`: Problema de tamaño grande ($n=90$).
+* `tai150b`: Problema de gran escala ($n=150$).
 
-- **Greedy**: asigna instalaciones en base a una heurística constructiva rápida.  
-- **Aleatoria**: genera soluciones iniciales aleatorias para tener una referencia base.  
-- **Búsqueda Local (Mejor Vecino)**: explora todo el vecindario y escoge el mejor movimiento.  
-- **Búsqueda Local (Primer Mejor)**: acepta la primera mejora encontrada en el vecindario.  
-- **Enfriamiento Simulado (SA)**: inspirado en procesos de enfriamiento físico, acepta soluciones peores con cierta probabilidad decreciente.  
-- **Búsqueda Tabú (TS)**: evita caer en ciclos manteniendo una memoria de movimientos recientes prohibidos ("tabú").  
-
----
-
-### 🔹 Práctica 2: Metaheurísticas avanzadas de construcción y exploración  
-Se estudian variantes más sofisticadas:  
-
-- **Greedy**.  
-- **Búsqueda Local (Primer Mejor)**.  
-- **GRASP (Greedy Randomized Adaptive Search Procedure)**: versión pura del algoritmo constructivo aleatorizado basado en greedy.  
-- **GRASP + Búsqueda Local**: variante que aplica una búsqueda local al final de cada construcción para intensificar la exploración y mejorar las soluciones obtenidas.  
-
-- **ILS (Iterated Local Search)**: aplica búsqueda local repetidamente desde soluciones perturbadas para escapar de óptimos locales.  
-- **VNS (Variable Neighborhood Search)**: explora de forma sistemática distintos vecindarios para diversificar la búsqueda.  
+Los algoritmos implementados comparan sus resultados obtenidos con las soluciones óptimas globales conocidas de cada dataset.
 
 ---
 
-### 🔹 Práctica 3: Algoritmos bioinspirados y poblacionales  
-En esta última práctica se introducen algoritmos de carácter evolutivo y multimodal:  
+## 📂 Contenido de las Prácticas y Algoritmos
 
-- **Greedy** (como referencia base).  
-- **Algoritmo Genético Básico**: implementación simple de comparación con heurística inicial.  
-- **Algoritmo Genético CHC (Cross-generational elitist selection, Heterogeneous recombination, Cataclysmic mutation)**: un algoritmo genético avanzado con fuerte elitismo y diversidad.  
-- **Algoritmo Genético Multimodal**: técnicas que permiten mantener varias soluciones competitivas simultáneamente para explorar mejor el espacio de búsqueda.  
+El código fuente de todos los algoritmos se encuentra estructurado en el directorio [Algoritmos/](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/):
 
----
+### 🔹 Práctica 1: Heurísticas Constructivas y Búsquedas Locales Iniciales
+* **Cuaderno de Ejecución**: [QAP_P1.ipynb](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/QAP_P1.ipynb)
+* **Algoritmos Implementados**:
+  * **Greedy Constructivo** ([AlgoritmoComparacionGreedy.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/AlgoritmoComparacionGreedy.py)): Genera una solución inicial acoplando de manera prioritaria flujos máximos en distancias mínimas.
+  * **Búsqueda Aleatoria** ([BusquedaAleatoria.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/BusquedaAleatoria.py)): Generación aleatoria de soluciones como cota inferior de rendimiento.
+  * **Búsqueda Local - El Mejor Vecino** ([BusquedaLocal.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/BusquedaLocal.py)): Explora el vecindario completo mediante operador de intercambio 2-opt y selecciona la mejor mejora.
+  * **Búsqueda Local - El Primer Mejor** ([BusquedaLocal.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/BusquedaLocal.py)): Recorre el vecindario aceptando el primer movimiento que mejore la solución actual.
+  * **Enfriamiento Simulado / Simulated Annealing** ([EnfriamientoSimulado.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/EnfriamientoSimulado.py)): Metaheurística basada en la termodinámica que permite escapar de óptimos locales aceptando soluciones peores de forma probabilística dependiente de la temperatura.
+  * **Búsqueda Tabú** ([BusquedaTabu.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/BusquedaTabu.py)): Metaheurística con memoria de corto plazo que prohíbe volver a estados anteriores registrados en la "Lista Tabú".
+* **Resultados**: Guardados en [resultados_P1.csv](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/resultados_P1.csv).
 
-## 📊 Evaluación  
-En cada práctica:  
-- Los algoritmos se ejecutan sobre los datasets **tai25b, sko90 y tai150b**.  
-- Se comparan los costos obtenidos con los **valores óptimos conocidos**.  
- 
+### 🔹 Práctica 2: Metaheurísticas de Construcción y Exploración Avanzadas
+* **Cuaderno de Ejecución**: [QAP_P2.ipynb](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/QAP_P2.ipynb)
+* **Algoritmos Implementados**:
+  * **GRASP (Greedy Randomized Adaptive Search Procedure)** ([GRASP.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/GRASP.py)): Genera soluciones combinando selección probabilística adaptativa sobre una lista restringida de candidatos (RCL).
+  * **GRASP + Búsqueda Local**: Aplica intensificación mediante búsqueda local 2-opt tras cada fase de construcción de GRASP.
+  * **ILS (Iterated Local Search)** ([ILS.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/ILS.py)): Aplica de forma iterativa búsqueda local tras efectuar una perturbación controlada en la solución actual para cambiar de cuenca de atracción.
+  * **VNS (Variable Neighborhood Search)** ([VNS.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/VNS.py)): Explora el espacio alternando sistemáticamente entre diferentes estructuras de vecindario (K-vecindarios).
+* **Resultados**: Guardados en [resultados_P2.csv](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/resultados_P2.csv).
+
+### 🔹 Práctica 3: Algoritmos Poblacionales y Bioinspirados
+* **Cuaderno de Ejecución**: [QAP_P3.ipynb](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/QAP_P3.ipynb)
+* **Algoritmos Implementados**:
+  * **Algoritmo Genético Básico (AGB)** ([AlgoritmoGeneticoBasico.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/AlgoritmoGeneticoBasico.py)): Modelo poblacional estándar basado en selección, cruce (OX o PMX) y mutación clásica.
+  * **Algoritmo Genético CHC** ([AlgoritmoGeneticoCHC.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/AlgoritmoGeneticoCHC.py)): Algoritmo evolutivo con cruce altamente disruptivo (HUX), selección elitista estricta libre de mutación continua, y reinicialización catastrófica de la población cuando se estanca el progreso.
+  * **Algoritmo Genético Multimodal (AGM)** ([AlgoritmoGeneticoMultimodal.py](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/Algoritmos/AlgoritmoGeneticoMultimodal.py)): Incorpora técnicas de nichos (*crowding* o *sharing*) para mantener y desarrollar múltiples soluciones óptimas locales competitivas de forma paralela en la población.
+* **Resultados**: Guardados en [resultados_P3.csv](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/resultados_P3.csv).

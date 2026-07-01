@@ -1,96 +1,61 @@
-# 📘 Ejercicios de Haskell
+# Modelos Avanzados de Computación (MAC)
 
-Repositorio con prácticas de **Modelos Avanzados de Computación**.  
-Incluye ejercicios de listas, recursión, funciones de orden superior, combinatoria, álgebra y teoría de números.
-**Se debe tener instalado GHCI**  
+Este directorio contiene las prácticas de programación funcional desarrolladas para la asignatura **Modelos Avanzados de Computación** del Grado en Ingeniería Informática de la **Universidad de Huelva (UHU)**. 
 
----
-
-## 📂 Contenido
-
-### 🔹 Práctica 1
-Ejercicios básicos de listas, palíndromos y propiedades de números.
-
-1. `P1_1_cambia_el_primero.hs` → Cambia el primer valor de una lista.  
-2. `P1_2_cambia_el_n.hs` → Cambia el valor en la posición `n` de una lista.  
-3. `P1_3_get_mayor_abs.hs` → Devuelve el número con mayor valor absoluto de una lista.  
-4. `P1_4_num_veces.hs` → Cuenta cuántas veces aparece un valor en una lista.  
-5. `P1_5_palabras_mayores_n.hs` → Filtra palabras cuya longitud es mayor que `n`.  
-6. `P1_6_es_palindroma.hs` → Comprueba si una palabra es palíndroma.  
-7. `P1_7_esprimo.hs` → Determina si un número es primo.  
-8. `P1_8_sumparesresimp.hs` → Suma pares y resta impares en una lista.  
-9. `P1_9_muestra_foldr_suma_n.hs` → Muestra los pasos de `foldr (+)`.  
-10. `P1_10_palindromas.hs` → Comprueba si todas las palabras de una lista son palíndromas.  
-11. `P1_11_sumaSiPalindromo.hs` → Cuenta cuántos palíndromos hay en una lista de strings.  
-12. `P1_12_getMenorListas.hs` → Devuelve el menor número de una lista de listas.  
-13. `P1_13_SumPrimoRestPali.hs` → Suma 1 por cada primo y resta 1 por cada lista palíndroma.  
-14. `P1_14_sumparmultimp.hs` → Suma pares y multiplica por el mcm de los impares.  
-15. `P1_15_sumKde0aN.hs` → Suma `k` a los `n` primeros elementos de una lista.  
+Todos los ejercicios están implementados utilizando el lenguaje de programación funcional **Haskell**. Para ejecutarlos, es necesario disponer del entorno interactivo **GHCi** (Glasgow Haskell Compiler interactive).
 
 ---
 
-### 🔹 Práctica 2
-Ejercicios de combinatoria, ecuaciones cuadráticas, intervalos y primos.  
+## 📂 Contenido del Directorio
 
-1. `P2_1_nsobrek.hs` → Calcula el número de combinaciones **C(n, k)** con distintas implementaciones:  
-   - Ecuaciones  
-   - Guardas  
-   - If-then-else  
-   - Where  
-
-2. `P2_2_raices.hs` → Calcula las **raíces reales** de una ecuación cuadrática con varias variantes (`raices`, `raicesGuardas`, `raicesIf`, `raicesCase`, `raicesWhere`).  
-
-3. `P2_3_interseccion.hs` → Devuelve la **intersección entre dos intervalos** `[a, b]` y `[c, d]` si existe.  
-
-4. `P2_4_pertenece.hs` → Comprueba la **pertenencia de un elemento en una lista** (y también de una tupla en una lista de tuplas), implementado con:  
-   - Recursión simple  
-   - Guardas  
-   - If-then-else  
-   - Case  
-
-5. `P2_5_encontrarNPrimo.hs` → Encuentra el **n-ésimo número primo** (ejemplo: el primo nº 10.001).  
-
-6. `P2_6_sumaNPrimerosPrimos.hs` → Calcula la **suma de todos los primos menores que n**.  
+### 🔹 Práctica 1: Listas, Recursión y Operaciones Básicas
+Ejercicios introductorios enfocados en la manipulación recursiva de listas y propiedades numéricas básicas:
+1. [P1_1_cambia_el_primero.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_1_cambia_el_primero.hs): Cambia el primer valor de una lista.
+2. [P1_2_cambia_el_n.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_2_cambia_el_n.hs): Modifica el elemento en la posición $n$ de una lista.
+3. [P1_3_get_mayor_abs.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_3_get_mayor_abs.hs): Encuentra el número con mayor valor absoluto en una lista.
+4. [P1_4_num_veces.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_4_num_veces.hs): Cuenta las ocurrencias de un elemento en una lista.
+5. [P1_5_palabras_mayores_n.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_5_palabras_mayores_n.hs): Filtra aquellas palabras con longitud estrictamente mayor que $n$.
+6. [P1_6_es_palindroma.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_6_es_palindroma.hs): Determina si un string es palíndromo.
+7. [P1_7_esprimo.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_7_esprimo.hs): Comprueba si un entero es número primo.
+8. [P1_8_sumparesresimp.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_8_sumparesresimp.hs): Suma los números pares y resta los impares de una lista.
+9. [P1_9_muestra_foldr_suma_n.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_9_muestra_foldr_suma_n.hs): Traza paso a paso la reducción con `foldr (+)`.
+10. [P1_10_palindromas.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_10_palindromas.hs): Verifica si todos los elementos de una lista son strings palíndromos.
+11. [P1_11_sumaSiPalindromo.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_11_sumaSiPalindromo.hs): Cuenta la cantidad de palíndromos presentes en una lista de palabras.
+12. [P1_12_getMenorListas.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_12_getMenorListas.hs): Devuelve el número menor de una lista de listas de enteros.
+13. [P1_13_SumPrimoRestPali.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_13_SumPrimoRestPali.hs): Suma 1 por cada número primo y resta 1 por cada lista palíndroma procesada.
+14. [P1_14_sumparmultimp.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_14_sumparmultimp.hs): Suma los elementos pares y los multiplica por el mínimo común múltiplo (mcm) de los impares.
+15. [P1_15_sumKde0aN.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P1_15_sumKde0aN.hs): Suma una constante $k$ a los primeros $n$ números de una lista.
 
 ---
 
-### 🔹 Práctica 3
-Ejercicios de **listas intensionales** en Haskell.
-
-1. `ej1` → Lista con los números del 1 al 10 sumando 10 a cada uno.  
-2. `ej2` → Lista de listas unitarias con los números pares del 1 al 10.  
-3. `ej3` → Lista de listas con la expresión `11 - x` para `x` en `[1..10]`.  
-4. `ej4` → Lista booleana indicando si cada número de 1 a 10 es impar.  
-5. `ej5` → Pares `(x*3, x<10)` para `x` en `[1..6]`.  
-6. `ej6` → Pares `(x*5, even x && x < 4)` con condición `x<=3 || x==8`.  
-7. `ej7` → Pares `(x+10, x+11)` para los números impares de 1 a 10.  
-8. `ej8` → Listas `[5..x+4]` para impares entre 3 y 9.  
-9. `ej9` → Secuencia aritmética descendente generada con `(5-x)*5+1`.  
-10. `ej10` → Para cada `x` par, genera `[4..x+2]`, la invierte y filtra pares.  
+### 🔹 Práctica 2: Combinatoria, Álgebra y Estructuras Condicionales
+Implementación de lógica matemática mediante diversas guardas, condicionales (`if-then-else`), construcciones `case` y cláusulas `where`:
+1. [P2_1_nsobrek.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P2_1_nsobrek.hs): Cálculo combinatorio del coeficiente binomial $\binom{n}{k}$ bajo diferentes esquemas de control sintácticos.
+2. [P2_2_raices.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P2_2_raices.hs): Obtención de las raíces reales de ecuaciones de segundo grado $ax^2 + bx + c = 0$.
+3. [P2_3_interseccion.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P2_3_interseccion.hs): Determina y devuelve la intersección geométrica entre dos intervalos cerrados $[a, b]$ y $[c, d]$.
+4. [P2_4_pertenece.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P2_4_pertenece.hs): Comprobación de pertenencia de elementos a listas simples y de tuplas utilizando distintas estructuras recursivas.
+5. [P2_5_encontrarNPrimo.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P2_5_encontrarNPrimo.hs): Algoritmo de cribado para encontrar el n-ésimo número primo.
+6. [P2_6_sumaNPrimerosPrimos.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P2_6_sumaNPrimerosPrimos.hs): Suma total de todos los números primos existentes menores que un entero dado $n$.
 
 ---
 
-### 🔹 Práctica 4
-Ejercicios con **registros, fechas y árboles binarios**.
+### 🔹 Práctica 3: Listas Intensionales
+* **Archivo de Referencia**: [P3_listasIntensionales.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P3_listasIntensionales.hs)
 
-Para comprobar esta práctica se debe compilar `P4_Main.hs`.
-Incluye el módulo auxiliar `MEmpleados.hs` con las funciones necesarias. 
+Ejercicios resueltos empleando la potencia expresiva de las **listas por comprensión** (listas intensionales) en Haskell para la generación, filtrado y transformación compacta de datos numéricos y estructurados.
 
-1. `Ejercicio 2` → Gestión de empleados de la empresa **JobVen SL**.  
-   - Listar empleados con todos sus datos (DNI, nombre, apellidos, fecha de nacimiento, cargo, fecha de alta).  
-   - Filtrar por **fecha de nacimiento** y/o **fecha de alta**.  
-   - Buscar empleados por **cargo**.  
-   - Volver al menú principal.   
+---
 
-2. `Ejercicio 3` → Implementación de un **árbol binario de empleados** ordenado por fecha de nacimiento.  
-   - Recorrido en **profundidad**.  
-   - Recorrido en **anchura**.  
-   - Búsqueda de empleados por **DNI**.  
-   - Volver al menú principal.  
+### 🔹 Práctica 4: Registros de Datos y Estructuras de Árbol Binario
+Módulo principal y librerías que modelan una base de datos de empleados de una empresa mediante registros condicionales y estructuras arbóreas:
+* **Módulo de Lógica**: [P4_MEmpleados.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P4_MEmpleados.hs)
+* **Programa Ejecutable**: [P4_Main.hs](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20Avanzados%20de%20Computacion/P4_Main.hs)
+  
+Funcionalidades implementadas:
+1. **Gestión de Empleados**: Listado, filtrado por fechas de nacimiento/alta y búsquedas selectivas de la plantilla de *JobVen SL*.
+2. **Árbol Binario de Empleados**: Organización de registros de empleados estructurados en un árbol ordenado por fecha de nacimiento. Soporta búsquedas rápidas por DNI y recorridos sistemáticos en profundidad (inorden, preorden, postorden) y en anchura (niveles).
 
-📌 **Nota de compilación**:  
-Para compilar el programa principal de esta práctica, ejecutar:  
-
+📌 **Compilación del ejecutable**:
 ```bash
 ghc P4_Main.hs -o P4_Main.exe
 ```
@@ -98,23 +63,6 @@ ghc P4_Main.hs -o P4_Main.exe
 ---
 
 ### 🚀 Proyecto Final
-El repositorio también incluye un **Proyecto Final** en Haskell, desarrollado como trabajo de cierre de la asignatura **Modelos Avanzados de Computación**.  
-
-En este proyecto se integran y aplican los conceptos trabajados a lo largo de las prácticas:  
-- Manejo de listas, recursión y funciones de orden superior.  
-- Definición y uso de tipos de datos personalizados.  
-- Módulos auxiliares para estructuración del código.  
-- Uso de árboles y estructuras de datos.  
-
-Puedes consultar el código completo del proyecto en el siguiente enlace:  
+Integración de los conceptos de la asignatura en un software robusto. El código base y detalles del proyecto colaborativo final pueden consultarse en el repositorio externo del equipo:
 
 👉 [MAC_PracticaFinal_KJBA_JDCZ](https://github.com/jcalvente083/MAC_PracticaFinal_KJBA_JDCZ)
-
-
----
-
-
-
-## 📜 Notas
-- Cada ejercicio se encuentra en un archivo independiente (`.hs`).  
-- Algunos ejercicios incluyen múltiples implementaciones (ecuaciones, guardas, if-then-else, case, where).
