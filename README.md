@@ -10,6 +10,7 @@ Además de las soluciones prácticas, se incluye un proyecto unificado de **[Lib
 - [x] **[Fundamentos de Análisis de Algoritmos](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Fundamentos%20de%20An%C3%A1lisis%20de%20Algoritmos/README.md)**
 - [ ] **Algoritmia y Modelos de Computación** 
 - [x] **[Inteligencia Artificial](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Inteligencia%20Artificial/README.md)**
+- [x] **[Representación del Conocimiento](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Representaci%C3%B3n%20del%20Conocimiento/README.md)**
 - [x] **[Sistemas Inteligentes](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Sistemas%20Inteligentes/README.md)** 
 - [x] **[Modelos bioinspirados y heurísticas de búsqueda](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Modelos%20bioinspirados%20y%20heuristicas%20de%20busqueda/README.md)** 
 - [x] **[Aprendizaje Automático](file:///c:/Users/kjba2/Documents/Algoritmos-y-Computacion/Aprendizaje%20Automatico/README.md)**
